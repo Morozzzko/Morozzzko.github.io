@@ -1,0 +1,80 @@
+# Welcome to Jekyll!
+#
+# This config file is meant for settings that affect your whole blog, values
+# which you are expected to set up once and rarely edit after that. If you find
+# yourself editing this file very often, consider using Jekyll's data files
+# feature for the data you need to update frequently.
+#
+# For technical reasons, this file is *NOT* reloaded automatically when you use
+# 'bundle exec jekyll serve'. If you change this file, please restart the server process.
+
+# Site settings
+# These are used to personalize your new site. If you look in the HTML files,
+# you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
+# You can create any custom variable you would like, and they will be accessible
+# in the templates via {{ site.myvariable }}.
+title: "Igor writing about things"
+name: Igor Morozov
+email: igor@morozov.is
+repository: Morozzzko/Morozzzko.github.io
+description: |
+  Things about functional programming in Ruby
+
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "https://www.morozov.is" # the base hostname & protocol for your site, e.g. http://example.com
+
+
+
+read_time: true
+
+# Build settings
+markdown: kramdown
+plugins:
+  - jekyll-feed
+  - jekyll-remote-theme
+  - jekyll-paginate
+  - jekyll-gist
+
+remote_theme: mmistakes/minimal-mistakes
+minimal_mistakes_skin: "contrast" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum" "sunrise"
+
+paginate: 5
+
+defaults:
+  # _posts
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: single
+      author_profile: true
+      read_time: true
+      comments: false
+      share: true
+      related: false
+
+
+# Exclude from processing.
+# The following items will not be processed, by default. Create a custom list
+# to override the default setting.
+# exclude:
+#   - Gemfile
+#   - Gemfile.lock
+#   - node_modules
+#   - vendor/bundle/
+#   - vendor/cache/
+#   - vendor/gems/
+#   - vendor/ruby/
+
+author:
+  name   : Igor Morozov
+  avatar : "/assets/images/bio-photo.jpg"
+  bio: |
+    I'm a software engineer familiar with Ruby, Python, JavaScript and ReasonML.
+    <br />
+    I write about functional programming and organize <a href="https://djangogirls.org/">Django Girls</a> workshops in Moscow.
+  email  : igor@morozov.is
+  home   : / # null (default), "absolute or relative url to link to author home"
+  github: Morozzzko
+  linkedin: igor-morozov
+
