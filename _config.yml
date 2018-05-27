@@ -53,6 +53,7 @@ defaults:
       share: true
       related: false
 
+excerpt_separator: "<!-- excerpt -->"
 
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list

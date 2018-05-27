@@ -21,6 +21,8 @@ others. However, you don't need to have an extensive knowledge of monads to
 use ROP in your code. In this article, I'll show you how to write railway-oriented
 code in Ruby.
 
+<!-- excerpt -->
+
 ## ROP with dry-transaction
 
 There is a [dry-transaction](http://dry-rb.org/gems/dry-transaction/) gem
