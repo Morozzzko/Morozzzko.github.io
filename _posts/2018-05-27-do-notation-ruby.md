@@ -1,6 +1,6 @@
 ---
 layout: single
-title: "Using do notation in Ruby for Railway Oriented Programming"
+title: "Using do notation for Railway Oriented programming in Ruby"
 date: '2018-05-27 13:25:00 +0300'
 ---
 
