@@ -162,7 +162,7 @@ Since 1.0.0.beta1 of dry-monads, there's a solution to the problems: do notation
 
 ## Do notation in Ruby
 
-When we work we monads and `Result` in particular, we have to constantly `bind`
+When we work with monads and `Result` in particular, we have to constantly `bind`
 them together. When we introduce complex logic with conditions, we end up with
 nested binds, and those are hard to work with. Do notation provides an alternative
 to `bind`, which also flattens the code.
