@@ -180,8 +180,9 @@ With that:
 ```ruby
 def call(data)
   validated_data = yield validate(data)
+
   yield log(validated_data[:name])
-  yield persist(validated_data)
+  persist(validated_data) # <= You don't need to `yield` the last expression
 end
 ```
 
@@ -241,6 +242,8 @@ The core points:
 * No need to unwrap the monad: `yield` does it for us
 * `log` and `persist` no longer need to return `Result` as they don't affect the flow
 * We don't have to stick to declarative style anymore
+* No need to `yield` the last expression — Ruby handles it for you
+* Last expression **must** return `Result`
 
 ## Performance
 
