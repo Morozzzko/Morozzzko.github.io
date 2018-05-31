@@ -148,7 +148,7 @@ end
 The differences:
 
 * Plain methods instead of a DSL
-* Better control over flow of our application: more methods to
+* Better control over flow of our application: more ways to add branching
 
 However, there are some disadvantages to the approach
 
