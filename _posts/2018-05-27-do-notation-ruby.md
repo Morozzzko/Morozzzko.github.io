@@ -107,7 +107,7 @@ ourselves, right?
 * `bind` applies unwrapped `Success` value to the block, which should return a `Result` object. No-op on `Failure`
 * `fmap` is similar to `bind`, but wraps the returned value into `Success`
 * `or` is similar to `bind`, but only applies `Failure` values
-* `or_fmap` is similar to `or`, but wraps the returned value into `Failure`
+* `or_fmap` is similar to `or`, but wraps the returned value into `Success`
 * `tee` does the same thing as `bind`, but returns input if the result is a `Success`
 * `success?` and `failure?` tell us which kind of `Result` it is
 * `value_or` extracts the value from `Success` or returns fallback value
