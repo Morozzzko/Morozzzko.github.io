@@ -27,6 +27,10 @@ document.addEventListener(
 <section>
   <h2>Hey, I'm Igor</h2>
   <p>/'<span style="font-family: monospace;">iːgɔːɹ</span>/</p>
+
+  <aside class="notes">
+    Say something about yourself
+  </aside>
 </section>
 
 <section>
@@ -34,6 +38,9 @@ document.addEventListener(
   <p>
     I get paid to write Ruby, but I really love ReasonML
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -41,6 +48,9 @@ document.addEventListener(
   <p>
     because I can never be sure my code works correctly
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -62,6 +72,9 @@ document.addEventListener(
       I forget some details
     </li>
   </ul>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -69,10 +82,16 @@ document.addEventListener(
   <p>
     New hobby: finding the right tools
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
   <h2>Tools to write type-safe Ruby code</h2>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -95,10 +114,16 @@ document.addEventListener(
     </code>
 
   </pre>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
   <h2>What was so cool about it?</h2>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -126,6 +151,9 @@ document.addEventListener(
   <p>
     We have to type each attribute name three times
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -147,6 +175,9 @@ document.addEventListener(
   <p>
     One attribute &ndash; one definition. No more typos!
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -173,6 +204,9 @@ document.addEventListener(
   <p>
     It has nilable types too!
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -194,6 +228,9 @@ document.addEventListener(
   <p>
     Convenience <em>and</em> type safety!
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -218,6 +255,9 @@ document.addEventListener(
     </code>
 
   </pre>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -225,6 +265,9 @@ document.addEventListener(
   <p>
     But it's deprecated in favor of dry-struct
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -245,6 +288,9 @@ document.addEventListener(
   <p>
     It's a good option if you want to reduce boilerplate and annotate types
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -252,6 +298,9 @@ document.addEventListener(
   <p>
     You can't fulyl enjoy those libraries until you've learned to think differently
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -262,6 +311,9 @@ document.addEventListener(
     =<br />
     ❤
   </h2>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -270,15 +322,21 @@ document.addEventListener(
     <li>Expression-based syntax</li>
     <li>Higher order functions</li>
     <li>Immutability (<code>#freeze</code>)</li>
-    <li>Identity function <code>Object#itself</code></li>
+    <li>Identity function (<code>Object#itself</code>)</li>
     <li>map, flat_map, reduce, select, reject</li>
     <li><code>proc#curry</code></li>
     <li>Tail recursion optimization (opt-in)</li>
   </ul>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
   <h2><q>dry-types is a simple and extendable type system for Ruby</q></h2>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -294,6 +352,9 @@ document.addEventListener(
     </ul>
 
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -301,6 +362,9 @@ document.addEventListener(
   <q>
     A type is defined as its representation and a set of operators manipulating these representations.
   </q>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <!-- <section>
@@ -332,6 +396,9 @@ document.addEventListener(
   <q>
     A type is a set of values which a variable can possess and a set of functions that one can apply to these values.
   </q>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -339,10 +406,16 @@ document.addEventListener(
   <p>
     But we still expect our variables types be predictable
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
   <h2>How do we define a type in Ruby?</h2>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -350,10 +423,16 @@ document.addEventListener(
   <q>
   If it looks like a duck, swims like a duck, and quacks like a duck, then it probably is a duck.
   </q>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
   <h2>Object belongs to a type if it exposes desired behavior</h2>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -378,18 +457,32 @@ document.addEventListener(
       # => "Hello there <3"
     </code>
   </pre>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
-  <h2>What's so different about dry-types?</h2>
+  <h2>
+    What's so different about dry-types?
+  </h2>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
   <h2>Composable type and value constructors</h2>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
   <h2>A constructor is a method that initialized an object of a a specific type</h2>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -403,6 +496,9 @@ document.addEventListener(
     <li><code>Kernel#Rational</code></li>
     <li><code>…</code></li>
   </ul>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -416,6 +512,9 @@ document.addEventListener(
       # (can't convert Array into Float)
     </code>
   </pre>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -429,6 +528,9 @@ document.addEventListener(
       # (can't convert Array into Float)
     </code>
   </pre>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -442,10 +544,13 @@ document.addEventListener(
     <li>params <code>(Types::Params)</code></li>
     <li>json <code>(Types::JSON)</code></li>
   </ul>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
-  <h2>Definition types</h2>
+  <h2>Definitions</h2>
   <pre>
     <code class="ruby" data-trim>
       class Duck
@@ -462,6 +567,9 @@ document.addEventListener(
   <p>
     Base definitions without type checks or coercions. Only suitable for type annotations
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -483,6 +591,9 @@ document.addEventListener(
   <p>
     Coercible types use kernel coercions to build a specific value and raise exceptions if it's impossible.
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -505,6 +616,9 @@ document.addEventListener(
   <p>
     Strict types ensure that the constructor input matches the output type.
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -527,6 +641,9 @@ document.addEventListener(
   <p>
     Optional types mark a strict or coercible type as nilable.
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -551,6 +668,9 @@ document.addEventListener(
   <p>
     Maybe types behave similarly to optional types, except they wrap the result into the Maybe monad.
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -558,6 +678,9 @@ document.addEventListener(
   <p>
     is a type formed by combining other types.
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -565,6 +688,9 @@ document.addEventListener(
   <p>
     Whenever a type consists of multiple fields, it's a product type.
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -572,6 +698,9 @@ document.addEventListener(
   <p>
     Whenever a value can be one of multiple possible types, it's a sum.
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -587,6 +716,9 @@ document.addEventListener(
       # (nil violates constraints (type?(Integer, nil) failed))
     </code>
   </pre>
+
+  <aside class="notes">
+  </aside>
 
 </section>
 
@@ -604,6 +736,8 @@ document.addEventListener(
     </code>
   </pre>
 
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -627,6 +761,8 @@ document.addEventListener(
     </code>
   </pre>
 
+  <aside class="notes">
+  </aside>
 </section>
 
 <!--
@@ -653,6 +789,9 @@ end
   <p>
     You can use them, but you can't give them a good definition without being wrong
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -660,6 +799,9 @@ end
   <p>
     What's the problem?
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -676,10 +818,18 @@ end
       end
     </code>
   </pre>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
-  <h2>A monad is a result object with a few rules</h2>
+  <h2>
+    A monad is a result object with a few rules
+  </h2>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -690,10 +840,16 @@ end
   <p>
     Popular for Railway-oriented programming
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
   <h2><code>type Result a b = Failure a | Success b</code></h2>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -717,6 +873,9 @@ end
   <p>
     It returns <code>Failure(String)</code> or <code>Success(Enemy)</code>
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -735,6 +894,9 @@ end
     </code>
 
   </pre>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -758,6 +920,9 @@ end
     </code>
 
   </pre>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -765,6 +930,9 @@ end
   <p>
     Errors are not so exceptional, so we must always keep them in mind.
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -782,6 +950,9 @@ end
         .value_or { nil }
     </code>
   </pre>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -790,6 +961,9 @@ end
   <code>
     Task { ... }.bind(&:print)
   </code>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -811,6 +985,9 @@ end
       end
     </code>
   </pre>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <!-- <section>
@@ -837,6 +1014,9 @@ end
     <li>Monads are not scary</li>
     <li>Ruby is great for programmers</li>
   </ul>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <section>
@@ -846,6 +1026,9 @@ end
     <br />
     igor@morozov.is
   </p>
+
+  <aside class="notes">
+  </aside>
 </section>
 
 <!-- <section>
