@@ -30,8 +30,13 @@
       <link rel="stylesheet" href="{{ "/vendor/reveal.js/css/theme/black.css" | prepend: site.baseurl }}" id="theme"/>
     {% endif %}
 
+    {%if page.highlightjs_theme %}
+      <link rel="stylesheet" href="{{ "/vendor/highlight.js/" | prepend: site.baseurl | append: page.highlightjs_theme | append: '.css' }}" id="theme"/>
+    {% endif %}
+
+
     <!-- Code syntax highlighting -->
-    <link rel="stylesheet" href="{{ "/vendor/reveal.js/lib/css/zenburn.css" | prepend: site.baseurl }}"/>
+    <!-- <link rel="stylesheet" href="{{ "/vendor/reveal.js/lib/css/zenburn.css" | prepend: site.baseurl }}"/> -->
 
     <!-- Printing and PDF exports -->
     <script>
