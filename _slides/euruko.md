@@ -3,6 +3,7 @@ layout: slides
 title: "Ducks and Monads: Wonders of Ruby types"
 description: EuRuKo 2018
 theme: white
+highlightjs_theme: atom-one-light # github
 transition: slide
 ---
 
@@ -20,7 +21,7 @@ document.addEventListener(
 </style>
 
 <section>
-  <h1>Ducks and monads</h1>
+  <h1>Ducks and Monads</h1>
   <h2>Wonders of Ruby Types</h2>
 </section>
 
@@ -34,10 +35,7 @@ document.addEventListener(
 </section>
 
 <section>
-  <h2>I'm a developer at Qlean.ru</h2>
-  <p>
-    I get paid to write Ruby, but I really love ReasonML
-  </p>
+  <h2>I'm a polyglot programmer at Qlean.ru</h2>
 
   <aside class="notes">
   </aside>
@@ -45,36 +43,43 @@ document.addEventListener(
 
 <section>
   <h2>I don't trust myself</h2>
-  <p>
-    because I can never be sure my code works correctly
-  </p>
 
   <aside class="notes">
   </aside>
 </section>
 
 <section>
-  <h2>Four reasons I don't trust myself</h2>
-  <ul>
-    <li class="fragment" data-fragment-index="0">
-      undefined is not a function
-    </li>
-    <li class="fragment" data-fragment-index="2">
-      N&nbsp;+&nbsp;1
-    </li>
-    <li class="fragment" data-fragment-index="3">
-      I mess up business logic
-    </li>
-    <li class="fragment" data-fragment-index="4">
-      Sometimes I forget to close a bracket 🙈
-    </li>
-    <li class="fragment" data-fragment-index="5">
-      I forget some details
-    </li>
-  </ul>
+  <h2>There are four reasons I don't trust myself</h2>
+</section>
 
-  <aside class="notes">
-  </aside>
+<section>
+  <h2>
+    undefined is not a function
+  </h2>
+</section>
+
+<section>
+  <h2>
+    N&nbsp;+&nbsp;1
+  </h2>
+</section>
+
+<section>
+  <h2>
+    I mess up business logic
+  </h2>
+</section>
+
+<section>
+  <h2>
+    I forget to close a bracket
+  </h2>
+</section>
+
+<section>
+  <h2>
+    I forget some details
+  </h2>
 </section>
 
 <section>
@@ -285,9 +290,6 @@ document.addEventListener(
       donald = Duck.new(name: 'Donald')
     </code>
   </pre>
-  <p>
-    It's a good option if you want to reduce boilerplate and annotate types
-  </p>
 
   <aside class="notes">
   </aside>
@@ -318,19 +320,15 @@ document.addEventListener(
 
 <section>
   <h2>Ruby's functional features</h2>
-  <ul>
-    <li>Expression-based syntax</li>
-    <li>Higher order functions</li>
-    <li>Immutability (<code>#freeze</code>)</li>
-    <li>Identity function (<code>Object#itself</code>)</li>
-    <li>map, flat_map, reduce, select, reject</li>
-    <li><code>proc#curry</code></li>
-    <li>Tail recursion optimization (opt-in)</li>
-  </ul>
-
-  <aside class="notes">
-  </aside>
 </section>
+
+<section><h2>Expression-based syntax</h2></section>
+<section><h2>Higher order functions</h2></section>
+<section><h2>Immutability (<code>#freeze</code>)</h2></section>
+<section><h2>Identity function (<code>Object#itself</code>)</h2></section>
+<section><h2>map, flat_map, reduce, select, reject</h2></section>
+<section><h2><code>proc#curry</code></h2></section>
+<section><h2>Tail recursion optimization (opt-in)</h2></section>
 
 <section>
   <h2><q>dry-types is a simple and extendable type system for Ruby</q></h2>
@@ -342,7 +340,6 @@ document.addEventListener(
 <section>
   <h2>What's a type, anyway?</h2>
   <p>
-    In 1976, Parnas, Shore and Weiss gave five definitons of ”data type”
     <ul>
       <li>Syntactic</li>
       <li>Representation</li>
@@ -534,33 +531,15 @@ document.addEventListener(
 </section>
 
 <section>
-  <h2>Categories of dry-types</h2>
-  <ul>
-    <li>definition <code>(Types)</code></li>
-    <li>strict <code>(Types::Strict)</code></li>
-    <li>coercible <code>(Types::Coercible)</code></li>
-    <li>optional <code>(Types::Optional)</code></li>
-    <li>maybe <code>(Types::Maybe)</code></li>
-    <li>params <code>(Types::Params)</code></li>
-    <li>json <code>(Types::JSON)</code></li>
-  </ul>
-
-  <aside class="notes">
-  </aside>
-</section>
-
-<section>
   <h2>Definitions</h2>
   <pre>
     <code class="ruby" data-trim>
-      class Duck
-        extend Dry::Initializer
-
-        option :name, Types::String
-        option :age, Types::Integer, optional: true
+      class Duck < Dry::Struct
+        attribute :name, Types::String
+        attribute :age, Types::Integer
       end
 
-      donald = Duck.new(name: 123) #  No error here
+      donald = Duck.new(name: 123, age: []) #  No error here
     </code>
 
   </pre>
@@ -576,11 +555,9 @@ document.addEventListener(
   <h2>Coercible types</h2>
   <pre>
     <code class="ruby" data-trim>
-      class Duck
-        extend Dry::Initializer
-
-        option :name, Types::Coercible::String
-        option :age, Types::Coercible::Integer, optional: true
+      class Duck < Dry::Struct
+        attribute :name, Types::Coercible::String
+        attribute :age, Types::Coercible::Integer
       end
 
       donald = Duck.new(name: 'Donald', age: '13')
@@ -600,11 +577,9 @@ document.addEventListener(
   <h2>Strict types</h2>
   <pre>
     <code class="ruby" data-trim>
-      class Duck
-        extend Dry::Initializer
-
-        option :name, Types::Strict::String
-        option :age, Types::Strict::Integer, optional: true
+      class Duck < Dry::Struct
+        attribute :name, Types::Strict::String
+        attribute :age, Types::Strict::Integer
       end
 
       donald = Duck.new(name: 'Donald', age: '13')
@@ -625,11 +600,9 @@ document.addEventListener(
   <h2>Optional types</h2>
   <pre>
     <code class="ruby" data-trim>
-      class Duck
-        extend Dry::Initializer
-
-        option :name, Types::Optional::Strict::String
-        option :age, Types::Optional::Strict::Integer
+      class Duck < Dry::Struct
+        attribute :name, Types::Optional::Strict::String
+        attribute :age, Types::Optional::Strict::Integer
       end
 
       donald = Duck.new(name: 'Donald', age: nil)
@@ -652,11 +625,9 @@ document.addEventListener(
     <code class="ruby" data-trim>
       Dry::Types.load_extensions(:maybe)
 
-      class Duck
-        extend Dry::Initializer
-
-        option :name, Types::Maybe::Strict::String
-        option :age, Types::Maybe::Strict::Integer
+      class Duck < Dry::Struct
+        attribute :name, Types::Maybe::Strict::String
+        attribute :age, Types::Maybe::Strict::Integer
       end
 
       donald = Duck.new(name: 'Donald', age: nil)
@@ -684,6 +655,7 @@ document.addEventListener(
 </section>
 
 <section>
+<!-- TODO: think about removing subtitle -->
   <h2>Algebraic data type: product</h2>
   <p>
     Whenever a type consists of multiple fields, it's a product type.
@@ -694,6 +666,7 @@ document.addEventListener(
 </section>
 
 <section>
+<!-- TODO: think about removing subtitle -->
   <h2>Algebraic data type: sum</h2>
   <p>
     Whenever a value can be one of multiple possible types, it's a sum.
@@ -786,19 +759,16 @@ end
 
 <section>
   <h2>Monads are similar to musical instruments</h2>
-  <p>
-    You can use them, but you can't give them a good definition without being wrong
-  </p>
 
   <aside class="notes">
+    You can use them, but you can't give them a good definition without being wrong
   </aside>
 </section>
 
 <section>
-  <h2>A monad is just a monoid in the category of endofunctors</h2>
-  <p>
+  <h2><q>A monad is just a monoid in the category of endofunctors.
     What's the problem?
-  </p>
+  </q></h2>
 
   <aside class="notes">
   </aside>
@@ -846,7 +816,7 @@ end
 </section>
 
 <section>
-  <h2><code>type Result a b = Failure a | Success b</code></h2>
+  <h2><code class="haskell">type Result a b = Failure a | Success b</code></h2>
 
   <aside class="notes">
   </aside>
@@ -1008,6 +978,7 @@ end
 
 <section>
   <h2>Recap</h2>
+  <!-- TODO: split -->
   <ul>
     <li>dry-initializer + dry-types can replace Virtus</li>
     <li>dry-types = flexible type definitions and type safety</li>
