@@ -19,6 +19,11 @@ document.addEventListener(
     text-transform: none !important;
   }
 
+  .reveal div.slide-number {
+    background: none;
+    color: black;
+  }
+
   .reveal pre code.ruby {
     font-size: 1.0em;
     line-height: 1.5em;
@@ -162,304 +167,56 @@ document.addEventListener(
 
     JavaScript: 7 out of 10.
 
-    This statistics does not include silent data corruptions that happen every day because we don't care about types.
-
-    Types are important. What can we use in Ruby?
-
   </aside>
 </section>
 
 <section>
-  <h2>Virtus (deprecated)</h2>
+  <h2>Silent data corruption: <br />JSON in Rails</h2>
   <pre>
     <code class="ruby" data-trim>
-      class User
-        include Virtus.model
+      value = "{\"foo\":\"bar\"}"
 
-        attribute :name, String
-        attribute :age, Integer, optional: true
-      end
+      # Rails 4
+      my_model.value = value # => { foo: "bar" }
 
-      user = User.new(name: 'Mickey')
-
-      user.age # => nil
-      user.age = '31' # => 31
-      user.age.class # => Integer
-
+      # Rails 5
+      my_model.value = value # => "{\"foo\":\"bar\"}"
     </code>
 
   </pre>
 
   <aside class="notes" data-markdown>
-    I entered Ruby in May 2016. Back then, the most popular tool for type-safe programming in Ruby was Virtus.
-
-    I haven't had a chance to use it because I started off with dry-rb gems, but I still kept talking to people
-    and I asked them: what was so cool about it? Why do people use Virtus, and what do they love about it?
-
-  </aside>
-</section>
-
-<!-- <section>
-  <h2>What was so cool about it?</h2>
-
-  <aside class="notes" data-markdown>
-
-  </aside>
-</section> -->
-
-<!-- <section>
-  <h2>Boilerplate (before)</h2>
-  <pre>
-    <code class="ruby" data-trim>
-      class User
-        attr_accessor :name, :phone, :age, :repo, :injected_service
-
-        def initialize(
-          name: , phone: nil, age: nil,
-          repo: UserRepo,
-          injected_service: InjectedService.new
-        )
-          @name = name
-          @phone = phone
-          @age = age
-          @repo = repo
-          @injected_service = injected_service
-        end
-      end
-    </code>
-
-  </pre>
-
-  <aside class="notes" data-markdown>
-    One of the first points they mention is reduced boilerplate.
-
-    When we're using a plain old Ruby object, we have to write everything:
-
-    * constructor
-    * assign instance variable
-    * generate accessors
-
-    That results in a pretty WET code that's annoying to write
 
   </aside>
 </section>
 
 <section>
-  <h2>Less boilerplate (after)</h2>
-  <pre>
-    <code class="ruby" data-trim>
-      class User
-        include Virtus.model
-
-        attribute :name, String
-        attribute :phone, String, optional: true
-        attribute :age, Integer, optional: true
-        attribute :repo, Class, default: UserRepo
-        attribute :injected_service, Class, default: InjectedService
-      end
-    </code>
-
-  </pre>
-  <p>
-    One attribute &ndash; one definition. No more typos!
-  </p>
-
-  <aside class="notes" data-markdown>
-    Virtus took care of that: it gave us a DSL to generate constructors and accessors. Less code, fewer mistakes.
-  </aside>
-</section>
-
-<section>
-  <h2>Type checks</h2>
-
-  <pre>
-    <code class="ruby" data-trim>
-      class Duck
-        include Virtus.model(strict: true)
-
-        attribute :name, String # <- can never be nil
-        attribute :age, Integer, required: false
-      end
-
-      donald = Duck.new(name: 'Donald')
-
-      donald.age # => nil
-
-      donald.age = 'I am not a number'
-      # => Failed to coerce attribute `age'
-      # from "I am not a number" into Integer
-    </code>
-  </pre>
-  <p>
-    It has nilable types too!
-  </p>
-
-  <aside class="notes" data-markdown>
-  </aside>
-</section>
-
-<section>
-  <h2>Type coercions</h2>
-  <pre>
-    <code class="ruby" data-trim>
-      class Event
-        include Virtus.model
-
-        attribute :date, Date
-      end
-
-      euruko = Event.new(date: "2018-08-24")
-      euruko.date # => Fri, 24 Aug 2018
-      euruko.date.class # => Date < Object
-    </code>
-
-  </pre>
-  <p>
-    Convenience <em>and</em> type safety!
-  </p>
-
-  <aside class="notes" data-markdown>
-  </aside>
-</section>
-
-<section>
-  <h2>Nested models</h2>
-  <pre>
-    <code class="ruby" data-trim>
-      class EventDuration
-        include Virtus.model
-        attribute :start_at, Date
-        attribute :finish_at, Date
-      end
-
-      class Event
-        include Virtus.model
-        attribute :date, EventDuration
-      end
-
-      euruko = Event.new(date: {
-        start_at: "2018-08-24",
-        finish_at: "2018-08-25"
-      })
-    </code>
-
-  </pre>
-
-  <aside class="notes" data-markdown>
-  </aside>
-</section>
-
-<section>
-  <h2>Virtus used to empower us</h2>
-  <p>
-    But it's deprecated in favor of dry-struct
-  </p>
-
-  <aside class="notes" data-markdown>
-  </aside>
-</section> -->
-
-<section>
-  <h2>dry-initializer can replace Virtus</h2>
-
-  <pre>
-    <code class="ruby" data-trim>
-      class Duck
-        extend Dry::Initializer
-
-        option :name, String
-        option :age, Integer, optional: true
-      end
-
-      donald = Duck.new(name: 'Donald')
-    </code>
-  </pre>
-
-  <aside class="notes" data-markdown>
-  </aside>
-</section>
-
-<section>
-  <h2>dry-struct &amp; dry-types force you to learn</h2>
-  <!-- <p>
-    You can't fully enjoy those libraries until you've learned to think differently
-  </p> -->
-
-  <aside class="notes" data-markdown>
-  </aside>
+  <h2>We have to use the right libraries</h2>
 </section>
 
 <section>
   <h2>
-    functional programming <br />
-    + <br />
-    Ruby <br />
-    =<br />
-    ❤
+    Writing code is easier than fixing it
   </h2>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
-  <h2>Expression-based syntax</h2>
-</section>
-
-<section>
-  <h2>Higher order functions</h2>
-</section>
-
-<section>
-  <h2>Immutability (<code>#freeze</code>)</h2>
-</section>
-
-<section>
-  <h2>Identity function (<code>Object#itself</code>)</h2>
-</section>
-
-<section>
-  <h2>map, flat_map, reduce, select, reject</h2>
-</section>
-
-<section>
-  <h2>Currying and partial application</h2>
-</section>
-
-<section>
-  <h2>Tail recursion optimization</h2>
-</section>
-
-<section>
-  <h2><q>dry-types is a simple and extendable type system for Ruby</q></h2>
-
-  <aside class="notes" data-markdown>
-  </aside>
+  <h2>
+    Every object has a type
+  </h2>
 </section>
 
 <section>
   <h2>What's a type, anyway?</h2>
-  <ul class="fragment" data-fragment-index="1">
+  <ul>
     <li>Syntactic</li>
     <li>Representation</li>
-    <li><strong>Representation and behavior</strong></li>
+    <li>Representation and behavior</li>
     <li>Value space</li>
     <li><strong>Value space and behavior</strong></li>
   </ul>
 
   <aside class="notes" data-markdown>
-  </aside>
-</section>
-
-<section>
-  <h3>
-    <q>
-      A type is defined as its representation and a set of operators manipulating these representations.
-    </q>
-  </h3>
-
-  <aside class="notes" data-markdown>
-    Representation and behavior
   </aside>
 </section>
 
@@ -475,56 +232,59 @@ document.addEventListener(
 </section>
 
 <section>
-  <h2>A variable can possess an infinite set of values</h2>
-  <p>
-    But we still expect its types to be predictable
-  </p>
+  <h2>
+    We learn to consider all possible values
+  </h2>
+</section>
+
+<section>
+  <h2>
+    nil does not belong to every type
+  </h2>
+</section>
+
+<section>
+  <h2>
+    ActiveSupport teaches us to be reckless
+  </h2>
+</section>
+
+<section>
+  <h2>
+    <code>blank?</code> and <code>present?</code><br/>are bad for your code
+  </h2>
+</section>
+
+<section>
+  <h2>
+    We have to think about design of our data
+  </h2>
+</section>
+
+<section>
+  <h2>
+    Being careful is not enough
+  </h2>
+</section>
+
+<section>
+  <h2><q>dry-types is a simple and extendable type system for Ruby</q></h2>
 
   <aside class="notes" data-markdown>
   </aside>
 </section>
 
 <section>
-  <h2>How do we define a type in Ruby?</h2>
-
-  <aside class="notes" data-markdown>
-  </aside>
-</section>
-
-<section>
-  <h2>Duck test</h2>
-  <q>
-  If it looks like a duck, swims like a duck, and quacks like a duck, then it probably is a duck.
-  </q>
-
-  <aside class="notes" data-markdown>
-  </aside>
-</section>
-
-<section>
-  <h2>Object belongs to a type if it exposes desired behavior</h2>
-
-  <aside class="notes" data-markdown>
-  </aside>
-</section>
-
-<section>
-  <h2>Ducks behave similarly</h2>
-
+  <h2>Data constructors</h2>
   <pre>
     <code class="ruby" data-trim>
-      class Duck
-        def call
-          "Hello there"
-        end
-      end
+      Types::Strict::String["foo"] # => "foo"
+      Types::Strict::String[nil] # => Dry::Types::ConstraintError:
+      # nil violates constraints
 
-      huey = Duck.new
-      dewey = -> { "<3" }
-
-      [huey, dewey].map(&:call).join(' ')
-      # => "Hello there <3"
+      Types::Optional::Strict::String[nil] # => nil
     </code>
+
   </pre>
 
   <aside class="notes" data-markdown>
@@ -532,38 +292,50 @@ document.addEventListener(
 </section>
 
 <section>
-  <h2>
-    What's so different about dry&#x2011;types?
-  </h2>
+  <h2>Complex definitions</h2>
+  <pre>
+    <code class="ruby" data-trim>
+      IntArray = Types::Strict::Array.of(Types::Strict::Integer)
+
+      Enum = Types::Strict::String.enum('foo', 'bar')
+
+      Timestamp = Types::Strict::String | Types::Strict::Time
+
+      MyHash = Types::Strict::Hash.schema(
+        foo: Types.Instance(MyClass),
+        bar: Types::Strict::Float
+      )
+    </code>
+
+  </pre>
 
   <aside class="notes" data-markdown>
   </aside>
 </section>
 
 <section>
-  <h2>Composable type and value constructors</h2>
+  <h2>dry-types won't change your architecture</h2>
 
   <aside class="notes" data-markdown>
   </aside>
 </section>
 
 <section>
-  <h2>A value constructor is a method that initializes an object of a specific type</h2>
+  <img style="border: none; max-width: 400px; max-height: auto" src="/assets/images/slides/euruko/hanami.png" />
+  <h2>Trying out dry-types: Hanami</h2>
 
   <aside class="notes" data-markdown>
   </aside>
 </section>
 
 <section>
-  <h2>Value constructors in Ruby</h2>
+  <h2>Enhancing your application with dry-types</h2>
+
   <ul>
-    <li class="fragment" data-fragment-index="1"><code>Class#new</code></li>
-    <li class="fragment" data-fragment-index="2"><code>Kernel#Integer</code></li>
-    <li class="fragment" data-fragment-index="2"><code>Kernel#String</code></li>
-    <li class="fragment" data-fragment-index="2"><code>Kernel#Hash</code></li>
-    <li class="fragment" data-fragment-index="2"><code>Kernel#URI</code></li>
-    <li class="fragment" data-fragment-index="2"><code>Kernel#Rational</code></li>
-    <li  class="fragment" data-fragment-index="2"><code>…</code></li>
+    <li>Describe your data using dry-types</li>
+    <li>Use those definitions in constructors</li>
+    <li>Use them in setters</li>
+    <li>(hard) Use dry-struct for domain models</li>
   </ul>
 
   <aside class="notes" data-markdown>
@@ -571,238 +343,35 @@ document.addEventListener(
 </section>
 
 <section>
-  <h2>Value constructor: Kernel#Float</h2>
-  <pre>
-    <code class="ruby" data-trim>
-      Float("123") # => 123.0
-      Float(123) # => 123.0
-      Float(123.0) # => 123.0
-      Float([123]) # => TypeError
-      # (can't convert Array into Float)
-    </code>
-  </pre>
+  <h2>Three steps to type safety</h2>
+
+  <ul>
+    <li>Stop using ActiveSupport</li>
+    <li>Consider all possible values</li>
+    <li>Use strict constructors</li>
+  </ul>
 
   <aside class="notes" data-markdown>
-  </aside>
-</section>
-
-<section>
-  <h2>Value constructors in dry-rb</h2>
-  <pre>
-    <code class="ruby" data-trim>
-      Types::Coercible::Float["123"] # => 123.0
-      Types::Coercible::Float[123] # => 123.0
-      Types::Coercible::Float.call(123.0) # => 123.0
-      Types::Coercible::Float.([123]) # => TypeError
-      # (can't convert Array into Float)
-    </code>
-  </pre>
-
-  <aside class="notes" data-markdown>
-  </aside>
-</section>
-
-<section>
-  <h2>Definitions</h2>
-  <pre>
-    <code class="ruby" data-trim>
-      class Duck < Dry::Struct
-        attribute :name, Types::String
-        attribute :age, Types::Integer
-      end
-
-      donald = Duck.new(name: 123, age: []) #  No error here
-    </code>
-
-  </pre>
-
-  <aside class="notes" data-markdown>
-  </aside>
-</section>
-
-<section>
-  <h2>Coercible types</h2>
-  <code>
-    Types::Coercible::Integer['13'] <br /># => 13
-  </code>
-
-  <aside class="notes" data-markdown>
-  </aside>
-</section>
-
-<section>
-  <h2>Strict types</h2>
-  <pre>
-    <code class="ruby" data-trim>
-      Types::Strict::Integer['13']
-      # => Dry::Types::ConstraintError ("13" violates constraints
-      # => (type?(Integer, "13") failed))
-
-      Types::Strict::Integer[nil] # => ConstraintError
-
-      Types::Strict::Integer[1] # => 1
-    </code>
-
-  </pre>
-
-  <aside class="notes" data-markdown>
-  </aside>
-</section>
-
-<section>
-  <h2>Optional types</h2>
-  <pre>
-    <code class="ruby" data-trim>
-      Types::Optional::Strict::String[nil] # => nil
-
-      Types::Optional::Strict::String["foo"] # => "foo"
-    </code>
-
-  </pre>
-
-  <aside class="notes" data-markdown>
-  </aside>
-</section>
-
-<section>
-  <h2>Types and transformations</h2>
-
-  <pre>
-    <code class="ruby" data-trim>
-      Email = Types::Strict::String
-                .constructor(&:downcase)
-                .constructor(&:strip)
-
-      Email["  hello@EXAMPLE.com"] # => "hello@example.com"
-
-    </code>
-  </pre>
-
-  <aside class="notes" data-markdown>
-    Mention type constructors
   </aside>
 </section>
 
 <section>
   <h2>
-    dry-types gives us a new way to think and treat our data
+    Expressing errors with types
   </h2>
-
-  <aside class="notes" data-markdown>
-    * Mutability
-    * Limit possible values
-    * Static type checking
-  </aside>
-</section>
-
-<!-- <section>
-  <h2>Maybe types</h2>
-  <pre>
-    <code class="ruby" data-trim>
-      Dry::Types.load_extensions(:maybe)
-
-      class Duck < Dry::Struct
-        attribute :name, Types::Maybe::Strict::String
-        attribute :age, Types::Maybe::Strict::Integer
-      end
-
-      donald = Duck.new(name: 'Donald', age: nil)
-      donald.name # => Some('Donald')
-      donald.age # => None
-    </code>
-
-  </pre>
-  <p>
-    Maybe types behave similarly to optional types, except they wrap the result into the Maybe monad.
-  </p>
-
-  <aside class="notes" data-markdown>
-  </aside>
-</section> -->
-
-<section>
-  <h2>Algebraic data type (ADT)</h2>
-  <p>
-    is a type formed by combining other types.
-  </p>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
-  <h2>Product type: variable has many fields</h2>
-
-  <aside class="notes" data-markdown>
-  </aside>
+  <h2>
+    Errors are not that exceptional
+  </h2>
 </section>
 
 <section>
-  <h2>Sum type: variable can use different types</h2>
-
-  <aside class="notes" data-markdown>
-    * Variant type
-    * Tagged union
-    * Disjoint union
-  </aside>
+  <h2>
+    Types can facilitate error handling
+  </h2>
 </section>
-
-<section>
-  <h2>Sum in action</h2>
-
-  <pre>
-    <code class="ruby" data-trim>
-      Age = Types::Strict::String | Types::Strict::Integer
-
-      Age["12"] #=> "12"
-      Age[12] # => 12
-
-      Age[nil] # => Dry::Types::ConstraintError
-      # (nil violates constraints (type?(Integer, nil) failed))
-    </code>
-  </pre>
-
-  <aside class="notes" data-markdown>
-    Yet another case of type constructors: we compose two types to get a third one
-  </aside>
-
-</section>
-
-<!-- <section>
-  <h2>Instance type</h2>
-
-  <pre>
-    <code class="ruby" data-trim>
-      Goose = Class.new
-
-      OptionalGoose = Types.Instance(Goose).optional
-
-      lucy = Goose.new
-
-      OptionalGoose[lucy] # => #<Goose#....>
-
-      OptionalGoose[nil] # => nil
-    </code>
-  </pre>
-
-  <aside class="notes" data-markdown>
-  </aside>
-</section> -->
-
-<!--
-
-require 'dry/types'
-require 'dry-initializer'
-
-module Types
-  include Dry::Types.module
-end
-
-
-
-
-
--->
 
 <section>
   <h1>Monads in Ruby</h1>
@@ -817,34 +386,6 @@ end
 </section>
 
 <section>
-  <h2><q>A monad is just a monoid in the category of endofunctors.
-    What's the problem?
-  </q></h2>
-
-  <aside class="notes" data-markdown>
-  </aside>
-</section>
-
-<section>
-  <h2>A monad is a computation context</h2>
-  <pre>
-    <code class="ruby" data-trim>
-      def call
-        Maybe(1)
-          .bind(&second_action)
-          .bind(&other_action)
-          .or(&recover_from_error)
-          .fmap(&render_result)
-          .value!
-      end
-    </code>
-  </pre>
-
-  <aside class="notes" data-markdown>
-  </aside>
-</section>
-
-<section>
   <h2>
     A monad is a result object with a few rules
   </h2>
@@ -855,12 +396,6 @@ end
 
 <section>
   <h2>Result (Either) monad</h2>
-  <p>
-    Useful for computations that might fail
-  </p>
-  <p>
-    Popular for Railway-oriented programming
-  </p>
 
   <aside class="notes" data-markdown>
   </aside>
@@ -874,44 +409,56 @@ end
 </section>
 
 <section>
+  <h2>Using Result</h2>
   <pre>
     <code class="ruby" data-trim>
-      class Attack
-        include Dry::Monads::Result
-        FAILURE_MESSAGES = %i[fell_in_sewer tripped died]
+      require 'dry/monads/result'
 
-        def call(enemy)
-          if rand(2).zero?
-            Success(enemy.hit(10))
-          else
-            Failure(FAILURE_MESSAGES.sample)
-          end
+      include Dry::Monads::Result
+
+      Success(1).success # => 1
+      Success(1).success? # => true
+
+      Failure("abc").failure # => "abc"
+      Failure("abc").failure? # => true
+    </code>
+
+  </pre>
+
+  <aside class="notes" data-markdown>
+  </aside>
+</section>
+
+<section>
+  <h2>Computations: bind</h2>
+  <pre>
+    <code class="ruby" data-trim>
+      Success(1).bind do |value|
+        if value.positive?
+          Failure("Welp")
+        else
+          Success(value + 3)
         end
-      end
+      end # => Failure("Welp")
     </code>
 
   </pre>
-  <p>
-    It returns <code>Failure(String)</code> or <code>Success(Enemy)</code>
-  </p>
 
   <aside class="notes" data-markdown>
   </aside>
 </section>
 
 <section>
-  <h2>Escaping the context</h2>
+  <h2>Computations: fmap</h2>
   <pre>
     <code class="ruby" data-trim>
-      # To get an updated enemy:
-      attack.call(enemy).value! # will raise exception for Failure
-      attack.call(enemy).value_or { nil } # nil for Failure
+      Success(1).fmap do |value|
+        "The value is #{value}"
+      end # => Success("The value is 1")
 
-      # To get an error string:
-      attack.call(enemy).flip.value_or { nil } # => nil for Success
-
-      # To get whatever is inside the result:
-      attack.call(enemy).value_or(&:itself)
+      Failure(1).fmap do |value|
+        "The value is #{value}"
+      end # => Failure(1)
     </code>
 
   </pre>
@@ -921,7 +468,78 @@ end
 </section>
 
 <section>
-  <h2>Imperative monads: do-notation</h2>
+  <h2>Handling errors: or</h2>
+  <pre>
+    <code class="ruby" data-trim>
+      Failure(:not_found).or do |error|
+        case error
+        when :not_found
+          Failure(:db_error)
+        else
+          Success("Yay!")
+        end
+      end # => Failure(:db_error)
+    </code>
+
+  </pre>
+
+  <aside class="notes" data-markdown>
+  </aside>
+</section>
+
+<!-- <section>
+  <h2>Recovering from failure: <br />#or_fmap</h2>
+  <pre>
+    <code class="ruby" data-trim>
+      Failure(:not_found).or_fmap do |error|
+        logger.info("Error occured", error)
+
+        repo.default
+      end # => Success(...)
+    </code>
+
+  </pre>
+
+  <aside class="notes" data-markdown>
+  </aside>
+</section> -->
+
+<section>
+  <h2>Escaping the context: <br />value_or</h2>
+  <pre>
+    <code class="ruby" data-trim>
+      Success(-5).bind do |x|
+        if x.positive?
+          Success(x)
+        else
+          Failure("Something went wrong")
+        end
+      end.value_or { nil } # => nil
+    </code>
+
+  </pre>
+
+  <aside class="notes" data-markdown>
+  </aside>
+</section>
+
+<section>
+  <h2>Unwrapping</h2>
+  <pre>
+    <code class="ruby" data-trim>
+      Failure(
+        "Something went wrong"
+      ).value_or(&:itself) # => "Something went wrong"
+    </code>
+
+  </pre>
+
+  <aside class="notes" data-markdown>
+  </aside>
+</section>
+
+<section>
+  <h2>Do notation</h2>
   <pre>
     <code class="ruby" data-trim>
       class Operation
@@ -947,98 +565,48 @@ end
 </section>
 
 <section>
-  <h2>Monads promote early error handling</h2>
-  <p>
-    Errors are not so exceptional, so we must always keep them in mind.
-  </p>
-
-  <aside class="notes" data-markdown>
-  </aside>
+  <h1>Recap</h1>
 </section>
 
 <section>
-  <h2>Nil-safe computation: Maybe</h2>
-
-  <pre>
-    <code class="ruby" data-trim>
-      user&.orders&.first&.address&.id
-      # =>
-      user
-        .fmap(&:orders)
-        .fmap(&:first)
-        .fmap(&:address)
-        .fmap(&:id)
-        .value_or { nil }
-    </code>
-  </pre>
-
-  <aside class="notes" data-markdown>
-  </aside>
+  <h2>Types help us design our applications</h2>
 </section>
 
 <section>
-  <h2>Concurrency: Task</h2>
-
-  <code>
-    Task { ... }.bind(&:print)
-  </code>
-
-  <aside class="notes" data-markdown>
-  </aside>
+  <h2>ActiveSupport may be bad for our code</h2>
 </section>
 
 <section>
-  <h2>Exceptions: Try</h2>
-
-  <pre>
-    <code class="ruby" data-trim>
-      def divide(a, b)
-        Try(ZeroDivisionError) do
-          a / b
-        end.to_result
-      end
-
-      case divide(1, 0)
-        when Success
-          print "hooray!"
-        when Failure(ZeroDivisionError)
-          print "yikes"
-      end
-    </code>
-  </pre>
-
-  <aside class="notes" data-markdown>
-  </aside>
-</section>
-
-<!-- <section>
-  <h2>Type: integer</h2>
-  <p>
-    Possible values: {-∞ … -1, 0, 1, 2 … ∞} <br />
-    Applicable functions/operators: <code>+</code>, <code>-</code>, <code>zero?</code>, <code>negative?</code>, etc.
-  </p>
+  <h2>Use dry-types for a type-safe application design</h2>
 </section>
 
 <section>
-  <h2>Type: string</h2>
-  <p>
-    Possible values: {"", "hello", "there", "a" …} <br />
-    Applicable functions/operators: <code>+</code>, <code>split</code>, <code>empty?</code>, <code>upcase</code>, etc.
-  </p>
-</section> -->
+  <h2>Monads help us handle errors gracefully</h2>
+</section>
 
 <section>
-  <h2>Recap</h2>
-  <!-- TODO: split -->
+  <h2>Useful links and references</h2>
   <ul>
-    <li>dry-initializer + dry-types can replace Virtus</li>
-    <li>dry-types = flexible type definitions and type safety</li>
-    <li>Monads are not scary</li>
-    <li>Ruby is great for programmers</li>
+    <li><a href="http://dry-rb.org/gems/dry-types/">
+      dry-rb.org
+    </a></li>
+    <li><a href="https://solnic.codes/2016/11/02/duck-typing-vs-type-safety-in-ruby/">solnic.codes</a></li>
+    <li><a href="http://hanamirb.org/">hanamirb.org</a></li>
+    <li>
+      <a href="https://fsharpforfunandprofit.com/rop/">
+        Railway Oriented Programming
+      </a>
+    </li>
+    <li><a href="https://books.google.ru/books/about/Abstract_Types_Defined_as_Classes_of_Var.html?id=gKP1SQAACAAJ&redir_esc=y">Parnas, Weiss and Shore on data types</a></li>
+    <li>
+      <a href="http://trailblazer.to/gems/operation/2.0/">
+        Trailblazer operations
+      </a>
+    </li>
+    <li>
+      <a href="https://www.morozov.is/2018/05/27/do-notation-ruby.html">Do notation in Ruby</a>
+    </li>
   </ul>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
