@@ -449,25 +449,6 @@ document.addEventListener(
 </section>
 
 <section>
-  <h2>Computations: fmap</h2>
-  <pre>
-    <code class="ruby" data-trim>
-      Success(1).fmap do |value|
-        "The value is #{value}"
-      end # => Success("The value is 1")
-
-      Failure(1).fmap do |value|
-        "The value is #{value}"
-      end # => Failure(1)
-    </code>
-
-  </pre>
-
-  <aside class="notes" data-markdown>
-  </aside>
-</section>
-
-<section>
   <h2>Handling errors: or</h2>
   <pre>
     <code class="ruby" data-trim>
@@ -479,6 +460,25 @@ document.addEventListener(
           Success("Yay!")
         end
       end # => Failure(:db_error)
+    </code>
+
+  </pre>
+
+  <aside class="notes" data-markdown>
+  </aside>
+</section>
+
+<section>
+  <h2>Non-monadic computations: fmap</h2>
+  <pre>
+    <code class="ruby" data-trim>
+      Success(1).fmap do |value|
+        "The value is #{value}"
+      end # => Success("The value is 1")
+
+      Failure(1).fmap do |value|
+        "The value is #{value}"
+      end # => Failure(1)
     </code>
 
   </pre>
