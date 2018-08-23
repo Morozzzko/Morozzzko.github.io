@@ -4,7 +4,7 @@ title: "Ducks and Monads: Wonders of Ruby types"
 description: EuRuKo 2018
 theme: white
 highlightjs_theme: atom-one-light # github
-transition: slide
+transition: none
 ---
 
 <script>
