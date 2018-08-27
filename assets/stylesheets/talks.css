@@ -1,0 +1,19 @@
+.talks-heading {
+  display: inline-flex;
+}
+
+.talks {
+  margin-top: 2em;
+}
+
+.talks-heading a {
+  color: black;
+}
+
+.talks-heading .talks-link {
+  font-family: -apple-system, BlinkMacSystemFont, "Roboto", "Segoe UI",
+    "Helvetica Neue", "Lucida Grande", Arial, sans-serif;
+  font-size: 0.75em;
+  line-height: 1.5;
+  margin: 0 0.5em;
+}

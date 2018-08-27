@@ -23,9 +23,11 @@ description: |
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://www.morozov.is" # the base hostname & protocol for your site, e.g. http://example.com
 
-
 collections:
   slides:
+    output: true
+    permalink: /:collection/:name
+  talks:
     output: true
     permalink: /:collection/:name
 
@@ -72,14 +74,13 @@ excerpt_separator: "<!-- excerpt -->"
 #   - vendor/ruby/
 
 author:
-  name   : Igor Morozov
-  avatar : "/assets/images/bio-photo.jpg"
+  name: Igor Morozov
+  avatar: "/assets/images/bio-photo.jpg"
   bio: |
     I'm a software engineer familiar with Ruby, Python, JavaScript and ReasonML.
     <br />
     I write about functional programming and organize <a href="https://djangogirls.org/">Django Girls</a> workshops in Moscow.
-  email  : igor@morozov.is
-  home   : / # null (default), "absolute or relative url to link to author home"
+  email: igor@morozov.is
+  home: / # null (default), "absolute or relative url to link to author home"
   github: Morozzzko
   linkedin: igor-morozov
-
