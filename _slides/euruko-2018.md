@@ -39,24 +39,14 @@ document.addEventListener(
 <section>
   <h2>Hey, I'm Igor</h2>
   <p>/'<span style="font-family: monospace;">iːgɔːɹ</span>/</p>
-
-  <aside class="notes" data-markdown>
-    Say something about yourself
-  </aside>
 </section>
 
 <section>
   <h2>I'm a polyglot programmer at Qlean.ru</h2>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
   <h2>I don't trust myself</h2>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
@@ -67,40 +57,18 @@ document.addEventListener(
   <h2>
     undefined is not a function
   </h2>
-
-  <aside class="notes" data-markdown>
-    Type errors:
-
-    I expect a function, but it's a string
-    I expect a string, but it's a number
-
-  </aside>
 </section>
 
 <section>
   <h2>
     N&nbsp;+&nbsp;1
   </h2>
-  <aside class="notes" data-markdown>
-    Used to work with rom, switched to AR
-
-    I'm extra careful, but I still make those mistakes
-
-  </aside>
 </section>
 
 <section>
   <h2>
     I mess up business logic
   </h2>
-
-  <aside class="notes" data-markdown>
-    Sometimes the domain is so complex that I forget to handle an important case.
-
-    One of the recent examples: forgot to check cleaner's location, assigned a cleaner from Saint Petersburg to an order in Moscow.
-    Happily, that happened in staging environment, so the cleaner didn't have to buy a plane ticket.
-
-  </aside>
 </section>
 
 <section>
@@ -120,54 +88,18 @@ document.addEventListener(
   <p>
     New hobby: finding the right tools
   </p>
-
-  <aside class="notes" data-markdown>
-    I'm a human, so I make a lot of mistakes. I have to use the right tools to fight those errors
-
-    I use:
-
-    * automatic tests
-    * linters
-    * manual testing
-    * code review
-
-    It's also importan to find tools that help you *write* a good code.
-
-  </aside>
 </section>
 
 <section>
   <h2>Tools to write type-safe Ruby code</h2>
-
-  <aside class="notes" data-markdown>
-    Today I want to talk about Ruby's type system and libraries that help us write better code
-    with regard to type safety and expressiveness.
-
-    But first, we need stop and think if we really need to care about types.
-
-  </aside>
 </section>
 
 <section>
   <h2>Dynamic typing is not an excuse to be reckless</h2>
-
-  <aside class="notes" data-markdown>
-    Actually, yes, we do.
-
-    Ruby has a dynamic type system, but it is not a permission to be reckless about our customer's data.
-
-  </aside>
 </section>
 
 <section>
   <h2>2 out of 10 most common errors are about types</h2>
-
-  <aside class="notes" data-markdown>
-    According to Rollbar, two out of ten most popular errors in Rails projects are related to types.
-
-    JavaScript: 7 out of 10.
-
-  </aside>
 </section>
 
 <section>
@@ -184,10 +116,6 @@ document.addEventListener(
     </code>
 
   </pre>
-
-  <aside class="notes" data-markdown>
-
-  </aside>
 </section>
 
 <section>
@@ -215,9 +143,6 @@ document.addEventListener(
     <li>Value space</li>
     <li><strong>Value space and behavior</strong></li>
   </ul>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
@@ -226,9 +151,6 @@ document.addEventListener(
       A type is a set of values which a variable can possess and a set of functions that one can apply to these values.
     </q>
   </h3>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
@@ -269,9 +191,6 @@ document.addEventListener(
 
 <section>
   <h2><q>dry-types is a simple and extendable type system for Ruby</q></h2>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
@@ -286,9 +205,6 @@ document.addEventListener(
     </code>
 
   </pre>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
@@ -308,24 +224,15 @@ document.addEventListener(
     </code>
 
   </pre>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
   <h2>dry-types won't change your architecture</h2>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
   <img style="border: none; max-width: 400px; max-height: auto" src="/assets/images/slides/euruko/hanami.png" />
   <h2>Trying out dry-types: Hanami</h2>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
@@ -337,9 +244,6 @@ document.addEventListener(
     <li>Use them in setters</li>
     <li>(hard) Use dry-struct for domain models</li>
   </ul>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
@@ -350,9 +254,6 @@ document.addEventListener(
     <li>Consider all possible values</li>
     <li>Use strict constructors</li>
   </ul>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
@@ -379,33 +280,20 @@ document.addEventListener(
 
 <section>
   <h2>Monads are similar to musical instruments</h2>
-
-  <aside class="notes" data-markdown>
-    You can use them, but you can't give them a good definition without being wrong
-  </aside>
 </section>
 
 <section>
   <h2>
     A monad is a result object with a few rules
   </h2>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
   <h2>Result (Either) monad</h2>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
   <h2><code class="haskell">type Result a b = Failure a | Success b</code></h2>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
@@ -424,9 +312,6 @@ document.addEventListener(
     </code>
 
   </pre>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
@@ -443,9 +328,6 @@ document.addEventListener(
     </code>
 
   </pre>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
@@ -463,9 +345,6 @@ document.addEventListener(
     </code>
 
   </pre>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
@@ -482,27 +361,7 @@ document.addEventListener(
     </code>
 
   </pre>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
-
-<!-- <section>
-  <h2>Recovering from failure: <br />#or_fmap</h2>
-  <pre>
-    <code class="ruby" data-trim>
-      Failure(:not_found).or_fmap do |error|
-        logger.info("Error occured", error)
-
-        repo.default
-      end # => Success(...)
-    </code>
-
-  </pre>
-
-  <aside class="notes" data-markdown>
-  </aside>
-</section> -->
 
 <section>
   <h2>Escaping the context: <br />value_or</h2>
@@ -518,9 +377,6 @@ document.addEventListener(
     </code>
 
   </pre>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
@@ -533,9 +389,6 @@ document.addEventListener(
     </code>
 
   </pre>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
@@ -559,9 +412,6 @@ document.addEventListener(
     </code>
 
   </pre>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
 
 <section>
@@ -616,35 +466,4 @@ document.addEventListener(
     <br />
     igor@morozov.is
   </p>
-
-  <aside class="notes" data-markdown>
-  </aside>
 </section>
-
-<!-- <section>
-  <h2></h2>
-  <q>
-  </q>
-</section>
-
-<section>
-  <h2></h2>
-
-  <pre>
-    <code class="ruby" data-trim>
-    </code>
-  </pre>
-</section>
-
-<section>
-  <h2></h2>
-  <ul>
-    <li></li>
-  </ul>
-</section>
-
-<section>
-  <h2></h2>
-  <p>
-  </p>
-</section> -->
