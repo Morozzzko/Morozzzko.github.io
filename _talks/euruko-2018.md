@@ -29,8 +29,6 @@ Slide deck is available [here](/slides/euruko-2018).
 
 <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/v-H9nK8hqfE" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
-P.S. I know the embedded video is not working. Leaving it in case it ever starts working again. Also, it has the navigational purpose.
-
 ## Links and references
 
 <ul>
