@@ -6,6 +6,7 @@ group :jekyll_plugins do
   gem "jekyll-remote-theme"
   gem "jekyll-gist"
   gem "jekyll-paginate"
+  gem "jekyll-include-cache"
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
