@@ -15,6 +15,8 @@ Ruby is a multi-paradigm language with a strong bias towards object-oriented pro
 
 There's also one specific empowering feature: built-in support for partial application. In this article, I want to talk about implementation and use-cases for partial application in Ruby.
 
+<!-- excerpt -->
+
 # Proxy methods
 
 Let's say we have a function of two arguments. As an example, we'll take a function that accepts two strings: _tag_ and _text_ and formats them to look like **[tag] text**. The source code for this function would be fairly simple:
