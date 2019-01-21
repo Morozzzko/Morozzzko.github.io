@@ -257,7 +257,7 @@ def enable_partial_application(fun)
       fun.call(*passed_args)
     else
       ->(*args) {
-        apply.call(*passed_args, \*args) # <=
+        apply.call(*passed_args, *args) # <=
       }
     end
   }
