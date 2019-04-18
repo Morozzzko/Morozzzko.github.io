@@ -9,6 +9,7 @@ before_script:
 - mkdir build
 script:
 - bundle exec jekyll build
+- bundle exec danger
 deploy:
   fqdn: www.morozov.is
   local_dir: _site
