@@ -37,12 +37,11 @@ read_time: true
 markdown: kramdown
 plugins:
   - jekyll-feed
-  - jekyll-remote-theme
   - jekyll-paginate
   - jekyll-gist
   - jekyll-include-cache
 
-remote_theme: mmistakes/minimal-mistakes
+theme: minimal-mistakes-jekyll
 minimal_mistakes_skin: "contrast" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum" "sunrise"
 
 paginate: 5
