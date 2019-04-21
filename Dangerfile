@@ -1,19 +1,12 @@
-IGNORED_FILES = [
-  '2018-05-27-do-notation-ruby',
-  '2018-09-08-monad-laws-in-ruby',
-  '2019-01-12-partial-application-in-ruby'
-  'euruko-2018'
-]
+modified_files = (git.added_files + git.modified_files)
 
-checked_posts = Dir['_posts/**/*.md', '_slides/**/*.md'].reject do |name|
-  IGNORED_POSTS.any? do |ignored_post|
-    name.include?(ignored_post)
-  end
+files_for_proselint = modified_files.select do |file_path|
+  file_path.end_with?('md') && (
+    file_path.start_with?('_posts') ||
+    file_path.start_with?('_drafts') ||
+    file_path.start_with?('_slides')
+  )
 end
 
 prose.lint_files(
-  [
-    **checked_posts,
-    "_drafts/*.md",
-  ]
 )
