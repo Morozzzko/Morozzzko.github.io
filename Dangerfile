@@ -1,3 +1,7 @@
-prose.lint_files "_posts/*.md"
-prose.lint_files "_drafts/*.md"
-prose.lint_files "_slides/*.md"
+prose.lint_files(
+    [
+    "_posts/*.md",
+    "_drafts/*.md",
+    "_slides/*.md"
+    ]
+    )
