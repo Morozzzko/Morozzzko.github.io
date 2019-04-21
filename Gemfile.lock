@@ -36,6 +36,8 @@ GEM
       no_proxy_fix
       octokit (~> 4.7)
       terminal-table (~> 1)
+    danger-prose (2.0.7)
+      danger
     dnsruby (1.60.2)
     em-websocket (0.5.1)
       eventmachine (>= 0.12.9)
@@ -282,6 +284,7 @@ PLATFORMS
 
 DEPENDENCIES
   danger
+  danger-prose
   github-pages
   jekyll-feed (~> 0.6)
   jekyll-gist
