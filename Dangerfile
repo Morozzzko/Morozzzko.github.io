@@ -1,13 +1,13 @@
-# Sometimes it's a README fix, or something like that - which isn't relevant for
-# including in a project's CHANGELOG for example
-declared_trivial = github.pr_title.include? "#trivial"
+modified_files = (git.added_files + git.modified_files)
 
-# Make it more obvious that a PR is a work in progress and shouldn't be merged yet
-warn("PR is classed as Work in Progress") if github.pr_title.include? "[WIP]"
+files_for_proselint = modified_files.select do |file_path|
+  file_path.end_with?('md') && (
+    file_path.start_with?('_posts') ||
+    file_path.start_with?('_drafts') ||
+    file_path.start_with?('_slides')
+  )
+end
 
-# Warn when there is a big PR
-warn("Big PR") if git.lines_of_code > 500
-
-# Don't let testing shortcuts get into master by accident
-fail("fdescribe left in tests") if `grep -r fdescribe specs/ `.length > 1
-fail("fit left in tests") if `grep -r fit specs/ `.length > 1
+prose.lint_files(
+  files_for_proselint
+)
