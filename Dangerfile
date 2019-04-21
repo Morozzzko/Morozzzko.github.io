@@ -9,4 +9,5 @@ files_for_proselint = modified_files.select do |file_path|
 end
 
 prose.lint_files(
+  files_for_proselint
 )
