@@ -64,8 +64,6 @@ $ grep -rl 'Dry::Schema.Schema' ./**/*.rb | xargs gsed -i 's/Dry::Schema.Schema/
 
 If you've used [struct extension](https://dry-rb.org/gems/dry-validation/extensions/struct/), don't forget to search for `Dry::Schema.load_extensions` and remove `:struct` from the list.
 
-**Step 3**. Check you've ever inherited from `Dry::Validation::Params` and its subclasses. This may break your code
-
 **Step 3**. Replace `.each(&:type?)` predicates with `.each(:type?)`. The same goes for `maybe`, `filled` and `value`. You might get `ArgumentError: no receiver given` if you don't.
 
 ```
@@ -107,20 +105,75 @@ end
 ItemSchema.call(input: input)
 ```
 
-# TODO: update line numbers
+**Step 5**. Check you've ever inherited from `Dry::Validation::Params` and its subclasses using. If you have base schemas, update their definitions to use DSL instead of inheritance.
 
-**Before you proceed** Skip steps 5 and 6 if you've never used [type specs API](https://dry-rb.org/gems/dry-validation/type-specs/).
+You don't need this step if you don't use `configure` in your subclasses, because this step is a solution to an internal bug which has been fixed in later versions. We'll redo this step in # TODO: add reference to step where we revisit the step
 
-**Step 5**. Remove `config.type_specs` from your schemas
+```ruby
+
+# Before:
+
+class ApplicationSchema < Dry::Validation::Schema::Params
+  configure do
+    config.messages = :i18n
+  end
+end
+
+# After:
+
+ApplicationSchema = Dry::Schema.Params do
+  configure do
+    config.messages = :i18n
+  end
+end
+```
+
+And update its subclasses:
+
+```ruby
+# Before
+
+class MySchema < ApplicationSchema
+  define! do
+    ...
+    # your params go here
+  end
+end
+
+# After
+
+MySchema = Dry::Schema.define(parent: ApplicationSchema) do
+  ...
+  # your params go here
+end
+```
+
+Here's a little script that helps you replace class definitions. You'll have to do the rest manually.
+
+```
+$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/class \([[:alnum:]]*\) < ApplicationSchema/\1 = Dry::Schema.define(parent: ApplicationSchema) do/g
+```
+
+**Step 6**. Update DSL inheritance.
+
+Replace `Dry::Schema.Params(BaseClass)` with `Dry::Schema.Params(parent: BaseClass)`.
+
+```
+$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/Dry::Schema\(\(::\)\|\.\)\(Params\|JSON\|Schema\)(\([[:alnum:]]*\))/Dry::Schema\1\3(parent: \4)/g'
+```
+
+**Before you proceed** Skip steps 7 and 8 if you've never used [type specs API](https://dry-rb.org/gems/dry-validation/type-specs/).
+
+**Step 7**. Remove `config.type_specs` from your schemas
 
 ```
 $ grep -rl 'config.type_specs' ./**/*.rb | xargs gsed -i '/config\.type_specs/d'
 ```
 
-**Step 6**. Remove type spec usages from `required` and `optional`.
+**Step 8**. Remove type spec usages from `required` and `optional`.
 
 ```
-$ grep -rl 'Schema' ./**/*.rb | xargs gsed -n 's/\(required\|optional\)(\(:[[:alnum:]_]*\), [[:print:]]*)\./\1(\2)./p'
+$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\(required\|optional\)(\(:[[:alnum:]_]*\), [[:print:]]*)\(\.\|$\)/\1(\2)\3/g'
 ```
 
 ## Updating dry-schema
@@ -140,7 +193,7 @@ $ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/config\.namespace =/config.mess
 
 **Step ???**. Update dry-schema to `0.2.0`:
 
-`$ bundle add dry-struct --version 0.2.0`
+`$ bundle add dry-schema --version 0.2.0`
 
 If you're using I18n, you'll have to put `errors` under `dry_struct` namespace. This way,
 

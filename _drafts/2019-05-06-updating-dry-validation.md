@@ -36,3 +36,13 @@ $ bundle list | grep dry
 ```
 
 I've got 15 gems, but I only care about four of them: monads, types, struct and validation. Since monads are up-to-date, I'm only going to talk about types, struct and validation.
+
+## Steps
+
+Step 1. Bump dry-validation to `0.13.0` and `dry-types` to `0.14`.
+
+Step 2. Bump dry-validation to `1.0.0.alpha1`
+
+Step 3. See if you've ever used [struct extension](https://dry-rb.org/gems/dry-validation/extensions/struct/). Remove `Dry::Validation.load_extensions(:struct)`
+
+Step 4. Replace `Dry::Validation.Form`, `Dry::Validation.Params`, `Dry::Validation.Schema` with `Dry::Validations
