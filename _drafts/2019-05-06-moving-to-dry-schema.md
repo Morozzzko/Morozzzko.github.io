@@ -1,6 +1,6 @@
 ---
 layout: single
-title: "Updaring dry-rb gems: validations and types"
+title: "Moving to dry-schema"
 date: "2019-05-06 23:02:00 +0300"
 ---
 
@@ -64,7 +64,7 @@ $ grep -rl 'Dry::Schema.Schema' ./**/*.rb | xargs gsed -i 's/Dry::Schema.Schema/
 
 If you've used [struct extension](https://dry-rb.org/gems/dry-validation/extensions/struct/), don't forget to search for `Dry::Schema.load_extensions` and remove `:struct` from the list.
 
-Don't forget to check if you've ever inherited from `Dry::Validation::Schema` and its subclasses. This may break your code
+**Step 3**. Check you've ever inherited from `Dry::Validation::Params` and its subclasses. This may break your code
 
 **Step 3**. Replace `.each(&:type?)` predicates with `.each(:type?)`. The same goes for `maybe`, `filled` and `value`. You might get `ArgumentError: no receiver given` if you don't.
 
