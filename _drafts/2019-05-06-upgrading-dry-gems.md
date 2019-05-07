@@ -50,23 +50,95 @@ The gem we knew as `dry-validation` has evolved from a complex schema validation
 
 Meanwhile, it has become so complex they decided to break it down into two gems: dry-validation and [dry-schema](https://solnic.codes/2019/01/31/introducing-dry-schema/). The latter provides the old functionality of `dry-validation` — all the schema validations, coercions, and they fixed _all_ known issues. So, essentially, all I need is to switch to dry-schema and update it.
 
-Here's the list of atomic steps: you can deploy your application after each
+Here's the list of atomic steps: you can deploy your application after each. FIXME: it's probably false, step 2 is getting TOO MASSIVE
 
 **Step 1**. Upgrade dry-validation to `0.13`. It's the last version before the switch, so if your builds pass — you're good to go. You'll have to update dry-types to `0.14` too.
 
-**Step 2**. Replace dry-validation with equivalent dry-schema version (0.1.0) and replace all `Dry::Validation` ocurrences with `Dry::Schema`. Also replace all `Dry::Validation.Schema` with `Dry::Validation.Params`
+**Step 2**. Replace dry-validation with equivalent dry-schema version (0.1.0) and replace all `Dry::Validation` ocurrences with `Dry::Schema`. Also replace all `Dry::Validation.Schema` with `Dry::Validation.define`.
 
 ```
 $ bundle remove dry-validation && bundle add dry-schema --version 0.1.0`
 $ grep -rl 'Dry::Validation' ./**/*.rb | xargs gsed -i 's/Dry::Validation/Dry::Schema/g'
-$ grep -rl 'Dry::Schema.Schema' ./**/*.rb | xargs gsed -i 's/Dry::Schema.Schema/Dry::Schema.Params/g'
+$ grep -rl 'Dry::Schema.Schema' ./**/*.rb | xargs gsed -i 's/Dry::Schema.Schema/Dry::Schema.define/g'
 ```
 
 If you've used [struct extension](https://dry-rb.org/gems/dry-validation/extensions/struct/), don't forget to search for `Dry::Schema.load_extensions` and remove `:struct` from the list.
 
 Don't forget to check if you've ever inherited from `Dry::Validation::Schema` and its subclasses. This may break your code
 
-**Step 3**. Update dry-schema to `0.2.0`:
+**Step 3**. Replace `.each(&:type?)` predicates with `.each(:type?)`. The same goes for `maybe`, `filled` and `value`. You might get `ArgumentError: no receiver given` if you don't.
+
+```
+$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\.\(filled\|value\|each\|maybe\)(&/.\1(/g'
+```
+
+**Step 4**. Refactor schemas that use [arrays as input](https://dry-rb.org/gems/dry-validation/0.13/array-as-input/).
+
+The feature has been removed and it's not coming back until dry-schema 1.0. Here's [an issue](https://github.com/dry-rb/dry-schema/issues/22) with the feature.
+
+The refactoring will look like this:
+
+```ruby
+# Before
+
+ItemSchema = Dry::Schema.Params do
+  each do
+    schema do
+      required(item_id).filled(:int?)
+      required(option_ids).each(:int?)
+    end
+  end
+end
+
+ItemSchema.call(input)
+
+# After
+
+ItemSchema = Dry::Schema.Params do
+  required(:input).each do
+    schema do
+      required(:item_id).filled(:int?)
+      required(:option_ids).each(:int?)
+    end
+  end
+end
+
+
+ItemSchema.call(input: input)
+```
+
+# TODO: update line numbers
+
+**Before you proceed** Skip steps 5 and 6 if you've never used [type specs API](https://dry-rb.org/gems/dry-validation/type-specs/).
+
+**Step 5**. Remove `config.type_specs` from your schemas
+
+```
+$ grep -rl 'config.type_specs' ./**/*.rb | xargs gsed -i '/config\.type_specs/d'
+```
+
+**Step 6**. Remove type spec usages from `required` and `optional`.
+
+```
+$ grep -rl 'Schema' ./**/*.rb | xargs gsed -n 's/\(required\|optional\)(\(:[[:alnum:]_]*\), [[:print:]]*)\./\1(\2)./p'
+```
+
+## Updating dry-schema
+
+**Step ???**. Update error messages config
+
+1. Replace `config.messages` with `config.messages.backend`
+2. Replace `config.messages_file = '/path/to/my/errors.yml'` with `config.messages.load_paths << '/path/to/my/errors.yml'`
+3. Replace `config.namespace = :user` with `config.messages.namespace = :user`
+
+```ruby
+
+$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/config\.messages =/config.messages.backend =/g'
+$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/config\.messages_file =/config.messages.load_paths <</g'
+$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/config\.namespace =/config.messages.namespace =/g'
+```
+
+**Step ???**. Update dry-schema to `0.2.0`:
 
 `$ bundle add dry-struct --version 0.2.0`
 
@@ -85,6 +157,10 @@ en:
   dry_struct:
     errors:
       array?: must be an array
+```
+
+```
+grep -rl 'Schema' ./**/*.rb | xargs gsed -n '/[(required|optional)](:[[:alnum:]_]*)\.schema/p'
 ```
 
 ## TL;DR
