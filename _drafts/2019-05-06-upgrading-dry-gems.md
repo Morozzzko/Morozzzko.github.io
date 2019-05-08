@@ -162,7 +162,7 @@ Replace `Dry::Schema.Params(BaseClass)` with `Dry::Schema.Params(parent: BaseCla
 $ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/Dry::Schema\(\(::\)\|\.\)\(Params\|JSON\|Schema\)(\([[:alnum:]]*\))/Dry::Schema\1\3(parent: \4)/g'
 ```
 
-**Before you proceed** Skip steps 7 and 8 if you've never used [type specs API](https://dry-rb.org/gems/dry-validation/type-specs/).
+**Before you proceed** Skip steps 7 and 8 if you've never used [type specs API](https://dry-rb.org/gems/dry-validation/0.13/type-specs/).
 
 **Step 7**. Remove `config.type_specs` from your schemas
 
@@ -176,28 +176,15 @@ $ grep -rl 'config.type_specs' ./**/*.rb | xargs gsed -i '/config\.type_specs/d'
 $ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\(required\|optional\)(\(:[[:alnum:]_]*\), [[:print:]]*)\(\.\|$\)/\1(\2)\3/g'
 ```
 
-**That's it**. If you
+**That's it**. Most likely, the basic transition to dry-schema is done. If you've ever used [high-level rules](https://dry-rb.org/gems/dry-validation/0.13/high-level-rules/), [validation blocks](https://dry-rb.org/gems/dry-validation/0.13/custom-validation-blocks/), you have two options: either refactor to remove those features, or install dry-validation 1.0, which requires `dry-schema >= 0.3`.
 
-## Updating dry-schema
+If you want to use dry-validation 1.0, stay with me — we'll go through upgrade process for `dry-schema` and come back to `dry-validation`.
 
-**Step ???**. Update error messages config
+## Updating dry-schema to 0.2
 
-1. Replace `config.messages` with `config.messages.backend`
-2. Replace `config.messages_file = '/path/to/my/errors.yml'` with `config.messages.load_paths << '/path/to/my/errors.yml'`
-3. Replace `config.namespace = :user` with `config.messages.namespace = :user`
+**Step 1**. Update your gemfile to specify `gem 'dry-schema', '~> 0.2.0'` and run `bundle install`
 
-```ruby
-
-$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/config\.messages =/config.messages.backend =/g'
-$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/config\.messages_file =/config.messages.load_paths <</g'
-$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/config\.namespace =/config.messages.namespace =/g'
-```
-
-**Step ???**. Update dry-schema to `0.2.0`:
-
-`$ bundle add dry-schema --version 0.2.0`
-
-If you're using I18n, you'll have to put `errors` under `dry_struct` namespace. This way,
+**Step 2**. If you're using I18n, move `errors` under `dry_struct` namespace. This way,
 
 ```yaml
 en:
@@ -214,8 +201,61 @@ en:
       array?: must be an array
 ```
 
+**Step 3**. Find any `schema` macro usages and replace them with `hash`, as `schema` no longer prepends `value(:hash?)` check.
+
+```ruby
+# Before
+
+required(:foo).schema do
+end
+
+# After
+
+required(:foo).hash do
+end
+```
+
+```
+$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/schema \(do\|{\)/hash \1/g'
+```
+
+**Step 4**. Find any `each` macro usages and replace them with `array` to add type check. Since Ruby has a `Enumerable#each` function, we can't automate it, but we can still find possible occurences:
+
+```
+$ grep -rl 'Schema' ./**/*.rb | xargs grep -n 'each \(do\|{\)'
+```
+
+Feel free to skip if you feel like you don't need type checks.
+
+## Updating dry-schema to 0.3
+
+# UNFINISHED
+
+**Step 1**. Update error messages config
+
+1. Replace `config.messages` with `config.messages.backend`
+2. Replace `config.messages_file = '/path/to/my/errors.yml'` with `config.messages.load_paths << '/path/to/my/errors.yml'`
+3. Replace `config.namespace = :user` with `config.messages.namespace = :user`
+
+```ruby
+
+$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/config\.messages =/config.messages.backend =/g'
+$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/config\.messages_file =/config.messages.load_paths <</g'
+$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/config\.namespace =/config.messages.namespace =/g'
+```
+
 ```
 grep -rl 'Schema' ./**/*.rb | xargs gsed -n '/[(required|optional)](:[[:alnum:]_]*)\.schema/p'
 ```
 
-## TL;DR
+Finding DI:
+
+```
+$ grep -rl 'Schema' ./**/*.rb | xargs grep -n 'option :[[:alnum:]_]*$'
+```
+
+Finding logic:
+
+```
+$ grep -rl 'Schema' ./**/*.rb | xargs grep -n 'rule\|validate('
+```
