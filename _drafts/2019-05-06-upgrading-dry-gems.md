@@ -37,12 +37,10 @@ $ bundle list | grep dry
 
 I've got 15 gems, but I only care about four of them: monads, types, struct and validation. Since monads are up-to-date, I'm only going to talk about types, struct and validation.
 
-The upgrade is not going to be easy as there are two issues with the gems:
+My goals:
 
-1. What used to be `dry-validation` is now `dry-schema`, so I have to switch gems
-2. `dry-validation`, `dry-schema` and `dry-struct` all depend on `dry-types`, so I can't just bump the version and expect it to work
-
-I'll keep that in mind and try and deliver working updates.
+- Figure out what we need to update in our code to new gems
+- Get a code that won't crash. Tests might fail and logic may break though
 
 ## dry-validation to dry-schema
 
@@ -180,9 +178,9 @@ $ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\(required\|optional\)(\(:[[:al
 
 If you want to use dry-validation 1.0, stay with me — we'll go through upgrade process for `dry-schema` and come back to `dry-validation`.
 
-## Updating dry-schema to 0.2
+## Updating dry-schema to 0.3
 
-**Step 1**. Update your gemfile to specify `gem 'dry-schema', '~> 0.2.0'` and run `bundle install`
+**Step 1**. Update your gemfile to specify `gem 'dry-schema', '~> 0.3.0'` and run `bundle install`
 
 **Step 2**. If you're using I18n, move `errors` under `dry_struct` namespace. This way,
 
@@ -227,26 +225,51 @@ $ grep -rl 'Schema' ./**/*.rb | xargs grep -n 'each \(do\|{\)'
 
 Feel free to skip if you feel like you don't need type checks.
 
-## Updating dry-schema to 0.3
+**Step 5**. Load [hints extension](https://dry-rb.org/gems/dry-schema/extensions/hints/) if you use monads or `.messages`.
 
-# UNFINISHED
+```ruby
+Dry::Schema.load_extensions(:hints)
+```
 
-**Step 1**. Update error messages config
+## Upgrading dry-schema to 0.4
+
+**Step 1**. Update dry-struct, dry-types and dry-schema and run `bundle install`.
+
+```ruby
+gem 'dry-schema', '~> 0.4.0'
+gem 'dry-struct', '~> 0.7.0'
+gem 'dry-types', '~> 0.15.0'
+```
+
+**Step 2**. Replace `Dry::Types.module` with `Dry.Types(default: :nominal)`
+
+```
+$ gsed -i 's/Dry::Types\.module/Dry.Types(default: :nominal)/g' ./**/*.rb
+```
+
+**Step 3**. Replace legacy hash schemas with new ones. See https://dry-rb.org/gems/dry-types/0.15/hash-schemas/
+
+**Step 4**. Update error message config
 
 1. Replace `config.messages` with `config.messages.backend`
 2. Replace `config.messages_file = '/path/to/my/errors.yml'` with `config.messages.load_paths << '/path/to/my/errors.yml'`
 3. Replace `config.namespace = :user` with `config.messages.namespace = :user`
 
-```ruby
-
+```
 $ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/config\.messages =/config.messages.backend =/g'
 $ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/config\.messages_file =/config.messages.load_paths <</g'
 $ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/config\.namespace =/config.messages.namespace =/g'
 ```
 
+**Step 5**. Symbolize all string keys
+
 ```
-grep -rl 'Schema' ./**/*.rb | xargs gsed -n '/[(required|optional)](:[[:alnum:]_]*)\.schema/p'
+$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\(required\|optional\)(\(\'\|"\)\([[:alnum:]_]*\)\(\'\|"\)/\1(:\3/g'
 ```
+
+**Step 6**.
+
+# UNFINISHED
 
 Finding DI:
 
@@ -258,4 +281,10 @@ Finding logic:
 
 ```
 $ grep -rl 'Schema' ./**/*.rb | xargs grep -n 'rule\|validate('
+```
+
+Finding predicates:
+
+```
+$ grep -rl 'Schema' ./**/*.rb | xargs grep -n 'predicates'
 ```
