@@ -176,6 +176,8 @@ $ grep -rl 'config.type_specs' ./**/*.rb | xargs gsed -i '/config\.type_specs/d'
 $ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\(required\|optional\)(\(:[[:alnum:]_]*\), [[:print:]]*)\(\.\|$\)/\1(\2)\3/g'
 ```
 
+**That's it**. If you
+
 ## Updating dry-schema
 
 **Step ???**. Update error messages config
