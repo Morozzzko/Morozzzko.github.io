@@ -119,9 +119,11 @@ end
 
 # After:
 
-ApplicationSchema = Dry::Schema.Params do
-  configure do
-    config.messages = :i18n
+class ApplicationSchema < Dry::Validation::Schema::Params
+  define do
+    configure do
+      config.messages = :i18n
+    end
   end
 end
 ```
@@ -132,6 +134,9 @@ And update its subclasses:
 # Before
 
 class MySchema < ApplicationSchema
+  configure do
+  end
+
   define! do
     ...
     # your params go here
@@ -231,14 +236,14 @@ Feel free to skip if you feel like you don't need type checks.
 Dry::Schema.load_extensions(:hints)
 ```
 
-## Upgrading dry-schema to 0.4
+## The leap towards 1.0.0
 
 **Step 1**. Update dry-struct, dry-types and dry-schema and run `bundle install`.
 
 ```ruby
-gem 'dry-schema', '~> 0.4.0'
-gem 'dry-struct', '~> 0.7.0'
-gem 'dry-types', '~> 0.15.0'
+gem 'dry-schema', '~> 1.0.0'
+gem 'dry-struct', '~> 1.0.0'
+gem 'dry-types', '~> 1.0.0'
 ```
 
 **Step 2**. Replace `Dry::Types.module` with `Dry.Types(default: :nominal)`
@@ -267,7 +272,43 @@ $ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/config\.namespace =/config.mess
 $ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\(required\|optional\)(\(\'\|"\)\([[:alnum:]_]*\)\(\'\|"\)/\1(:\3/g'
 ```
 
-**Step 6**.
+**Step 6**. Replace `Types.Definition` with `Types.Nominal`
+
+```
+$ gsed -i 's/Types\.Definition/Types.Nominal/' ./**/*.rb
+```
+
+**Step 7**. If you rely on `Types::Params` and `Types::JSON` not to raise an exception on invalid input, decorate the definitions with `.lax`
+
+```
+$ gsed -i 's/Types::JSON::\([[:alnum:]]*\)/Types::JSON::\1.lax/g' ./**/*.rb
+$ gsed -i 's/Types::Params::\([[:alnum:]]*\)/Types::Params::\1.lax/g' ./**/*.rb
+```
+
+**Step 8**. `Result#{messages, errors, hints}` now return `MessageSet`, which can be converted to `Hash`. So we need to go and update the usages _everywhere_. Also `Result#to_monad` now wraps entire `Result` object, so we have to update accordingly and unpack `.output` and
+
+```ruby
+# Before
+
+render errors: Schema.call(params).errors
+render errors: Schema.call(params).to_monad.failure
+
+# After
+
+render errors: Schema.call(params).errors.to_h
+render errors: Schema.call(params).to_monad.failure.errors.to_h
+```
+
+I've used the scripts to help me look and trace those values:
+
+```
+$ grep -rl 'Schema' ./**/*.rb | xargs grep -n '\.messages'
+$ grep -rl 'Schema' ./**/*.rb | xargs grep -n '\.errors'
+$ grep -rl 'Schema' ./**/*.rb | xargs grep -n '\.to_monad'
+$ grep -rl 'Schema' ./**/*.rb | xargs grep -n '\.failure'
+$ grep -rl 'Schema' ./**/*.rb | xargs grep -n '\.value_or'
+$ grep -rl 'Schema' ./**/*.rb | xargs grep -n '\.value!'
+```
 
 # UNFINISHED
 
@@ -288,3 +329,7 @@ Finding predicates:
 ```
 $ grep -rl 'Schema' ./**/*.rb | xargs grep -n 'predicates'
 ```
+
+Bugs:
+https://dry-rb.org/gems/dry-schema/basics/working-with-schemas/
+config.messages comes into define too
