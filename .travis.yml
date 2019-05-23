@@ -1,15 +1,17 @@
 language: ruby
 sudo: false
-install: bundle install --without development --jobs=3 --retry=3
+install:
+  - gem install bundler -v '1.17.3'
+  - bundle install --without development --jobs=3 --retry=3
 cache: bundler
 branches:
   except:
-  - master
+    - master
 before_script:
-- mkdir build
+  - mkdir build
 script:
-- bundle exec jekyll build
-- bundle exec danger
+  - bundle exec jekyll build
+  - bundle exec danger
 deploy:
   fqdn: www.morozov.is
   local_dir: _site
@@ -20,4 +22,3 @@ deploy:
   target-branch: master
   on:
     branch: build
-
