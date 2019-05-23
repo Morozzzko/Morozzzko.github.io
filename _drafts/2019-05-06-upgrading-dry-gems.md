@@ -4,11 +4,11 @@ title: "Moving to dry-schema"
 date: "2019-05-06 23:02:00 +0300"
 ---
 
-I'm enthusiastic about [dry-rb gems](https://dry-rb.org/). Actually, I've never worked on Ruby projects without a dry-rb gem. However, some people are sceptical about them, as a lot of core dry-rb gems are still in their `0.x` phase, which leads to a lot of breaking changes and eventual bugs.
+I'm enthusiastic about [dry-rb gems](https://dry-rb.org/). Actually, I've never worked on Ruby projects without a dry-rb gem. However, some people are sceptical, as a lot of core dry-rb gems are still in their `0.x` phase, which leads to a lot of breaking changes and hours of refactoring.
 
 I'm happy to see dry-rb mature: dry-monads entered 1.0 phase in Summer 2018, and now [two more libraries](https://dry-rb.org/news/2019/04/23/dry-types-and-dry-struct-1-0-0-released/) hit v1.0 milestones: dry-types and dry-struct; and dry-validation is in its 1.0 RC phase.
 
-I haven't updated my dry-rb gems for a couple of months, so I've missed a lot of breaking changes in various gems. So I decided to upgrade the gems and write about the new changes.
+I haven't updated my dry-rb gems for a couple of months, so I've missed a lot of breaking changes. Finally, I decided to upgrade the gems and write about the proccess. I'll take a swing at _automating_ my upgrade process as much as I can.
 
 <!-- excerpt -->
 
@@ -37,18 +37,17 @@ $ bundle list | grep dry
 
 I've got 15 gems, but I only care about four of them: monads, types, struct and validation. Since monads are up-to-date, I'm only going to talk about types, struct and validation.
 
-My goals:
+In this post, I'll try to give a step-by-step guide that will _simplify_ the upgrading process. It won't give a 100% working solutions, but it will probably save you a couple of hours.
 
-- Figure out what we need to update in our code to new gems
-- Get a code that won't crash. Tests might fail and logic may break though
+**Note**. I use macOS with GNU sed (`gsed`) instead of built-in `sed` command. So if you want to follow my instructions, install it via `brew install gnu-sed`. Since I'm using [fish](https://fishshell.com/) instead of `bash` / `zsh`, some commands might need slight modifications to work.
 
 ## dry-validation to dry-schema
 
-The gem we knew as `dry-validation` has evolved from a complex schema validation & coercion to a high-level contracts DSL with complex domain logic.
+The gem we knew as `dry-validation` has evolved from a complex schema validation & coercion into a high-level contract DSL with domain logic.
 
-Meanwhile, it has become so complex they decided to break it down into two gems: dry-validation and [dry-schema](https://solnic.codes/2019/01/31/introducing-dry-schema/). The latter provides the old functionality of `dry-validation` — all the schema validations, coercions, and they fixed _all_ known issues. So, essentially, all I need is to switch to dry-schema and update it.
+Meanwhile, it has become so complex they decided to break it down into two gems: dry-validation and [dry-schema](https://solnic.codes/2019/01/31/introducing-dry-schema/). The latter provides the old functionality of `dry-validation` — the schema validations, coercions, and they fixed _all_ known issues. `dry-validation` adds domain rules and validations on top of that.
 
-Here's the list of atomic steps: you can deploy your application after each. FIXME: it's probably false, step 2 is getting TOO MASSIVE
+I don't want to go around and update everything manually, so I'm going to replace `dry-validation` with `dry-schema` as much as I can, and manually refactor the rest.
 
 **Step 1**. Upgrade dry-validation to `0.13`. It's the last version before the switch, so if your builds pass — you're good to go. You'll have to update dry-types to `0.14` too.
 
@@ -285,7 +284,15 @@ $ gsed -i 's/Types::JSON::\([[:alnum:]]*\)/Types::JSON::\1.lax/g' ./**/*.rb
 $ gsed -i 's/Types::Params::\([[:alnum:]]*\)/Types::Params::\1.lax/g' ./**/*.rb
 ```
 
-**Step 8**. `Result#{messages, errors, hints}` now return `MessageSet`, which can be converted to `Hash`. So we need to go and update the usages _everywhere_. Also `Result#to_monad` now wraps entire `Result` object, so we have to update accordingly and unpack `.output` and
+**Step 8**. Replace `:type?` predicates with type checks whereever you need this
+
+```
+$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\(filled\|maybe\|value\)(:str?/\1(:string/g'
+$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\(filled\|maybe\|value\)(:int?/\1(:integer/g'
+$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\(filled\|maybe\|value\)(:date?/\1(:date/g'
+```
+
+**Step 9**. `Result#{messages, errors, hints}` now return `MessageSet`, which can be converted to `Hash`. So we need to go and update the usages _everywhere_. Also `Result#to_monad` now wraps entire `Result` object, so we have to update accordingly and unpack `.output` and
 
 ```ruby
 # Before
