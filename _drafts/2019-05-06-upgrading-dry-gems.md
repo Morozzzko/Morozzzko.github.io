@@ -41,6 +41,8 @@ In this post, I'll try to give a step-by-step guide that will _simplify_ the upg
 
 **Note**. I use macOS with GNU sed (`gsed`) instead of built-in `sed` command. So if you want to follow my instructions, install it via `brew install gnu-sed`. Since I'm using [fish](https://fishshell.com/) instead of `bash` / `zsh`, some commands might need slight modifications to work.
 
+**Note**. I wrote this article while upgrading the dry-rb gems on my project. I decided to do it gradually — so you might encounter some redundant steps. If you do, please contact me via email and I'll upgrade it.
+
 ## dry-validation to dry-schema
 
 The gem we knew as `dry-validation` has evolved from a complex schema validation & coercion into a high-level contract DSL with domain logic.
@@ -102,9 +104,16 @@ end
 ItemSchema.call(input: input)
 ```
 
-**Step 5**. Check you've ever inherited from `Dry::Validation::Params` and its subclasses using. If you have base schemas, update their definitions to use DSL instead of inheritance.
+**Step 5**. Check you've ever inherited from `Dry::Validation` schemas. If you did, do the following transformations:
 
-You don't need this step if you don't use `configure` in your subclasses, because this step is a solution to an internal bug which has been fixed in later versions. We'll redo this step in # TODO: add reference to step where we revisit the step
+1. Rename classes
+
+- `Dry::Validation::Schema::Params` → `Dry::Schema::Params`
+- `Dry::Validation::Schema::JSON` → `Dry::Schema::JSON`
+- `Dry::Validation::Schema` → `Dry::Schema`
+
+2. Replace `define!` block with `define`
+3. Move `configure` block under `define`
 
 ```ruby
 
@@ -118,7 +127,7 @@ end
 
 # After:
 
-class ApplicationSchema < Dry::Validation::Schema::Params
+class ApplicationSchema < Dry::Schema::Params
   define do
     configure do
       config.messages = :i18n
@@ -134,6 +143,7 @@ And update its subclasses:
 
 class MySchema < ApplicationSchema
   configure do
+    config.messages = :yaml
   end
 
   define! do
@@ -144,16 +154,16 @@ end
 
 # After
 
-MySchema = Dry::Schema.define(parent: ApplicationSchema) do
-  ...
-  # your params go here
+class MySchema < ApplicationSchema
+  define do
+    configure do
+      config.messages = :yaml
+    end
+
+    ...
+    # your params go here
+  end
 end
-```
-
-Here's a little script that helps you replace class definitions. You'll have to do the rest manually.
-
-```
-$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/class \([[:alnum:]]*\) < ApplicationSchema/\1 = Dry::Schema.define(parent: ApplicationSchema) do/g
 ```
 
 **Step 6**. Update DSL inheritance.
@@ -178,15 +188,11 @@ $ grep -rl 'config.type_specs' ./**/*.rb | xargs gsed -i '/config\.type_specs/d'
 $ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\(required\|optional\)(\(:[[:alnum:]_]*\), [[:print:]]*)\(\.\|$\)/\1(\2)\3/g'
 ```
 
-**That's it**. Most likely, the basic transition to dry-schema is done. If you've ever used [high-level rules](https://dry-rb.org/gems/dry-validation/0.13/high-level-rules/), [validation blocks](https://dry-rb.org/gems/dry-validation/0.13/custom-validation-blocks/), you have two options: either refactor to remove those features, or install dry-validation 1.0, which requires `dry-schema >= 0.3`.
-
-If you want to use dry-validation 1.0, stay with me — we'll go through upgrade process for `dry-schema` and come back to `dry-validation`.
-
 ## Updating dry-schema to 0.3
 
-**Step 1**. Update your gemfile to specify `gem 'dry-schema', '~> 0.3.0'` and run `bundle install`
+**Step 9**. Update your gemfile to specify `gem 'dry-schema', '~> 0.3.0'` and run `bundle install`
 
-**Step 2**. If you're using I18n, move `errors` under `dry_struct` namespace. This way,
+**Step 10**. If you're using I18n, move `errors` under `dry_struct` namespace. This way,
 
 ```yaml
 en:
@@ -203,7 +209,7 @@ en:
       array?: must be an array
 ```
 
-**Step 3**. Find any `schema` macro usages and replace them with `hash`, as `schema` no longer prepends `value(:hash?)` check.
+**Step 11**. Find any `schema` macro usages and replace them with `hash`, as `schema` no longer prepends `value(:hash?)` check.
 
 ```ruby
 # Before
@@ -221,7 +227,7 @@ end
 $ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/schema \(do\|{\)/hash \1/g'
 ```
 
-**Step 4**. Find any `each` macro usages and replace them with `array` to add type check. Since Ruby has a `Enumerable#each` function, we can't automate it, but we can still find possible occurences:
+**Step 12**. Find any `each` macro usages and replace them with `array` to add type check. Since Ruby has a `Enumerable#each` function, we can't automate it, but we can still find possible occurences:
 
 ```
 $ grep -rl 'Schema' ./**/*.rb | xargs grep -n 'each \(do\|{\)'
@@ -229,7 +235,7 @@ $ grep -rl 'Schema' ./**/*.rb | xargs grep -n 'each \(do\|{\)'
 
 Feel free to skip if you feel like you don't need type checks.
 
-**Step 5**. Load [hints extension](https://dry-rb.org/gems/dry-schema/extensions/hints/) if you use monads or `.messages`.
+**Step 13**. Load [hints extension](https://dry-rb.org/gems/dry-schema/extensions/hints/) if you use monads or `.messages`.
 
 ```ruby
 Dry::Schema.load_extensions(:hints)
@@ -237,23 +243,25 @@ Dry::Schema.load_extensions(:hints)
 
 ## The leap towards 1.0.0
 
-**Step 1**. Update dry-struct, dry-types and dry-schema and run `bundle install`.
+**Step 14**. Update dry-struct, dry-types and dry-schema and run `bundle install`.
 
 ```ruby
-gem 'dry-schema', '~> 1.0.0'
+gem 'dry-schema', '~> 1.1.0'
 gem 'dry-struct', '~> 1.0.0'
 gem 'dry-types', '~> 1.0.0'
 ```
 
-**Step 2**. Replace `Dry::Types.module` with `Dry.Types(default: :nominal)`
+**Step 15**. Replace `Dry::Types.module` with `Dry.Types(default: :nominal)`
+
+If you've never used nominal types (i.e. `Types::Hash`, `Types::Integer`), feel free to use `Dry.Types` instead.
 
 ```
 $ gsed -i 's/Dry::Types\.module/Dry.Types(default: :nominal)/g' ./**/*.rb
 ```
 
-**Step 3**. Replace legacy hash schemas with new ones. See https://dry-rb.org/gems/dry-types/0.15/hash-schemas/
+**Step 16**. Replace legacy hash schemas with new ones. See https://dry-rb.org/gems/dry-types/0.15/hash-schemas/
 
-**Step 4**. Update error message config
+**Step 17**. Update error message config
 
 1. Replace `config.messages` with `config.messages.backend`
 2. Replace `config.messages_file = '/path/to/my/errors.yml'` with `config.messages.load_paths << '/path/to/my/errors.yml'`
@@ -265,26 +273,26 @@ $ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/config\.messages_file =/config.
 $ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/config\.namespace =/config.messages.namespace =/g'
 ```
 
-**Step 5**. Symbolize all string keys
+**Step 18**. Symbolize all string keys
 
 ```
 $ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\(required\|optional\)(\(\'\|"\)\([[:alnum:]_]*\)\(\'\|"\)/\1(:\3/g'
 ```
 
-**Step 6**. Replace `Types.Definition` with `Types.Nominal`
+**Step 19**. Replace `Types.Definition` with `Types.Nominal`
 
 ```
 $ gsed -i 's/Types\.Definition/Types.Nominal/' ./**/*.rb
 ```
 
-**Step 7**. If you rely on `Types::Params` and `Types::JSON` not to raise an exception on invalid input, decorate the definitions with `.lax`
+**Step 20**. If you rely on `Types::Params` and `Types::JSON` not to raise an exception on invalid input, decorate the definitions with `.lax`
 
 ```
 $ gsed -i 's/Types::JSON::\([[:alnum:]]*\)/Types::JSON::\1.lax/g' ./**/*.rb
 $ gsed -i 's/Types::Params::\([[:alnum:]]*\)/Types::Params::\1.lax/g' ./**/*.rb
 ```
 
-**Step 8**. Replace `:type?` predicates with type checks whereever you need this
+**Step 21**. Replace `:type?` predicates with type checks whereever you need this
 
 ```
 $ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\(filled\|maybe\|value\)(:str?/\1(:string/g'
@@ -292,7 +300,7 @@ $ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\(filled\|maybe\|value\)(:int?/
 $ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\(filled\|maybe\|value\)(:date?/\1(:date/g'
 ```
 
-**Step 9**. `Result#{messages, errors, hints}` now return `MessageSet`, which can be converted to `Hash`. So we need to go and update the usages _everywhere_. Also `Result#to_monad` now wraps entire `Result` object, so we have to update accordingly and unpack `.output` and
+**Step 22**. `Result#{messages, errors, hints}` now return `MessageSet`, which can be converted to `Hash`. So we need to go and update the usages _everywhere_. Also `Result#to_monad` now wraps entire `Result` object, so we have to update our code.
 
 ```ruby
 # Before
@@ -317,12 +325,60 @@ $ grep -rl 'Schema' ./**/*.rb | xargs grep -n '\.value_or'
 $ grep -rl 'Schema' ./**/*.rb | xargs grep -n '\.value!'
 ```
 
+## Refactoring to dry-validation
+
+The steps above should be good enough to update most of the features, but if you 've ever used [high-level rules](https://dry-rb.org/gems/dry-validation/0.13/high-level-rules/), [validation blocks](https://dry-rb.org/gems/dry-validation/0.13/custom-validation-blocks/), you have two options: either remove those features from your schemas, or use dry-validation 1.0. I decided to refactor most of my schemas, that's what came out of it.
+
+There are things to keep in mind during the update:
+
+- `dry-validation` is a library to validate _domain_ logic and rules. The core concept is a `Contract`.
+- All contracts must be instantiated — no more `Schema.call`. We need to use `Contract.new.call` now
+- `Dry::Validation.Contract` returns an instantiated contract, while `Dry::Validation.Schema` used to return a class
+
+**Step 23**. Update dependency injection. The new version uses [dry-initializer](http://dry-rb.org/gems/dry-initializer/) under the hood, so it works like this:
+
+- use `option` for keyword arguments
+- use `param` for positional arguments
+
+You'll have to pass the arguments when you instantiate the method
+
+```ruby
+# Before
+
+Schema = Dry::Validation.Schema do
+  configure do
+    option :repo
+  end
+
+  ...
+end
+
+Schema.with(repo: my_repo).call(params)
+
+# After
+
+class Contract < Dry::Validation::Contract
+  option :repo
+end
+
+contract = Contract.new(repo: repo)
+contract.call(params)
+```
+
+I used the script to find the files I need to refactor:
+
+```
+$ grep -rl 'Schema' ./**/*.rb | xargs grep -n 'option :[[:alnum:]_]*$'
+```
+
+**Step 24**.
+
 # UNFINISHED
 
 Finding DI:
 
 ```
-$ grep -rl 'Schema' ./**/*.rb | xargs grep -n 'option :[[:alnum:]_]*$'
+
 ```
 
 Finding logic:
