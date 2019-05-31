@@ -428,12 +428,12 @@ We have Reform 2.2.4 with ActiveModel validations, so we [forked it](https://git
 
 The upgrade process took me about 3 work days of refactoring, and I was glad I learned basic `sed` to help me — it's annoying to do so much manual work.
 
-However, the new features are worth it
+However, I think the improvements are worth it. The ones I like the most:
 
-- Stricter type system with `dry-types`
-- Bug fixes
-- Simpler DSL for schema validations
-- New library to work with domain validations and contracts
+- `dry-types` is stricter and less verbose now — if you're not including nominal types, then `Types::String` is the same as `Types::Strict::String`
+- The known dry-validation bugs were fixed
+- Decreased complexity of schema validations
+- New library to design domain validations and contracts
 
 I urge you to try the new dry-rb gems — and write about your experience. If you've upgraded your gems and wrote a post about your journey and update process — please send me an email and I'll add a link to your page. And of course, it would be great to see new contributions to [official docs](https://github.com/dry-rb/dry-rb.org).
 
