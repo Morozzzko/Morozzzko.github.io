@@ -333,7 +333,7 @@ There are things to keep in mind during the update:
 
 - `dry-validation` is a library to validate _domain_ logic and rules. The core concept is a `Contract`.
 - All contracts must be instantiated — no more `Schema.call`. We need to use `Contract.new.call` now
-- `Dry::Validation.Contract` returns an instantiated contract, while `Dry::Validation.Schema` used to return a class
+- The idiomatic way to define a contract is to use standard Ruby syntax: `class Contract < Dry::Validation::Contract` as opposed to dry-schema's `Dry::Schema.Params { }`
 
 **Step 23**. Update dependency injection. The new version uses [dry-initializer](http://dry-rb.org/gems/dry-initializer/) under the hood, so it works like this:
 
@@ -424,4 +424,17 @@ We have Reform 2.2.4 with ActiveModel validations, so we [forked it](https://git
 
 **Step 26**. Fix the rest of failing specs. All done!
 
-# Recap
+## Recap
+
+The upgrade process took me about 3 work days of refactoring, and I was glad I learned basic `sed` to help me — it's annoying to do so much manual work.
+
+However, the new features are worth it
+
+- Stricter type system with `dry-types`
+- Bug fixes
+- Simpler DSL for schema validations
+- New library to work with domain validations and contracts
+
+I urge you to try the new dry-rb gems — and write about your experience. If you've upgraded your gems and wrote a post about your journey and update process — please send me an email and I'll add a link to your page. And of course, it would be great to see new contributions to [official docs](https://github.com/dry-rb/dry-rb.org).
+
+Let's build and use better tools together.
