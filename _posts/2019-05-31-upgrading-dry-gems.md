@@ -1,14 +1,14 @@
 ---
 layout: single
-title: "Moving to dry-schema"
-date: "2019-05-06 23:02:00 +0300"
+title: "dry-rb 1.0: upgrading validations, types and schemas"
+date: "2019-05-31 09:48:00 +0300"
 ---
 
 I'm enthusiastic about [dry-rb gems](https://dry-rb.org/). Actually, I've never worked on Ruby projects without a dry-rb gem. However, some people are sceptical, as a lot of core dry-rb gems are still in their `0.x` phase, which leads to a lot of breaking changes and hours of refactoring.
 
 I'm happy to see dry-rb mature: dry-monads entered 1.0 phase in Summer 2018, and now [two more libraries](https://dry-rb.org/news/2019/04/23/dry-types-and-dry-struct-1-0-0-released/) hit v1.0 milestones: dry-types and dry-struct; and dry-validation is in its 1.0 RC phase.
 
-I haven't updated my dry-rb gems for a couple of months, so I've missed a lot of breaking changes. Finally, I decided to upgrade the gems and write about the proccess. I'll take a swing at _automating_ my upgrade process as much as I can.
+I haven't updated my dry-rb gems for a couple of months, so I've missed a lot of breaking changes. Finally, I decided to upgrade the gems and write about the process. I'll take a swing at _automating_ my upgrade process as much as I can.
 
 <!-- excerpt -->
 
@@ -53,7 +53,7 @@ I don't want to go around and update everything manually, so I'm going to replac
 
 **Step 1**. Upgrade dry-validation to `0.13`. It's the last version before the switch, so if your builds pass — you're good to go. You'll have to update dry-types to `0.14` too.
 
-**Step 2**. Replace dry-validation with equivalent dry-schema version (0.1.0) and replace all `Dry::Validation` ocurrences with `Dry::Schema`. Also replace all `Dry::Validation.Schema` with `Dry::Validation.define`.
+**Step 2**. Replace dry-validation with equivalent dry-schema version (0.1.0) and replace all `Dry::Validation` occurrences with `Dry::Schema`. Also replace all `Dry::Validation.Schema` with `Dry::Validation.define`.
 
 ```
 $ bundle remove dry-validation && bundle add dry-schema --version 0.1.0`
@@ -227,7 +227,7 @@ end
 $ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/schema \(do\|{\)/hash \1/g'
 ```
 
-**Step 12**. Find any `each` macro usages and replace them with `array` to add type check. Since Ruby has a `Enumerable#each` function, we can't automate it, but we can still find possible occurences:
+**Step 12**. Find any `each` macro usages and replace them with `array` to add type check. Since Ruby has a `Enumerable#each` function, we can't automate it, but we can still find possible occurrences:
 
 ```
 $ grep -rl 'Schema' ./**/*.rb | xargs grep -n 'each \(do\|{\)'
@@ -292,7 +292,7 @@ $ gsed -i 's/Types::JSON::\([[:alnum:]]*\)/Types::JSON::\1.lax/g' ./**/*.rb
 $ gsed -i 's/Types::Params::\([[:alnum:]]*\)/Types::Params::\1.lax/g' ./**/*.rb
 ```
 
-**Step 21**. Replace `:type?` predicates with type checks whereever you need this
+**Step 21**. Replace `:type?` predicates with type checks wherever you need this
 
 ```
 $ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\(filled\|maybe\|value\)(:str?/\1(:string/g'
