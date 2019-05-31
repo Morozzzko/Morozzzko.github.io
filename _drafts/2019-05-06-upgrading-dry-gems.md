@@ -437,4 +437,10 @@ However, the new features are worth it
 
 I urge you to try the new dry-rb gems — and write about your experience. If you've upgraded your gems and wrote a post about your journey and update process — please send me an email and I'll add a link to your page. And of course, it would be great to see new contributions to [official docs](https://github.com/dry-rb/dry-rb.org).
 
-Let's build and use better tools together.
+## References
+
+- [Introducing dry-schema](https://solnic.codes/2019/01/31/introducing-dry-schema/) @ solnic.codes
+- [How it all started](https://discourse.dry-rb.org/t/plans-for-dry-validation-dry-schema-a-new-gem/215)
+- [dry-schema](https://dry-rb.org/gems/dry-schema/)
+- [dry-validation](https://dry-rb.org/gems/dry-validation/)
+- [dry-types](https://dry-rb.org/gems/dry-types/1.0/)
