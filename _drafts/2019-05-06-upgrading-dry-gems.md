@@ -371,28 +371,57 @@ I used the script to find the files I need to refactor:
 $ grep -rl 'Schema' ./**/*.rb | xargs grep -n 'option :[[:alnum:]_]*$'
 ```
 
-**Step 24**.
+**Step 24**. Rewrite rules and validations. I can't provide a comprehensive migration guide because I've just refactored everything and tried to make my specs pass without giving it much thought.
 
-# UNFINISHED
+```ruby
+# Before
 
-Finding DI:
 
+class CreditCardSchema < Dry::Validation::Schema::Params
+  configure do
+    config.type_specs = true
+  end
+
+  define! do
+    required(:number, :string).filled(format?: /\A\d{13,19}\z/)
+    required(:month, :string).filled(format?: /\A(0?[1-9]|1[012])\z/)
+
+    validate(expired: %i[year month]) do |year, month|
+      Date.new("20#{year}".to_i, month.to_i).end_of_month >= Date.current
+    end
+  end
+end
+
+# After
+class CreditCardSchema < Dry::Validation::Contract
+  params do
+    required(:month).filled(:string, format?: /\A(0?[1-9]|1[012])\z/)
+    required(:year).filled(:string, format?: /\A\d{2}\z/)
+  end
+
+  rule(:year, :month) do
+    year = values[:year]
+    month = values[:month]
+
+    if Date.new("20#{year}".to_i, month.to_i).end_of_month < Date.now
+      key(:expired).failure(:expired)
+      # ^ a little duplication here to produce the expected error message
+      # without refactoring anything else
+    end
+  end
+end
 ```
 
-```
-
-Finding logic:
+I used this script to search for all schemas that need rewriting:
 
 ```
 $ grep -rl 'Schema' ./**/*.rb | xargs grep -n 'rule\|validate('
 ```
 
-Finding predicates:
+**Step 25** (optional). If you're using Reform, you're in for a disappointment, especially if you've been using its `dry-validation` DSL.
 
-```
-$ grep -rl 'Schema' ./**/*.rb | xargs grep -n 'predicates'
-```
+We have Reform 2.2.4 with ActiveModel validations, so we [forked it](https://github.com/Qlean/reform/) and removed all the dry-validation stuff. Feel free to fork and use!
 
-Bugs:
-https://dry-rb.org/gems/dry-schema/basics/working-with-schemas/
-config.messages comes into define too
+**Step 26**. Fix the rest of failing specs. All done!
+
+# Recap
