@@ -131,9 +131,7 @@ end
 
 class ApplicationSchema < Dry::Schema::Params
   define do
-    configure do
-      config.messages = :i18n
-    end
+    config.messages = :i18n
   end
 end
 ```
@@ -158,9 +156,7 @@ end
 
 class MySchema < ApplicationSchema
   define do
-    configure do
-      config.messages = :yaml
-    end
+    config.messages = :yaml
 
     ...
     # your params go here
@@ -446,3 +442,22 @@ I urge you to try the new dry-rb gems — and write about your experience. If yo
 - [dry-schema](https://dry-rb.org/gems/dry-schema/)
 - [dry-validation](https://dry-rb.org/gems/dry-validation/)
 - [dry-types](https://dry-rb.org/gems/dry-types/1.0/)
+
+**Update (01.06.2019)**. [flash-gordon](https://github.com/flash-gordon) pointed out that you don't need to wrap config into the `configure` block. So I've replaced
+
+```ruby
+define do
+  configure do
+    config.xxx = yyy
+  end
+end
+```
+
+with a less nested version:
+
+```ruby
+
+define do
+  config.xxx = yyy
+end
+```
