@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-gem 'minimal-mistakes-jekyll'
+gem 'minimal-mistakes-jekyll', '~> 4.16.0'
 
 group :jekyll_plugins do
   gem "github-pages"
