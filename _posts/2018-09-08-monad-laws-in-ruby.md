@@ -2,6 +2,8 @@
 layout: single
 title: "Monad laws in Ruby"
 date: "2018-09-08 13:00:00 +0300"
+header:
+  og_image: "/assets/images/previews/monad_laws.png"
 ---
 
 I've been using monads in Ruby since May 2016, but I haven't really understood the theoretical basis for them. I thought about learning Haskell, but I gave up pretty soon: I didn't think I would benefit from it. Moreover, we started using ReasonML in Planado, which improved my functional programming skills to the point I didn't really need a new functional language in my life. Why bother with learning Haskell when you know Ruby and Reason, right?

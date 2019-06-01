@@ -2,6 +2,8 @@
 layout: single
 title: "dry-rb 1.0: upgrading validations, types and schemas"
 date: "2019-05-31 09:48:00 +0300"
+header:
+  og_image: "/assets/images/previews/upgrading_dry_gems.png"
 ---
 
 I'm enthusiastic about [dry-rb gems](https://dry-rb.org/). Actually, I've never worked on Ruby projects without a dry-rb gem. However, some people are sceptical, as a lot of core dry-rb gems are still in their `0.x` phase, which leads to a lot of breaking changes and hours of refactoring.

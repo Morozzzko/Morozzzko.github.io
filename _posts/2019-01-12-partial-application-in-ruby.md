@@ -2,6 +2,8 @@
 layout: single
 title: "Partial application in Ruby"
 date: "2019-01-12 00:00:15 +0300"
+header:
+  og_image: "/assets/images/previews/partial_application.png"
 ---
 
 Ruby is a multi-paradigm language with a strong bias towards object-oriented programming. You can argue that its design is influenced by Alan Kay and Smalltalk, as opposed to C++/Java-style object-oriented languages. Thankfully, this object-oriented design doesn't mean we can't use ideas from functional programming. There's a small list of functional traits in Ruby:
