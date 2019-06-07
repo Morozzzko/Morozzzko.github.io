@@ -190,7 +190,7 @@ $ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\(required\|optional\)(\(:[[:al
 
 **Step 9**. Update your gemfile to specify `gem 'dry-schema', '~> 0.3.0'` and run `bundle install`
 
-**Step 10**. If you're using I18n, move `errors` under `dry_struct` namespace. This way,
+**Step 10**. If you're using I18n, move `errors` under `dry_schema` namespace. This way,
 
 ```yaml
 en:
@@ -202,7 +202,7 @@ will turn into
 
 ```yaml
 en:
-  dry_struct:
+  dry_schema:
     errors:
       array?: must be an array
 ```
@@ -461,3 +461,5 @@ define do
   config.xxx = yyy
 end
 ```
+
+**Update (07.06.2019)**. [solnic](https://github.com/solnic/) pointed out that I made a typo in **Step 10**: it used to say `dry_struct` instead of `dry_schema`. I've updated the step accordingly.
