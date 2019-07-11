@@ -4,6 +4,7 @@ title: "EuRuKo 2018"
 slides: /slides/euruko-2018
 youtube: https://www.youtube.com/watch?v=v-H9nK8hqfE
 author_profile: true
+date: 2018-08-25
 ---
 
 On August 24th, 2018 I gave a talk at the [EuRuKo](http://euruko2018.org/) 2018

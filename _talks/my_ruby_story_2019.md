@@ -12,6 +12,8 @@ software engineering.
 I was featured in [My Ruby Story episode #088](https://devchat.tv/my-ruby-story/mrs-088-igor-morozov/), where
 I explained how I got into programming in general, and how I've become a Ruby developer.
 
+<audio src="https://devchat.cachefly.net/my-ruby-story/MRS_088_Igor_Morozov.mp3" controls></audio>
+
 <!-- excerpt -->
 
 ## TL;DL

@@ -10,7 +10,8 @@ author_profile: true
     A collection of my podcasts and talks at various conferences
 </div>
 
-{% for talk in site.talks %}
+{% assign talks = site.talks | sort: 'date' | reverse %}
+{% for talk in talks %}
     <div class="talks {{ include.type | default: "list" }}__item">
         <article class="archive__item" itemscope itemtype="http://schema.org/CreativeWork">
         <div class="talks-heading">
