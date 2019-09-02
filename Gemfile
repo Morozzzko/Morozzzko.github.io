@@ -10,7 +10,7 @@ gem 'rubocop'
 gem 'rubocop-daemon'
 
 group :jekyll_plugins do
-  gem 'github-pages'
+  # gem 'github-pages'
   gem 'jekyll-feed'
   gem 'jekyll-gist'
   gem 'jekyll-include-cache'
