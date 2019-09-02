@@ -1,15 +1,17 @@
 source "https://rubygems.org"
 
-gem 'minimal-mistakes-jekyll', '~> 4.16.0'
+gem 'minimal-mistakes-jekyll', '~> 4.16'
 
 group :jekyll_plugins do
   gem "github-pages"
-  gem "jekyll-feed", "~> 0.6"
+  gem "jekyll-feed"
   gem "jekyll-remote-theme"
   gem "jekyll-gist"
   gem "jekyll-paginate"
   gem "jekyll-include-cache"
 end
+
+# gem 'jekyll', '~> 4.0'
 
 gem 'danger'
 gem 'danger-prose' # Proselint
