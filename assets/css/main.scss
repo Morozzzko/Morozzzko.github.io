@@ -28,3 +28,18 @@ ul li,
 ol li {
   margin-bottom: 0;
 }
+
+// anchors
+
+.heading-anchor {
+  color: $text-color;
+  text-decoration: none;
+  opacity: 0.7;
+  visibility: hidden;
+}
+
+h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover {
+  .heading-anchor {
+    visibility: visible;
+  }
+}
