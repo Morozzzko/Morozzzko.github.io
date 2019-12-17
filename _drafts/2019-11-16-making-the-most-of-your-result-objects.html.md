@@ -27,14 +27,13 @@ Here's a list of what I've got:
 
 A result object is ...
 
-* a monoid in the category of 
+* a monoid in the category of endofunctors
 * a sum type with two unary constructors
 * a PORO-thingie with data inside and public methods to check for result
 * an object you'd return when the computation result is a set of unrelated or loosely related values, and we don't want to use hash or array for grouping them together
 * an object that contains computation result and a flag representing the "successfulness" of the operation
 * a container with arbitrary data plus a flag that represents the "successfullness" of the computation
 * a wrapper object that indicates whether or not the API call was a success, and includes the data if it was – a definition from [Braintree API](https://developers.braintreepayments.com/reference/general/result-objects/ruby)
-
 
 
 ## Why result objects
