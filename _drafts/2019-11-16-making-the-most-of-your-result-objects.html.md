@@ -7,15 +7,14 @@ header:
 toc: true
 ---
 
-Result objects are a popular patterns in the Ruby community. We use them one way or another:
+Result objects is a popular pattern in the Ruby community. We use them one way or another:
 
 * [Interactor](https://github.com/collectiveidea/interactor) uses `context` as a form of result object
 * [dry-transaction](https://dry-rb.org/gems/dry-transaction/0.13/) and [dry-monads](https://dry-rb.org/gems/dry-monads/1.0/) use Result (Either) monad as a result object
 * We store the result in the service/use case/interactor's instance attributes
-* We build our own result objects
+* We build our own result objects in our projects
 
-
-In this article, I would try and explain what's a result object, why do we use them and how to make them as useful as possible. We will walk through the design and implementation of our own result object using plain Ruby and supercharge it using `yield` and Ruby 2.7's [pattern matching](https://medium.com/cedarcode/ruby-pattern-matching-1e84cab3b44a). 
+In this article, I would try and explain what is a result object, why do we use them and how to make them as useful as possible. We will walk through the design and implementation of our own result object using plain Ruby. As a bonus, we will supercharge it using `yield` and Ruby 2.7's [pattern matching](https://medium.com/cedarcode/ruby-pattern-matching-1e84cab3b44a). 
 
 <!-- excerpt -->
 
@@ -52,7 +51,41 @@ Before digging in and explaining the solution, let's stop for a moment and see w
 **Hint**: if you're familiar with the concept of [railway oriented programming](/2018/05/27/do-notation-ruby.html), you may skip this section
 {: .notice }
 
-We use result objects to represent the result of a method call. 
+Let's consider a use-case. Let's say we are building a human resource management application for a cleaning service. Let's say we want to hire a candidate, then our code has to:
+
+1. Mark the candidate's account as "approved"
+2. Create a new profile for "cleaner"
+3. Give the new account access for all necessary functions
+4. Create an account for salaries
+5. Send a text message with an app link
+
+The thing about this business process – if any of the first four steps fail, we need to cancel everything and raise an error. The fifth step may fail – in this case, wel'll alert the operator and they'll handle it.
+
+Conventionally, we would achieve it using exceptions. Here's a short table that explains a list of expected outcomes:
+
+| Exception class | What happens |
+| -- | -- |
+| `CandidateDoesNotExist` | We're trying to approve a candidate that doesn't exist in the system |
+| `CandidateAlreadyHired` | The candidate is already hired |
+| `CandidateRejected` | The candidate was previously rejected, so we can't hire them |
+| `InsufficientData` | We don't have enough info about the candidate to hire them: probably a profile picture is missing |
+| `ProfileExists` | Cleaner profile already exists for this candidate. It may happen during race conditions |
+| `SalaryAccountExists` | Salary account already exists for this candidate. Possible raceRu condition |
+| `TextMessagesUnavailable` | We can't send a text message to the number |
+
+As you can see, some of those errors are domain-related, and some are purely technical – like `ProfileExists`, `SalaryAccountExists` and `TextMessageUnavailable`. The idea here is to list every error that we expect to occur regularly. SEGFAULT, HTTP timeouts, IO errors and similar errors are good, but we *don't want* to think about them all the time. 
+
+{% capture ruleOfThumb %}
+  Factors that tell you "This error is worth your attention"
+  1. You want to recover from it: retry, use different source of data, notify the user, or just ignore the step
+  2. It is a part of your business process
+{% endcapture %}
+
+
+{: .notice }
+{{ ruleOfThumb }}
+
+We use result objects to represent the result of a computation.
 
 Conventionally, Ruby has exceptions for this – you raise an exception if there's an error. You'd to catch it and voilà – here's your result, do whatever you want.
 
