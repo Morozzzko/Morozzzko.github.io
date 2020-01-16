@@ -49,7 +49,7 @@ In this post, we're going to focus on a result object that conforms to three of 
 Before digging in and explaining the solution, let's stop for a moment and see what exactly we are trying to solve.
 
 **Hint**: if you're familiar with the concept of [railway oriented programming](/2018/05/27/do-notation-ruby.html), you may skip this section
-{: .notice }
+{: .notice--info }
 
 Let's consider a use-case. Let's say we are building a human resource management application for a cleaning service. Let's say we want to hire a candidate, then our code has to:
 
@@ -70,20 +70,168 @@ Conventionally, we would achieve it using exceptions. Here's a short table that 
 | `CandidateRejected` | The candidate was previously rejected, so we can't hire them |
 | `InsufficientData` | We don't have enough info about the candidate to hire them: probably a profile picture is missing |
 | `ProfileExists` | Cleaner profile already exists for this candidate. It may happen during race conditions |
-| `SalaryAccountExists` | Salary account already exists for this candidate. Possible raceRu condition |
-| `TextMessagesUnavailable` | We can't send a text message to the number |
+| `SalaryAccountExists` | Salary account already exists for this candidate. Possible race condition |
+| `TextMessagesUnavailable` | We can't send a text message to the phone number |
 
 As you can see, some of those errors are domain-related, and some are purely technical – like `ProfileExists`, `SalaryAccountExists` and `TextMessageUnavailable`. The idea here is to list every error that we expect to occur regularly. SEGFAULT, HTTP timeouts, IO errors and similar errors are good, but we *don't want* to think about them all the time. 
 
-{% capture ruleOfThumb %}
-  Factors that tell you "This error is worth your attention"
-  1. You want to recover from it: retry, use different source of data, notify the user, or just ignore the step
-  2. It is a part of your business process
-{% endcapture %}
+<div class="notice--info">
+  <!-- TODO: make it a header -->
+  <strong>Factors that tell you "This error is worth your attention"</strong>
+
+  <ol>
+    <li>You want to recover from it: retry, use different source of data, notify the user, or just ignore the step</li>
+    <li>It is a part of your business process</li>
+  </ol>
+</div>
+
+Now, we've listed all natural errors, let's code them. I prefer to separate domain-specific errors from other errors, so I can just `rescue` any of those errors. So we need an empty base class for that
+
+```ruby
+# lib/my_app/errors.rb
+
+module MyApp
+  module Errors
+    class DomainError < StandardError; end
+  end
+end
+```
+
+Now we need to write all the exceptions. We're not doing anything fancy, so let's put it in the same file with `DomainError`
+
+```ruby
+# lib/my_app/errors.rb
+
+module MyApp
+  module Errors
+    class DomainError < StandardError; end
+
+    class CandidateDoesNotExist < DomainError; end
+    class CandidateAlreadyHired < DomainError; end 
+    class CandidateRejected < DomainError; end
+    class InsufficientData < DomainError; end
+    class ProfileExists < DomainError; end
+    class SalaryAccountExists < DomainError; end
+    class TextMessagesUnavailable < DomainError; end
+  end
+end
+```
+
+So far so good. Now we can use them in our services.
+
+To show what I'm talking about, I'll write a service that hires the candidate. Let's assume that the service only has one method `#call` which accepts the candidate's ID.
+
+```ruby
+
+# lib/my_app/services/hire_candidate.rb
+
+module MyApp
+  module Services
+    class HireCandidate
+      attr_accessor :candidate_repo
+
+      def initialize(candidate_repo:) 
+        @candidate_repo = candidate_repo
+      end
+
+      def call(candidate_id)
+        candidate = fetch_candidate(candidate_id)
+
+        raise Errors::CandidateAlreadyHired if candidate.hired?
+        raise Errors::CandidateRejected if candidate.rejected?
+        raise Errors::InsufficientData if candidate.profile_picture.nil? || candidate.name.empty?
+
+        candidate.update!(hired_at: Time.now)
+
+        candidate
+      end
+
+      private
+
+      def fetch_candidate(candidate_id)
+        candidate_repo.find(candidate_id)
+      rescue RecordNotFound
+        raise Errors::CandidateDoesNotExist
+      end
+    end
+  end
+end
+```
+
+So far, we've got a service that finds the candidate in our database, checks for constraints and raises helpful exceptions if we can't do something.
+
+Now we can use it in our code. Let's say we want to write a helpful error to the console.
 
 
-{: .notice }
-{{ ruleOfThumb }}
+```ruby
+
+module MyApp
+  hire_candidate = Services::HireCandidate.new
+
+  begin
+    hire_candidate.call(1)
+  rescue Errors::CandidateAlreadyHired, Errors::CandidateRejected
+    puts "Sorry, already worked with them, refresh your app"
+  rescue Errors::InsufficientData
+    puts "Welp, not enough data. Check for profile picture and name"
+  end
+end
+```
+
+Let's add some complexity and actually introduce the other parts – creating profile and salary account. Our requirements say that if we can't create a profile or an account, we need to rollback. 
+
+Let's say that we already have the two services:
+
+* `MyApp::Services::CreateProfile`, which only has one public method: `#call` which accepts a `Candidate`
+* `MyApp::Services::CreateSalaryAccount`, with the same interface 
+
+Now, our service will look like this:
+
+
+```ruby
+module MyApp
+  module Services
+    class HireCandidate
+      attr_accessor :create_profile, :create_salary_account, :candidate_repo
+
+      def initialize(create_profile:, create_salary_account:, candidate_repo:) 
+        @create_profile = create_profile
+        @create_salary_account = create_salary_account
+        @candidate_repo = candidate_repo
+      end
+
+      def call(candidate_id)
+        candidate = fetch_candidate(candidate_id)
+
+        raise Errors::CandidateAlreadyHired if candidate.hired?
+        raise Errors::CandidateRejected if candidate.rejected?
+        raise Errors::InsufficientData if candidate.profile_picture.nil? || candidate.name.empty?
+
+        candidate_repo.transaction do
+          candidate.update!(hired_at: Time.now)
+
+          create_profile.call(candidate)
+          create_salary_account.call(candidate)
+        end
+
+        candidate
+      end
+
+      private 
+
+      def fetch_candidate(candidate_id)
+        candidate_repo.find(candidate_id)
+      rescue RecordNotFound
+        raise Errors::CandidateDoesNotExist
+      end
+    end
+  end
+end
+```
+
+
+So far so good. 
+
 
 We use result objects to represent the result of a computation.
 
