@@ -348,6 +348,40 @@ end
 
 Looks clumsy, but it is what it is. We can handle some repetitive errors using Rails' `rescue_from` DSL, but it won't help much – sometimes we get to handle even more complex payloads for extremely difficult processes. That's the trick – we need to figure out a way to make our code easy to change and maintain.
 
+The question is, what is the problem here? It looks like a regular Ruby code. Sure, it may look new to some folks – everyone treats their errors differently – but do we really need to change anything here? We need to look deeper.
+
+## Failures of exceptional design
+
+### Failure to tell us about new outcomes
+
+When we design our systems, we try to consider all possible outcomes and design our code around those outcomes.
+
+If we use exceptions, we can easily handle different kinds of failures – we just need to write some `rescue` blocks and we're good.
+
+However, we can can never be sure that we've covered all possible outcomes.
+
+That might seem okay: the world is huge, it's ever-changing, and so is our software, yada yada. That's not what I'm talking about, though.
+
+In [thinking about errors](#thinking-about-errors) we've listed 7 errors that may exist in our system. In [going down the rabbit hole](#going-down-the-rabbit-hole) we've written code that handles all of those errors. 
+
+Let's keep in mind that in a real-world application, we'll probably have multiple entry points for the same code, and error handling will be different in all of those places:
+
+* We'll have an API
+* We might have another API, webhooks or websockets
+* What about `/admin`? We need those too
+
+Now, here's the question: what happens when we extend our logic? It's natural to add new steps and new errors. How do we deal with it?
+
+The answer is fairly simple – we just add 
+
+When we're talking about exceptions, we usually speak about classes and subclasses. When we designed our domain errors, we made a meta-class for them. It allowed us to `rescue` them all at once:
+
+```ruby
+rescue MyApp::Errors::DomainError
+ ...
+end
+```
+
 
 
 
