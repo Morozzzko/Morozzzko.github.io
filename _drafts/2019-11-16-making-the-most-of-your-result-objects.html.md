@@ -9,12 +9,12 @@ toc: true
 
 Result objects is a popular pattern in the Ruby community. We use them one way or another:
 
-* [Interactor](https://github.com/collectiveidea/interactor) uses `context` as a form of result object
+* [Interactor](https://github.com/collectiveidea/interactor) and [ActiveInteractor](https://github.com/aaronmallen/activeinteractor) use `context` as a form of result object
 * [dry-transaction](https://dry-rb.org/gems/dry-transaction/0.13/) and [dry-monads](https://dry-rb.org/gems/dry-monads/1.0/) use Result (Either) monad as a result object
 * We store the result in the service/use case/interactor's instance attributes
 * We build our own result objects in our projects
 
-In this article, I would try and explain what is a result object, why do we use them and how to make them as useful as possible. We will walk through the design and implementation of our own result object using plain Ruby. As a bonus, we will supercharge it using `yield` and Ruby 2.7's [pattern matching](https://medium.com/cedarcode/ruby-pattern-matching-1e84cab3b44a). 
+In this article, I will try and explain what a result object is, why do we use them and how to make them as useful as possible. We will walk through the design and implementation of our own result object using plain Ruby. As a bonus, we will supercharge it using `yield` and Ruby 2.7's [pattern matching](https://medium.com/cedarcode/ruby-pattern-matching-1e84cab3b44a). 
 
 <!-- excerpt -->
 
@@ -44,12 +44,14 @@ As you see, there's a lot of different approaches to result objects. I managed t
 
 In this post, we're going to focus on a result object that conforms to three of those groups: 1, 3a and 3b. We will see what's behind them in theory and practice.
 
-## Why result objects
+## Life without result objects
 
 Before digging in and explaining the solution, let's stop for a moment and see what exactly we are trying to solve.
 
 **Hint**: if you're familiar with the concept of [railway oriented programming](/2018/05/27/do-notation-ruby.html), you may skip this section
 {: .notice--info }
+
+### Thinking about errors
 
 Let's consider a use-case. Let's say we are building a human resource management application for a cleaning service. Let's say we want to hire a candidate, then our code has to:
 
@@ -85,7 +87,12 @@ As you can see, some of those errors are domain-related, and some are purely tec
   </ol>
 </div>
 
-Now, we've listed all natural errors, let's code them. I prefer to separate domain-specific errors from other errors, so I can just `rescue` any of those errors. So we need an empty base class for that
+Now, we've listed all natural errors, let's code them. 
+
+
+### Defining our errors
+
+I prefer to separate domain-specific errors from other errors, so I can just `rescue` any of those errors. So we need an empty base class for that
 
 ```ruby
 # lib/my_app/errors.rb
@@ -118,6 +125,8 @@ end
 ```
 
 So far so good. Now we can use them in our services.
+
+### Getting started with our error
 
 To show what I'm talking about, I'll write a service that hires the candidate. Let's assume that the service only has one method `#call` which accepts the candidate's ID.
 
@@ -160,7 +169,10 @@ end
 
 So far, we've got a service that finds the candidate in our database, checks for constraints and raises helpful exceptions if we can't do something.
 
-Now we can use it in our code. Let's say we want to write a helpful error to the console.
+If you're not familiar with dependency injection and why we're writing our constructors like that, please read [Solnic's article on dependency injection](https://solnic.codes/2013/12/17/the-world-needs-another-post-about-dependency-injection-in-ruby/)
+{: .notice--info }
+
+Now we can use it in our code. Let's say we want to print a helpful message to the console. Here's the code that will make it happen:
 
 
 ```ruby
@@ -178,26 +190,31 @@ module MyApp
 end
 ```
 
-Let's add some complexity and actually introduce the other parts – creating profile and salary account. Our requirements say that if we can't create a profile or an account, we need to rollback. 
+### Going down the rabbit hole
 
-Let's say that we already have the two services:
+Let's add some complexity and actually introduce the other parts – creating profile, salary account and sending a notification. Our requirements say that if we can't create a profile or an account, we need to rollback, but we may ignore if we can't send the notification.
+
+Let's say that we've already implemented three other services:
 
 * `MyApp::Services::CreateProfile`, which only has one public method: `#call` which accepts a `Candidate`
 * `MyApp::Services::CreateSalaryAccount`, with the same interface 
+* `MyApp::Services::SendNotification`
 
-Now, our service will look like this:
+Now, our service for hiring a candidate will look like this:
 
 
 ```ruby
 module MyApp
   module Services
     class HireCandidate
-      attr_accessor :create_profile, :create_salary_account, :candidate_repo
+      attr_accessor :create_profile, :create_salary_account, :send_notification, :candidate_repo, :logger
 
-      def initialize(create_profile:, create_salary_account:, candidate_repo:) 
+      def initialize(create_profile:, create_salary_account:, send_notification:, candidate_repo:, :logger) 
         @create_profile = create_profile
         @create_salary_account = create_salary_account
+        @send_notification = send_notification
         @candidate_repo = candidate_repo
+        @logger = logger
       end
 
       def call(candidate_id)
@@ -212,6 +229,12 @@ module MyApp
 
           create_profile.call(candidate)
           create_salary_account.call(candidate)
+        end
+
+        begin
+          send_notification.call(candidate)
+        rescue Errors::TextMessagesUnavailable
+          logger.warn('Text messages unavailable')
         end
 
         candidate
@@ -229,9 +252,107 @@ module MyApp
 end
 ```
 
+Let's see what we get from this code, reading from top to bottom:
 
-So far so good. 
+1. We have a service that hires a candidate
+2. If we want to hire a candidate, we need to know how to:
+  a) fetch candidate info from database
+  b) create a profile
+  c) create a salary account
+  d) send a message
+  e) log an error
+3. We take a candidate's ID and fetch the info from the database
+4. We check for multiple conditions and raise an error if something goes wrong
+5. We write down the exact time when the candidate was hired
+6. We create a profile
+7. We create salary account
+8. We try to send a notification and write to a log if we've failed
+9. We return the object with the candidate's info
 
+
+So far so good. Let's see how we can handle it in our app:
+
+
+```ruby
+module MyApp
+  hire_candidate = Services::HireCandidate.new(
+    create_profile: MyApp::Services::CreateProfile.new,
+    create_salary_account: MyApp::Services::CreateSalaryAccount.new,
+    send_notification: MyApp::Services::SendNotification.new,
+    logger: Logger,
+    candidate_repo: MyApp::Repositories::CandidateRepo.new
+  )
+
+  begin
+    hire_candidate.call(1)
+  rescue Errors::CandidateAlreadyHired, Errors::CandidateRejected
+    puts "Sorry, already worked with them, refresh your app"
+  rescue Errors::InsufficientData
+    puts "Welp, not enough data. Check for profile picture and name"
+  rescue Errors::ProfileExists 
+    puts "Couldn't create profile, please refresh" 
+  rescue Errors::SalaryAccountExists 
+    puts "Couldn't create salary account, please refresh"
+  end
+end
+```
+
+It sounds trivial enough, but let's see how the handling will look like in a more realistic situation. Let's say we have a web application with a controller. We're writing an API, so we need to return a JSON with a meaningful status and a message. 
+
+See how it might look like:
+
+```ruby
+
+module MyApp
+  module WebAPI
+    class CandidateController
+      def hire
+        candidate = hire_candidate.call(params[:candidate_id])
+
+        render json: { candidate_id: candidate.id }
+      rescue Errors::CandidateDoesNotExist
+        render status: :unprocessable_entity, 
+               json: { error_code: "does_not_exiss", message: "sorry but this candidate does not exist" }
+      rescue Errors::CandidateAlreadyHired
+        render status: :unprocessable_entity, 
+               json: { error_code: "candidate_already_hired", message: "sorry but we've already hired this candidate" }
+      rescue Errors::CandidateRejected
+        render status: :unprocessable_entity, 
+               json: { error_code: "candidate_rejected", message: "Sorry but the candidate is already rejected" }
+      rescue Errors::InsufficientData
+        render status: :unprocessable_entity, 
+               json: { error_code: "insufficient data", message: "You need to fill all necessary info" }
+      rescue Errors::ProfileExists 
+        render status: :unprocessable_entity, 
+               json: { error_code: "profile_exists", message: "Couldn't create profile, please refresh" }
+      rescue Errors::SalaryAccountExists 
+        render status: :unprocessable_entity, 
+               json: { error_code: "salary_account_exists", message: "Couldn't create salary account, please refresh" }
+      end
+
+      private
+
+      def hire_candidate
+        MyApp::Services::HireCandidate.new(
+          create_profile: MyApp::Services::CreateProfile.new,
+          create_salary_account: MyApp::Services::CreateSalaryAccount.new,
+          send_notification: MyApp::Services::SendNotification.new,
+          logger: Logger,
+          candidate_repo: MyApp::Repositories::CandidateRepo.new
+        )
+      end
+    end
+  end
+end
+```
+
+Looks clumsy, but it is what it is. We can handle some repetitive errors using Rails' `rescue_from` DSL, but it won't help much – sometimes we get to handle even more complex payloads for extremely difficult processes. That's the trick – we need to figure out a way to make our code easy to change and maintain.
+
+
+
+
+
+-----
 
 We use result objects to represent the result of a computation.
 
@@ -240,9 +361,11 @@ Conventionally, Ruby has exceptions for this – you raise an exception if there
 1. Errors become first-class residents of your application
 2. It becomes easier to figure out all possible outcomes
 3. The code becomes simpler, easier to write and a little more performant
-4. Complex logic becomes easier to read, compose and design
+4. Complex logic becomes easier to read, compose and desin
 
 For what it's worth, the ideological ones are about pragmatism too. Let's talk about them a little.
+
+## Life with result objects
 
 ### Errors become first-class residents of your application
 
