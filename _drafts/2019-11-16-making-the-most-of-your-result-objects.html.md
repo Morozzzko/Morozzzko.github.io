@@ -351,6 +351,7 @@ Looks clumsy, but it is what it is. We can handle some repetitive errors using R
 
 
 
+## Legacy
 
 -----
 
@@ -364,6 +365,8 @@ Conventionally, Ruby has exceptions for this – you raise an exception if there
 4. Complex logic becomes easier to read, compose and desin
 
 For what it's worth, the ideological ones are about pragmatism too. Let's talk about them a little.
+
+
 
 ## Life with result objects
 
