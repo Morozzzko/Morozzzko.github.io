@@ -354,36 +354,73 @@ The question is, what is the problem here? It looks like a regular Ruby code. Su
 
 ### Failure to tell us about new outcomes
 
-When we design our systems, we try to consider all possible outcomes and design our code around those outcomes.
+When we design our systems, we try to consider all possible outcomes and design our code around them.
 
 If we use exceptions, we can easily handle different kinds of failures – we just need to write some `rescue` blocks and we're good.
 
-However, we can can never be sure that we've covered all possible outcomes.
+However, we can can never be sure that we've covered all possible outcomes. 
 
-That might seem okay: the world is huge, it's ever-changing, and so is our software, yada yada. That's not what I'm talking about, though.
+That might seem okay: the world is huge, it's ever-changing and so is our software, yada yada. That's not what I'm talking about, though.
 
-In [thinking about errors](#thinking-about-errors) we've listed 7 errors that may exist in our system. In [going down the rabbit hole](#going-down-the-rabbit-hole) we've written code that handles all of those errors. 
+In [thinking about errors](#thinking-about-errors) we've listed 7 errors that may exist in our system. In [going down the rabbit hole](#going-down-the-rabbit-hole) we've written code that handles all of those errors. Let's work with that example
 
 Let's keep in mind that in a real-world application, we'll probably have multiple entry points for the same code, and error handling will be different in all of those places:
 
 * We'll have an API
 * We might have another API, webhooks or websockets
-* What about `/admin`? We need those too
+* What about `/admin`? We need might need this too
 
-Now, here's the question: what happens when we extend our logic? It's natural to add new steps and new errors. How do we deal with it?
+Now, here's the question: what happens when we extend our logic? It's natural to add new errors when we do, but how do we deal with it?
 
-The answer is fairly simple – we just add 
+Naturally, we would create a new exception class, `raise` it whenever we need, and add a new `rescue` clause everywhere. 
 
-When we're talking about exceptions, we usually speak about classes and subclasses. When we designed our domain errors, we made a meta-class for them. It allowed us to `rescue` them all at once:
+Here's the trick: _no static analysis tool_ can tell us that we forgot to cover an exception. It's virtually impossible for two reasons: inheritance and dynamic type system.
 
-```ruby
-rescue MyApp::Errors::DomainError
- ...
-end
+To be fair, the same problem may exist in Java – but only if you're lazy enough. You see, in Java you _have to_ list all exceptions in the function signature. It looks like this:
+
+```java
+public Candidate hireCandidate(ID candidateId)
+  throws CandidateDoesNotExist, CandidateAlreadyHired, 
+  InsufficientData, ProfileExists, 
+  SalaryAccountExists, TextMessagesUnavailable { 
+  ... // our code here
+}
+```
+
+Looks clumsy, right? Usually I'd be a lazy and just use the superclass, like this:
+
+```java
+public Candidate hireCandidate(ID candidateId) 
+  throws DomainError { 
+  ... // our code here
+}
 ```
 
 
+The difference between those two options is not so obvious, but it is quite important:
 
+When we list all possible exceptions, the compiler / linter can check if we've covered them all – it's also called an _exhaustiveness check_. We can't do that, if we're using a superclass – it's technically impossible to list all subclasses, as there's always a way to create a new one.
+
+Sure, there's a workaround: you can `rescue` all _concrete_ exception classes and then try to `rescue` their subclass.
+
+
+```ruby
+rescue MyApp::Errors::CandidateDoesNotExist
+  ..
+rescue MyApp::Errors:...
+  .. more rescues
+rescue MyApp::Errors::DomainError
+ ... # this code should never execute
+end
+```
+
+Sure, this will give us a _comprehensive_ coverage for the exceptions, but it has multiple downsides:
+
+1. The code never runs, so we have to work around our test coverage
+2. The logic becomes harder to understand, as we need to explain why we have a branch of code that _should never execute_
+3. We need to decide what to do if the never-meant-to-be-executed branch executes. Log an error? Raise another exception? Call 911? 
+
+Since we live in 
 
 ## Legacy
 
