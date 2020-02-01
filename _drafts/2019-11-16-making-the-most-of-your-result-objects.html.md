@@ -12,7 +12,7 @@ Result objects is a popular pattern in the Ruby community. We use them one way o
 * [Interactor](https://github.com/collectiveidea/interactor) and [ActiveInteractor](https://github.com/aaronmallen/activeinteractor) use `context` as a form of result object
 * [dry-transaction](https://dry-rb.org/gems/dry-transaction/0.13/) and [dry-monads](https://dry-rb.org/gems/dry-monads/1.0/) use Result (Either) monad as a result object
 * We store the result in the service/use case/interactor's instance attributes
-* We build our own result objects in our projects
+* We build our own result objects for our projects
 
 In this article, I will try and explain what a result object is, why do we use them and how to make them as useful as possible. We will walk through the design and implementation of our own result object using plain Ruby. As a bonus, we will supercharge it using `yield` and Ruby 2.7's [pattern matching](https://medium.com/cedarcode/ruby-pattern-matching-1e84cab3b44a). 
 
@@ -376,7 +376,7 @@ Naturally, we would create a new exception class, `raise` it whenever we need, a
 
 Here's the trick: _no static analysis tool_ can tell us that we forgot to cover an exception. It's virtually impossible for two reasons: inheritance and dynamic type system.
 
-To be fair, the same problem may exist in Java – but only if you're lazy enough. You see, in Java you _have to_ list all exceptions in the function signature. It looks like this:
+To be fair, the same problem may exist in Java too – but only if you're lazy enough. You see, in Java you _have to_ list all exceptions in the function signature. It looks like this:
 
 ```java
 public Candidate hireCandidate(ID candidateId)
@@ -387,7 +387,7 @@ public Candidate hireCandidate(ID candidateId)
 }
 ```
 
-Looks clumsy, right? Usually I'd be a lazy and just use the superclass, like this:
+Clumsy, right? Usually I'd be lazy and just list the superclass like this:
 
 ```java
 public Candidate hireCandidate(ID candidateId) 
@@ -399,7 +399,7 @@ public Candidate hireCandidate(ID candidateId)
 
 The difference between those two options is not so obvious, but it is quite important:
 
-When we list all possible exceptions, the compiler / linter can check if we've covered them all – it's also called an _exhaustiveness check_. We can't do that, if we're using a superclass – it's technically impossible to list all subclasses, as there's always a way to create a new one.
+When we list all possible exceptions, the compiler or linter can check if we've covered them all – we call it an _exhaustiveness check_. We can't do that if we're using a superclass because we can always inherit it and the checks will become false-positive.
 
 Sure, there's a workaround: you can `rescue` all _concrete_ exception classes and then try to `rescue` their subclass.
 
@@ -420,7 +420,11 @@ Sure, this will give us a _comprehensive_ coverage for the exceptions, but it ha
 2. The logic becomes harder to understand, as we need to explain why we have a branch of code that _should never execute_
 3. We need to decide what to do if the never-meant-to-be-executed branch executes. Log an error? Raise another exception? Call 911? 
 
-Since we live in 
+Since Ruby is a dynamically typed language, lack of such guarantee is a trade-off we can live with – we'll write some tests and go on with our lives. Yet, it's important to be aware of it.
+
+### Failure to compose
+
+### Failure to provide decent debugging experience
 
 ## Legacy
 
