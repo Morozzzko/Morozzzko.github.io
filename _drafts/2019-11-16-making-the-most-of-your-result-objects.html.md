@@ -401,7 +401,7 @@ The difference between those two options is not so obvious, but it is quite impo
 
 When we list all possible exceptions, the compiler or linter can check if we've covered them all – we call it an _exhaustiveness check_. We can't do that if we're using a superclass because we can always inherit it and the checks will become false-positive.
 
-Sure, there's a workaround: you can `rescue` all _concrete_ exception classes and then try to `rescue` their subclass.
+Sure, there's a workaround: you can `rescue` all _concrete_ exception classes and then try to `rescue` their superclass.
 
 
 ```ruby
@@ -414,7 +414,7 @@ rescue MyApp::Errors::DomainError
 end
 ```
 
-Sure, this will give us a _comprehensive_ coverage for the exceptions, but it has multiple downsides:
+This trick will give us a _comprehensive_ coverage for the exceptions, but it has multiple downsides:
 
 1. The code never runs, so we have to work around our test coverage
 2. The logic becomes harder to understand, as we need to explain why we have a branch of code that _should never execute_
@@ -424,7 +424,43 @@ Since Ruby is a dynamically typed language, lack of such guarantee is a trade-of
 
 ### Failure to compose
 
-### Failure to provide decent debugging experience
+### Failure to provide a decent debugging experience
+
+Here's the known issue about exceptions – they mess up the control flow. 
+
+### Failure to perform well
+
+Due to the nature of exceptions, they significantly slow down our code.
+
+### Failure to be predictive
+
+Nikita, mathematics, mapping and shit
+
+## Running away from the problems
+
+I have to admit that I get extremely frustrated with exceptions. Whenever I try to use them, the code gets more complex and harder to reason about. I've tried reading books and using other programming languages – that didn't help much.
+
+Result objects feel like a remedy – they help me structure, read and debug the code. It's not _the solution_, but an alternative approach to tackle the same problems. 
+
+Let's move on to the alternative approach to designing the application logic's flow.
+
+## Using data to solve our problems
+
+Let's take a step back and see how different languages approach error handling and handling special cases without using exceptions.
+
+Operating systems use [exit status](https://en.wikipedia.org/wiki/Exit_status) to tell you if the program has exit successfully. Usually, if the exit status is not zero, there was a problem. If there's an error, you can usually check logs, [stdout](https://en.wikipedia.org/wiki/Standard_streams#Standard_output_(stdout)) or [stderr](https://en.wikipedia.org/wiki/Standard_streams#Standard_error_(stderr)) to see what went wrong. 
+
+If you look at standard C functions, you can see that they return statuses too. One of my favorites is [strcmp](https://en.cppreference.com/w/c/string/byte/strcmp), which returns `0` if two strings are identical. If the strings are not identical, the _sign_ of the result will tell you which string appears first in lexicographical order.
+
+<!-- TODO: rewrite C to use errno instead. See https://www.studytonight.com/c/error-handling-in-c.php -->
+
+Whenever we look at [code in Go](https://blog.golang.org/error-handling-and-go), we can see that the common approach is to return _multiple values_ from a function. The last value contains the error or `nil` if everything's okay.
+
+[Elixir developers](https://medium.com/@moxicon/elixir-best-practices-for-error-values-50dc015a06f5) return `{:ok, value}` and `{:error, error_metadata}` tuples and use [pattern matching](https://elixir-lang.org/getting-started/pattern-matching.html) to handle the result.
+
+If we look at Rust, the most common pattern is the [Result type](https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html), which is a enum of two variants: `Ok(result)` for successful execution and `Err(error_metadata)` for unsuccessful one. You can find similar patterns in Haskell, Kotlin, OCaml, Scala and F#.
+
+If you look at those examples, you can see that they share the common trait – they use pure data to tell if everything's okay. It takes different forms and shapes: some systems use return codes, others return multiple values, while the most sophisticated ones use the _result type_.
 
 ## Legacy
 
