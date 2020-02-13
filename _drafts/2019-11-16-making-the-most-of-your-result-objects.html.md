@@ -321,7 +321,7 @@ module MyApp
                json: { error_code: "candidate_rejected", message: "Sorry but the candidate is already rejected" }
       rescue Errors::InsufficientData
         render status: :unprocessable_entity, 
-               json: { error_code: "insufficient data", message: "You need to fill all necessary info" }
+               json: { error_code: "insufficient_data", message: "You need to fill all necessary info" }
       rescue Errors::ProfileExists 
         render status: :unprocessable_entity, 
                json: { error_code: "profile_exists", message: "Couldn't create profile, please refresh" }
@@ -446,9 +446,9 @@ Let's move on to the alternative approach to designing the application logic's f
 
 ## Using data to solve our problems
 
-Let's take a step back and see how different languages approach error handling and handling special cases without using exceptions.
+Let's take a step back and see how different languages approach error handling and handling special cases without exceptions.
 
-Operating systems use [exit status](https://en.wikipedia.org/wiki/Exit_status) to tell you if the program has exit successfully. Usually, if the exit status is not zero, there was a problem. If there's an error, you can usually check logs, [stdout](https://en.wikipedia.org/wiki/Standard_streams#Standard_output_(stdout)) or [stderr](https://en.wikipedia.org/wiki/Standard_streams#Standard_error_(stderr)) to see what went wrong. 
+Operating systems use [exit status](https://en.wikipedia.org/wiki/Exit_status) to tell you if the program has exited successfully. Usually, if the exit status is not zero, there was a problem. In this case, you can usually check logs, [stdout](https://en.wikipedia.org/wiki/Standard_streams#Standard_output_(stdout)) or [stderr](https://en.wikipedia.org/wiki/Standard_streams#Standard_error_(stderr)) to see what went wrong. 
 
 If you look at standard C functions, you can see that they return statuses too. One of my favorites is [strcmp](https://en.cppreference.com/w/c/string/byte/strcmp), which returns `0` if two strings are identical. If the strings are not identical, the _sign_ of the result will tell you which string appears first in lexicographical order.
 
@@ -456,11 +456,174 @@ If you look at standard C functions, you can see that they return statuses too. 
 
 Whenever we look at [code in Go](https://blog.golang.org/error-handling-and-go), we can see that the common approach is to return _multiple values_ from a function. The last value contains the error or `nil` if everything's okay.
 
-[Elixir developers](https://medium.com/@moxicon/elixir-best-practices-for-error-values-50dc015a06f5) return `{:ok, value}` and `{:error, error_metadata}` tuples and use [pattern matching](https://elixir-lang.org/getting-started/pattern-matching.html) to handle the result.
+[Elixir developers](https://medium.com/@moxicon/elixir-best-practices-for-error-values-50dc015a06f5) return `{:ok, value}` and `{:error, error_metadata}` tuples and use [pattern matching](https://elixir-lang.org/getting-started/pattern-matching.html) to handle the result. Lisp developers use this pattern too.
 
 If we look at Rust, the most common pattern is the [Result type](https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html), which is a enum of two variants: `Ok(result)` for successful execution and `Err(error_metadata)` for unsuccessful one. You can find similar patterns in Haskell, Kotlin, OCaml, Scala and F#.
 
-If you look at those examples, you can see that they share the common trait – they use pure data to tell if everything's okay. It takes different forms and shapes: some systems use return codes, others return multiple values, while the most sophisticated ones use the _result type_.
+If you look at those examples, you can see that they share a common trait – they use pure data to tell if everything's okay. It takes different forms and shapes: some systems use return codes, others return multiple values, while the most sophisticated ones use the _result type_. 
+
+Let's see how we can apply those patterns in Ruby.
+
+## Working with tuples
+
+When we talk about returning multiple values, we actually meat returning [a tuple](https://en.wikipedia.org/wiki/Tuple) – an ordered list with some values. 
+
+Ruby has a nice support for this approach – let's see how we can write the `swap` functions that takes two values and reverses them:
+
+```ruby
+def swap(a, b)
+  [b, a]
+end
+
+a = 1
+b = 3
+
+# We've got nice destructurization, why don't we use it
+a, b = swap(a, b)
+
+puts a # 3
+puts b # 1
+```
+
+This is an effective approach, and we can even see it in [Rack](https://github.com/rack/rack) – the webserver interface. All applications and middlewares return a tuple of three elements – or a 3-tuple:
+
+1. The HTTP return code
+2. A map of HTTP headers
+3. The response body
+
+However, we don't use plain Rack so often, so why don't we look at how we may apply this pattern in our applications.
+
+It may be helpful to think about tuples as structs, but without named fields – you have to remember the position for each field. It actually works nice when you design your domain, as it enables you to create zero-cost abstractions. Just some examples:
+
+* You can use 2-tuple to express currency:  `[200, :eur]`, `[0.4, :rub]`
+* Velocity is a nice 3-tuple: `[10, :km, :h]`, `[300, :mile, :day]`
+* Playing cards work nicely as 2-tuples: `[:ace, :spades]`, `[7, :hearts]`
+
+You can see that it would be a bit cumbersome to use explicit field names in some circumstances. It's pure data with no logic, so it's reasonable to drop the field names altogether.
+
+Since errors do not really contain any logic, we can design them too. There are many ways to do it, but I would recommend following those guidelines:
+
+1. Use the first element to identify the _type_ of the result. You'll need to tell apart different kinds of success and failures, and the first element is perfect for it. 
+2. Use symbols to identify the type: `:success`, `:failure`, `:user_not_found`, and so on.
+3. Store metadata as other fields of the tuple. 
+4. Add as many fields as you like, but stay reasonable. A 4-tuple _might_ be too large, but a 10-tuple definitely needs refactoring.
+5. If you need to have a different number of fields for different cases, use different types. Make sure tuple size stays the same for each type. 
+6. Use ubiquitous language across your code. Don't mix `:success`, `:ok` and `:good` together – pick one.
+
+If we apply this pattern to errors we talked about in [going down the rabbit hole](#going-down-the-rabbit-hole), we'll get a result like this
+
+```ruby
+module MyApp
+  module WebAPI
+    class CandidateController
+      def hire
+        result, *_meta = hire_candidate.call(params[:candidate_id])
+
+        case result
+        when :success
+          render json: { candidate_id: candidate.id }
+        when :candidate_does_not_exist
+          render status: :unprocessable_entity, 
+                 json: { error_code: "does_not_exiss", message: "sorry but this candidate does not exist" }
+        when :candidate_already_hired
+          render status: :unprocessable_entity, 
+                 json: { error_code: "candidate_already_hired", message: "sorry but we've already hired this candidate" }
+        when :candidate_rejected
+          render status: :unprocessable_entity, 
+                 json: { error_code: "candidate_rejected", message: "Sorry but the candidate is already rejected" }
+        when :insufficient_data
+          render status: :unprocessable_entity, 
+                 json: { error_code: "insufficient_data", message: "You need to fill all necessary info" }
+        when :profile_exists 
+          render status: :unprocessable_entity, 
+                 json: { error_code: "profile_exists", message: "Couldn't create profile, please refresh" }
+        when :salary_account_exists 
+          render status: :unprocessable_entity, 
+                 json: { error_code: "salary_account_exists", message: "Couldn't create salary account, please refresh" }
+        end
+      end
+
+      private
+
+      ...
+    end
+  end
+end
+```
+
+It looks similar to the exception implementation, but it's actually a bit different:
+
+1. We don't need to create any classes – we just use symbols
+2. We can now _see_ duplicate code: `error_code` in JSON is equal to the `result` type. We can simplify the code further
+3. Only the message is different at this point. This looks like a great chance to refactor
+
+To be fair, we could have done most of the refactoring with exceptions, too. It's just easier to follow and comprehend for me. Your mileage may vary.
+
+There's a problem – if we add another type of error, the application won't tell us, as it will behave unexpectedly instead of crashing. I'll explain the solution in further sections. If you don't want to wait, feel free to skip to [TBA TBD](#).
+
+## Using wrapper classes
+
+Tuples may be a good solution especially for the Elixir folks, but they lack some elegance. For instance, I can't use `result.success?` to figure out if the execution was successful – I have to always destructurize. It's not so bad, but not so ergonomic either.
+
+So let's try and design a wrapper that will solve our problems and make the error-handling approach more idiomatic.
+
+First, we'll need to figure out what we need:
+
+1. We're making a `Result` type
+2. It has two different outcomes: a `Success` and a `Failure`
+3. Both have `success?` and `failure?` methods
+4. It's just a container for some value
+
+So, it will look like this:
+
+```ruby
+class Result
+  attr_reader :value
+
+  def initialize(value)
+    @value = value
+  end
+
+  def success?
+    false
+  end
+
+  def failure?
+    false
+  end
+end
+
+class Success < Result
+  def success?
+    true
+  end
+end
+
+class Failure < Result
+  def failure?
+    true
+  end
+end
+```
+
+Let's see how we would use it:
+
+```ruby
+Success.new(candidate).success?
+Failure.new([:candidate_does_not_exist, candidate_name])
+
+result = some_function.call # returns a Success or a Failure
+
+if result.success?
+  do_something
+else
+  do_something_else
+end
+```
+
+
+
+
 
 ## Legacy
 
