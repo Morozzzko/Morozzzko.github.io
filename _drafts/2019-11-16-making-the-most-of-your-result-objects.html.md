@@ -561,11 +561,16 @@ To be fair, we could have done most of the refactoring with exceptions, too. It'
 
 There's a problem – if we add another type of error, the application won't tell us, as it will behave unexpectedly instead of crashing. I'll explain the solution in further sections. If you don't want to wait, feel free to skip to [TBA TBD](#).
 
-## Using wrapper classes
+## Building a generic Result type
 
-Tuples may be a good solution especially for the Elixir folks, but they lack some elegance. For instance, I can't use `result.success?` to figure out if the execution was successful – I have to always destructurize. It's not so bad, but not so ergonomic either.
+Tuples may be a good solution, but they lack some features. For instance, I can't use `result.success?` to figure out if the execution was successful – I have to always destructurize and check myself. It's not so bad, but not so ergonomic either.
 
-So let's try and design a wrapper that will solve our problems and make the error-handling approach more idiomatic.
+So let's try and design a wrapper that will solve our problems and make the error-handling approach a bit more idiomatic.
+
+I will write multiple subsection, each will explain rationale and implementation of different features. 
+
+
+### The basics
 
 First, we'll need to figure out what we need:
 
@@ -620,8 +625,6 @@ else
   do_something_else
 end
 ```
-
-
 
 
 
