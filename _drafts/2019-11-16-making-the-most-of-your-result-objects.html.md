@@ -450,9 +450,8 @@ Let's take a step back and see how different languages approach error handling a
 
 Operating systems use [exit status](https://en.wikipedia.org/wiki/Exit_status) to tell you if the program has exited successfully. Usually, if the exit status is not zero, there was a problem. In this case, you can usually check logs, [stdout](https://en.wikipedia.org/wiki/Standard_streams#Standard_output_(stdout)) or [stderr](https://en.wikipedia.org/wiki/Standard_streams#Standard_error_(stderr)) to see what went wrong. 
 
-If you look at standard C functions, you can see that they return statuses too. One of my favorites is [strcmp](https://en.cppreference.com/w/c/string/byte/strcmp), which returns `0` if two strings are identical. If the strings are not identical, the _sign_ of the result will tell you which string appears first in lexicographical order.
 
-<!-- TODO: rewrite C to use errno instead. See https://www.studytonight.com/c/error-handling-in-c.php -->
+TODO: rewrite C to use errno instead. See https://www.studytonight.com/c/error-handling-in-c.php
 
 Whenever we look at [code in Go](https://blog.golang.org/error-handling-and-go), we can see that the common approach is to return _multiple values_ from a function. The last value contains the error or `nil` if everything's okay.
 
@@ -626,42 +625,37 @@ else
 end
 ```
 
+### Fluent interface
 
+When you have multiple operations which may fail or not, handling everything with ifs and elses becomes gruesome. 
 
-## Legacy
+What if we could chain it like a [railway](https://fsharpforfunandprofit.com/rop/)? If each function returns a success, we'll keep executing the chain. If either of them returns `Failure`, the whole chain should stop and return the error.
 
------
+Let's say we need a method called `and_then`, which works like this:
 
-We use result objects to represent the result of a computation.
+```ruby
+Success(2).and_then { |value| value * 2 }.and_then { "Hello world" } # => Success("Hello World")
 
-Conventionally, Ruby has exceptions for this – you raise an exception if there's an error. You'd to catch it and voilà – here's your result, do whatever you want.
+Failure(:foo).and_then { "Hello world" } # => Failure(:foo)
+```
 
-1. Errors become first-class residents of your application
-2. It becomes easier to figure out all possible outcomes
-3. The code becomes simpler, easier to write and a little more performant
-4. Complex logic becomes easier to read, compose and desin
+`Success#and_then` works with a block. If the receiver is a `Success`, the method will unwrap the `value` and pass it to the given block. If the receiver is a `Failure`, it will do nothing.
 
-For what it's worth, the ideological ones are about pragmatism too. Let's talk about them a little.
+Here's how to implement it:
 
+```ruby
+class Success < Result
+  def and_then(&block)
+    yield value
+  end
+end
 
-
-## Life with result objects
-
-### Errors become first-class residents of your application
-
-
-### It becomes easier to figure out all possible outcomes
-
-
-### The code becomes simpler, easier to write and a little more performant
-
-
-### Complex logic becomes easier to read, compose and design
-
-# Recap
-
-# Links and references
-
+class Failure < Result
+  def and_then(&block)
+    self
+  end
+end
+```
 
 * [Ruby pigeon article on errors without exceptions](https://www.rubypigeon.com/posts/result-objects-errors-without-exceptions/)
 
