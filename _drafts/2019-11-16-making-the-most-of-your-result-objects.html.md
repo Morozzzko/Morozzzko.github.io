@@ -467,7 +467,7 @@ Let's see how we can apply those patterns in Ruby.
 
 When we talk about returning multiple values, we actually meat returning [a tuple](https://en.wikipedia.org/wiki/Tuple) – an ordered list with some values. 
 
-Ruby has a nice support for this approach – let's see how we can write the `swap` functions that takes two values and reverses them:
+Ruby has a nice support for this approach – let's see how we can write the `swap` functions that takes two values and swaps them:
 
 ```ruby
 def swap(a, b)
@@ -484,7 +484,7 @@ puts a # 3
 puts b # 1
 ```
 
-This is an effective approach, and we can even see it in [Rack](https://github.com/rack/rack) – the webserver interface. All applications and middlewares return a tuple of three elements – or a 3-tuple:
+This is an effective approach, and we can even see it in [Rack](https://github.com/rack/rack), the web server interface. All applications and middlewares return a tuple of three elements – or a 3-tuple:
 
 1. The HTTP return code
 2. A map of HTTP headers
@@ -553,10 +553,10 @@ end
 It looks similar to the exception implementation, but it's actually a bit different:
 
 1. We don't need to create any classes – we just use symbols
-2. We can now _see_ duplicate code: `error_code` in JSON is equal to the `result` type. We can simplify the code further
+2. We can now _see duplicate code_: `error_code` in JSON is equal to the `result` type. We can simplify the code further
 3. Only the message is different at this point. This looks like a great chance to refactor
 
-To be fair, we could have done most of the refactoring with exceptions, too. It's just easier to follow and comprehend for me. Your mileage may vary.
+To be fair, we could have done most of the refactoring with exceptions, too. It just might be easier to comprehend, as data-based approach exposes it better.
 
 There's a problem – if we add another type of error, the application won't tell us, as it will behave unexpectedly instead of crashing. I'll explain the solution in further sections. If you don't want to wait, feel free to skip to [TBA TBD](#).
 
@@ -625,28 +625,32 @@ else
 end
 ```
 
-### Fluent interface
+### Fluent interface: happy path
 
 When you have multiple operations which may fail or not, handling everything with ifs and elses becomes gruesome. 
 
 What if we could chain it like a [railway](https://fsharpforfunandprofit.com/rop/)? If each function returns a success, we'll keep executing the chain. If either of them returns `Failure`, the whole chain should stop and return the error.
 
-Let's say we need a method called `and_then`, which works like this:
+Let's say we need a method called `and_then`, which enables us to write code like this:
 
 ```ruby
-Success(2).and_then { |value| value * 2 }.and_then { "Hello world" } # => Success("Hello World")
+fetch_user.call(id).and_then do |user|
+  reward_user_for_random_reason(user)
+end.and_then do |user, reason|
+  send_reward_notification(user, reason)
+end # => Success(notification)
 
-Failure(:foo).and_then { "Hello world" } # => Failure(:foo)
+Failure(:foo).and_then { |user| reward_user_for_random_reason } # => Failure(:foo)
 ```
 
-`Success#and_then` works with a block. If the receiver is a `Success`, the method will unwrap the `value` and pass it to the given block. If the receiver is a `Failure`, it will do nothing.
+`Success#and_then` works with a block. If the receiver is a `Success`, the method will unwrap the `value` and pass it to the given block. If the receiver is a `Failure`, it will do nothing. 
 
 Here's how to implement it:
 
 ```ruby
 class Success < Result
   def and_then(&block)
-    yield value
+    Success.new(yield value)
   end
 end
 
@@ -656,6 +660,9 @@ class Failure < Result
   end
 end
 ```
+
+
+### Fluent interface: failure track
 
 * [Ruby pigeon article on errors without exceptions](https://www.rubypigeon.com/posts/result-objects-errors-without-exceptions/)
 
