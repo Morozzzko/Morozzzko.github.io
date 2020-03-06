@@ -1,10 +1,11 @@
 ---
 layout: single
-title: "Useful result objects"
+title: "Helpful approaches to domain errors"
 date: "2019-11-16 17:52:00+0300"
 header:
   og_image: "/assets/images/previews/result-objects.png"
 toc: true
+toc_sticky: true
 ---
 
 Result objects is a popular pattern in the Ruby community. We use them one way or another:
@@ -610,51 +611,91 @@ class Failure < Result
 end
 ```
 
-Let's see how we would use it:
+It's the most basic of result objects: it just stores data and contains if it's a success or a failure. Let's see how we would use it:
 
 ```ruby
-Success.new(candidate).success?
-Failure.new([:candidate_does_not_exist, candidate_name])
+Success.new(candidate).success? # => true
+Failure.new([:candidate_does_not_exist, candidate_name]).success? # => false
 
 result = some_function.call # returns a Success or a Failure
 
 if result.success?
   do_something
 else
-  do_something_else
+  error = result.value
+
+  print_error(error)
 end
 ```
 
+It's powerful enough as is, but let's take it further and see what else we can get from this idea.
+
+
 ### Fluent interface: happy path
 
-When you have multiple operations which may fail or not, handling everything with ifs and elses becomes gruesome. 
+When you have multiple operations which may fail or not, handling everything with ifs and elses becomes gruesome. Imagine having code like this:
+
+```ruby
+def reward_user_by_id(id)
+  user = User.find(id) 
+
+  return Failure(:user_not_found) if user.nil?
+
+  reward_result = reward_user_for_random_reason(user)
+
+  return reward_result if reward_result.failure?
+
+  send_notification_result = send_reward_notification(user)
+
+  return send_notification_result if send_notification_result.failure?
+end
+```
+
+All those long `return ifs` make our code clumsy and less pleasant to write. 
 
 What if we could chain it like a [railway](https://fsharpforfunandprofit.com/rop/)? If each function returns a success, we'll keep executing the chain. If either of them returns `Failure`, the whole chain should stop and return the error.
 
 Let's say we need a method called `and_then`, which enables us to write code like this:
 
 ```ruby
+# It will return a Success(...)
 fetch_user.call(id).and_then do |user|
   reward_user_for_random_reason(user)
 end.and_then do |user, reason|
   send_reward_notification(user, reason)
-end # => Success(notification)
+end 
 
-Failure(:foo).and_then { |user| reward_user_for_random_reason } # => Failure(:foo)
+# It will return Failure(:foo)
+Failure(:foo).and_then do |user| 
+  reward_user_for_random_reason 
+end 
+
+# It will return Success(:bar)
+Success(:foo).and_then do 
+  Success(:bar)
+end
+
+# It will return Failure(:user_does_not_exist)
+Success(:foo).and_then do 
+  Failure(:user_does_not_exist)
+end
 ```
 
 `Success#and_then` works with a block. If the receiver is a `Success`, the method will unwrap the `value` and pass it to the given block. If the receiver is a `Failure`, it will do nothing. 
 
+**Tip:** make sure not to return anything but `Success` and `Failure` values inside the blocks. It will break the fluent interface and give you hours of frustration 
+{: .notice--info }
+
 Here's how to implement it:
 
 ```ruby
-class Success < Result
+class Success
   def and_then(&block)
-    Success.new(yield value)
+    yield value
   end
 end
 
-class Failure < Result
+class Failure
   def and_then(&block)
     self
   end
@@ -662,7 +703,130 @@ end
 ```
 
 
-### Fluent interface: failure track
+### Fluent interface: recovering from errors
+
+We've learned to chain computations in case of success. What if we've got a failure and want to fix it? Let's talk about it.
+
+There are two typical use-cases:
+
+1. We want to _try_ to recover from `Failure` by using a different logic, which may fail too
+2. We want to recover from `Failure`. Usually by returning a fallback value or calling a method which will never fail
+
+Naming methods is difficult, so let's pick anything. Let's say that method `or` implements the first use-case and `recover` implements the second use-case.
+
+Let's see how they should look and behave:
+
+```ruby
+# Those methods work on Failures
+Failure(:foo).or { Success(:yass) } # => Success(:yass)
+Failure(:foo).recover { :yass) } # => Success(:yass)
+
+# They do nothing on Success
+Success(:bar).or { Success(:yass) } # => Success(:bar)
+Success(:bar).recover { :foo) } # => Success(:bar)
+
+# Real-life example
+# Let's say we have two kind of IDs: 
+# 1. Serial ID from database 
+# 2. A user-sourced external ID
+# We need our API endpoint to accept both external ID and Serial ID via URL
+# Note: all URL params are accessible at params
+
+find_order_by_id.call(params[:id]).or do
+  find_order_by_external_id.call(params[:id]) 
+end.and_then do |order|
+  do_something_with_order.call(order)
+end
+```
+
+Here's how the implementation is going to look like:
+
+```ruby
+class Success
+  def or(&block)
+    self
+  end
+
+  def recover(&block)
+    self
+  end
+end
+
+class Failure
+  def or(&block)
+    yield self
+  end
+
+  def recover(&block)
+    Success.new(yield self)
+  end
+end
+```
+
+### Fluent interface: happy path, again
+
+We've spent some time discussing fluent interface, but here's something unfair: so far, we've got two methods to handle Failure, but only one to handle Success. Let's rectify it.
+
+Right now, we only have one method: `and_then`. It has to explicitly return `Success`, otherwise things may break. But there are use-cases when this approach makes us frustrated:
+
+1. We don't want to manually create a `Success` when we call a method that doesn't return a `Result`
+2. We've calculated a value inside our block and don't feel like building a `Success` manually, because it's _obviously_ a success
+
+The naming would be the hardest here. We can't do it semantically, because `and_then` is already taken. I'll cross the line here and dive into the roots of this abstraction.
+
+Ruby has a class `Array`. It has a method that does something similar to our use-case. It's `Array#map`.
+
+See how it works:
+
+1. `map` accepts a block
+2. it applies a block to each value inside the array
+3. it returns an array of _the same size_, but with  different values inside
+
+See the similarities? We need a function that doesn't transform the `Result` – if it was a `Success`, it will always stay this way. Only the contents changes.
+
+That being said, let's call this method `#map`. 
+
+I know it may not sound so persuasive, but `Result#map` and `Array#map` have the similar nature if we speak about computer science and maths behind those methods. Check out [lambdacast episode 16](https://lambdacast.com) for a better explanation.
+
+Alright, let's see how we want it to behave:
+
+```ruby
+# map does nothing on Failure
+Failure(:foo).map { Success(:yass) } # => Failure(:foo)
+
+# map automatically wraps value into Success
+Success(2).map { |value| value * 2 } # => Success(4)
+
+# it will wrap anything you pass to it without modification
+# we don't want any surprise modifications
+Success(2).map { Failure("woops") } # => Success(Failure("woops"))
+Success(2).map { Success("hello") } # => Success(Success("hello"))
+
+find_user(params[:username]).map do |user| 
+  user.orders 
+end.map do |orders| 
+  fetch_order_stats(orders) 
+end.and_then do |stats| 
+  send_stats_to_crm(stats) 
+end
+```
+
+With that in mind, let's design the implementation:
+
+```ruby
+class Success
+  def map(&block)
+    Success.new(yield block)
+  end
+end
+
+class Failure
+  def map(&block)
+    self
+  end
+end
+```
+
 
 * [Ruby pigeon article on errors without exceptions](https://www.rubypigeon.com/posts/result-objects-errors-without-exceptions/)
 
