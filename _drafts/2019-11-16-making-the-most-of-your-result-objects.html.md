@@ -827,6 +827,8 @@ class Failure
 end
 ```
 
+### Separating success and failure
+
 
 * [Ruby pigeon article on errors without exceptions](https://www.rubypigeon.com/posts/result-objects-errors-without-exceptions/)
 
