@@ -1,7 +1,9 @@
 _site
 .sass-cache
 .asset-cache
+.jekyll-cache
 .jekyll-metadata
 .vscode
 .rvmrc
 .DS_STORE
+node_modules
