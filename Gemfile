@@ -9,6 +9,7 @@ gem 'solargraph'
 gem 'rubocop'
 gem 'rubocop-daemon'
 
+gem 'pry-byebug'
 gem 'rake'
 
 group :jekyll_plugins do
