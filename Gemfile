@@ -13,15 +13,13 @@ gem 'pry-byebug'
 gem 'rake'
 
 group :jekyll_plugins do
-  # gem 'github-pages'
+  gem 'jekyll-compose'
   gem 'jekyll-feed'
   gem 'jekyll-gist'
   gem 'jekyll-include-cache'
   gem 'jekyll-paginate'
   gem 'jekyll-remote-theme'
 end
-
-# gem 'jekyll', '~> 4.0'
 
 gem 'danger'
 gem 'danger-prose' # Proselint
