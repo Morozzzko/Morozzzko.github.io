@@ -4,7 +4,7 @@ title: Should I _really_ use monads?
 toc: true
 ---
 
-A couple of weeks ago I witnessed a dialog in a [Ruby chat](https://t.me/rubylang). I'm paraphrasing, but it went like this:
+A couple of weeks ago I witnessed a dialogue in a [Ruby chat](https://t.me/rubylang). I'm paraphrasing, but it went like this:
 
 > xxx: What is `dry`? I've seen this gem prefix and discussions, but never actually learned about it. <br />
 > yyy: It's a set of libraries to tackle some problems. <br />
@@ -23,14 +23,14 @@ When we're speaking about monads in Ruby, we're usually talking about [dry-monad
 
 > A monad is just a _monoid_ in the category of endofunctors. What's the problem?
 
-The internet is full of jokes like this. It's a comprehensive definition, but it's _so vague_. To be fair, _most _definitions won't give you anything concrete. Giving a definition to monads is a lot like trying to give a proper definition to a "musical instrument". It's going to be either vague and correct or understandable and incomplete; simply because each instrument, just like each monad, plays a different role. I'll give you somewhat correct, but a little vague explanation.
+The internet is full of jokes like this. It's a comprehensive definition, but it's _so vague_. To be fair, _most_ definitions won't give you anything concrete. Giving a definition to monads is a lot like trying to give a proper definition to a "musical instrument". It's going to be either vague and correct or understandable and incomplete; simply because each instrument, just like each monad, plays a different role. I'll give you somewhat correct, but a little vague explanation.
 
 A `monad` is just a ~~fancy~~ mathematical name for abstractions that behave in a [specific way](/2018/09/08/monad-laws-in-ruby.html). In theory, it lets us chain them, compose them in different ways. In practice, we'd rarely notice the monadic nature of those abstractions. Let's focus on individual monads and see what they bring to the table.
 
 **Fact**: Ruby's built-in `Array` and `String` are _monoids_ too. We never think about it — that's how we should treat monads too.
 {: .notice--info }
 
-[Maybe](https://dry-rb.org/gems/dry-monads/1.3/maybe/) is an abstraction that allows us to express _absense of data_. In practice, it enables us to do nil-safe computations and never worry about getting `undefined method for nil:NilClass`. It acts like an _extremely explicit_ alternative to `nil`. It may be good when you return it from a [repository](https://medium.com/@laertis.pappas/repository-pattern-in-ruby-i-decoupling-activerecord-and-persistence-e395e1b0cf69), but I don't use it my models.
+[Maybe](https://dry-rb.org/gems/dry-monads/1.3/maybe/) is an abstraction that allows us to express _absence of data_. In practice, it enables us to do nil-safe computations and never worry about getting `undefined method for nil:NilClass`. It acts like an _extremely explicit_ alternative to `nil`. It may be good when you return it from a [repository](https://medium.com/@laertis.pappas/repository-pattern-in-ruby-i-decoupling-activerecord-and-persistence-e395e1b0cf69), but I don't use it my models.
 
 [Try](https://dry-rb.org/gems/dry-monads/1.3/try/) is a nice wrapper for exceptions. It's helpful if you need to chain some actions, which may raise an exception. The standard exception-catching mechanism may break the flow and make you jump around the code to get the full picture. Try saves you from this.
 
@@ -47,7 +47,7 @@ So, what's the problem with monads? They seem to be a pretty controversial topic
 Everyone has their own problems with monads. Some folks get mildly annoyed by little things. Others are outraged that such an abomination exists in Ruby. Just see what folks have been telling me:
 
 * Monads are only useful in statically typed languages and only cause trouble in Ruby
-* Functional programming doens't look right in Ruby
+* Functional programming doesn't look right in Ruby
 * Monads don't feel like a right fit in Ruby
 * It's just a syntactic sugar for if and else (_speaking about Result_)
 * We already have exceptions for that (_speaking about Result_)
@@ -65,7 +65,7 @@ This issue is probably the most popular one. There's actually a lot of reasons f
 
 1. Monads are a concept from the category theory. Math. Their representation in software development is mostly `Haskell`, which uses them _heavily_, and it's definitely not a mainstream language. It creates a subconscious association: haskell / monads =  something difficult and clumsy
 2. The `Result` type gets a lot of usage in Rust, Kotlin, Swift, F#, OCaml/ReasonML and Elm too. All of those languages are statically typed and compiled, which enables to do extra static analysis. For example, the compilers may check if you've handled all possible cases. Those checks are nearly impossible to implement in Ruby
-3. Ruby is an object-oriented language. Monads are a concept from functional programming, which may seem a bit odd and counterintuitive.
+3. Ruby is an object-oriented language. Monads are a concept from functional programming, which may seem a bit odd and counter-intuitive.
 4. When you take a look at dry-monads, you'll see unfamiliar methods like `#bind`, `#fmap`, `#or_fmap`. Those things require some additional learning and are not so trivial
 5. The so-called [do notation](/2018/05/27/do-notation-ruby.html) is a syntactic sugar which looks unfamiliar to Ruby developers
 6. Combining different kinds of monads may be troublesome. As an example, you may treat `Result` as a `Maybe`, which will definitely result in bugs.
@@ -78,7 +78,7 @@ Those things boil down to four points:
 3. What trouble will they cause? Will they create bigger problems?
 4. Is it difficult to learn?
 
-I'll speak about the usefullness and problems in [My own perspective](#my-own-perspective), so let's see if it's idiomatic and/or difficult.
+I'll speak about the usefulness and problems in [My own perspective](#my-own-perspective), so let's see if it's idiomatic and/or difficult.
 
 
 ==== WE NEED CONTENT HERE =====
@@ -187,7 +187,7 @@ If you're thinking about something greater, you might consider other kinds of ar
 
 If you're still looking for a way to organize domain logic, you'll have to learn and teach. Best way to learn is to practise: build a couple of tiny playgrounds. Try using `Result` to organize the domain logic. Speak about it on [dry-rb chat](https://dry-rb.zulipchat.com). 
 
-Once you've learned enough to hold a conversation, gradually introduce yout team to the new approaches. It works well if you have a designated space for sharing knowledge – talks, articles, tutorials, etc. If you don't, you might as well just create one. It's a nice improvement to your _engineering culture_.
+Once you've learned enough to hold a conversation, gradually introduce your team to the new approaches. It works well if you have a designated space for sharing knowledge – talks, articles, tutorials, etc. If you don't, you might as well just create one. It's a nice improvement to your _engineering culture_.
 
 
 # The answer
