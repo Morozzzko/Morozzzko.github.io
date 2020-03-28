@@ -204,7 +204,16 @@ Here's the thing: the question is actually more of a _stylistic_ preference than
 
 Use whatever suits you better. Yet, be open-minded.
 
-# References
+# Links and references
 
-
-
+* [dry-monads](https://dry-rb.org/gems/dry-monads/)
+* [dry-rb chat](https://dry-rb.zulipchat.com)
+* [Eventide](https://eventide-project.org/)
+* [F# for fun and profit](https://fsharpforfunandprofit.com/)
+* [Railway oriented programming](https://fsharpforfunandprofit.com/rop/)
+* [Vasily Kolesnikov's asynchronous file downloader](https://gist.github.com/v-kolesnikov/c5807aab0ac7ba5d1ba5e31be32e21e6)
+* [ActiveInteractor](https://github.com/aaronmallen/activeinteractor)
+* [Interactor](https://github.com/collectiveidea/interactor/)
+* [Concurrent ruby](https://github.com/ruby-concurrency/concurrent-ruby)
+* [Monads in Python](https://returns.readthedocs.io/)
+* [Vitaly Pushkar's article on Error handling with Monads in Ruby](http://nywkap.com/programming/either-monads-ruby.html)
