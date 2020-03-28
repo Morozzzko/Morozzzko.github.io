@@ -1,6 +1,6 @@
 ---
 layout: single
-title: Why should I use monads?
+title: Should I _really_ use monads?
 toc: true
 ---
 
@@ -78,7 +78,7 @@ Those things boil down to four points:
 3. What trouble will they cause? Will they create bigger problems?
 4. Is it difficult to learn?
 
-I'll speak about the usefullness and problems in [Perspective of a developer](#TBA), so let's see if it's idiomatic and/or difficult.
+I'll speak about the usefullness and problems in [My own perspective](#my-own-perspective), so let's see if it's idiomatic and/or difficult.
 
 
 ==== WE NEED CONTENT HERE =====
@@ -124,7 +124,7 @@ When I'm dealing with something complex, I want to work with things that don't c
 
 I'm a domain-driven design enthusiast. I'm always looking for better ways to communicate my intentions via code as clearly as possible. Monads help me with this – they make my intentions clear. 
 
-In [What is a monad](#TBA) I've listed four different monads and their purpose. In my business logic,  They help me answer the main question: "what's going on here?". I `return Success(...)` when everything is good, I `Try` to run some code which may fail with an error, I perform an asynchronous `Task`, and I will `Maybe` get a value when I query the database. 
+In [What is a monad](#what-is-a-monad) I've listed four different monads and their purpose. In my business logic,  They help me answer the main question: "what's going on here?". I `return Success(...)` when everything is good, I `Try` to run some code which may fail with an error, I perform an asynchronous `Task`, and I will `Maybe` get a value when I query the database. 
 
 Sure, I can pretend I'm writing Haskell and write code that's hard to read even for someone who's experienced with monads. It's always up to me.
 
@@ -138,11 +138,73 @@ In reality, monads are just simple building blocks. They're a nice addition to y
 
 Another example of a better naming for monads is Python's [returns](https://returns.readthedocs.io/), which was heavily inspired by Ruby's dry-monads. They don't use the name monad anywhere. It's just a library of _primitives_ to write _business logic_. Nothing about endofunctors and category theory.
 
-Monads sound scary and off-putting. They're not that scary, but there's nothing special about them. They just let us do greater things. Let's move on and talk about that.
+Monads sound scary and off-putting. They're not that scary, and there's nothing special about them. They just let us do greater things. Let's move on and talk about that.
 
 
 # How do I persuade my team to use monads
 
-I had to answer it for the first time when [Janko](https://github.com/janko) approached me after EuRuKo 2018 to talk about it. I had no idea then, but I have some ideas now.
+I had to answer it for the first time when [Janko](https://github.com/janko) approached me after EuRuKo 2018 to talk about it. I had no idea back then. It's safe to say that I've learned something and can now speak about it.
+
+When people speak about introducing monads, they usually speak about using Result to organize domain logic. I'm going to focus on that.
+
+Here's the thing:
+
+> Monads are not the goal. Think bigger
+
+As you might have read in [What is a monad](#what-is-a-monad), monads are just primitive tools that let you express something. Do you _really_ want to get stuck on such details? I thought I did. 
+
+However, just using this piece of tech without seeing a _bigger picture_ will likely be fruitless or even frustrating. Please, don't follow this path unless you have the authority to _just do it_. You wouldn't have needed this article in this case though, would you?
+
+Let's try and see the bigger picture here. What exactly are you trying to solve? 
+
+* Are you stuck with plain old fat models / fat controllers? 
+* Are you struggling with exceptions in domain logic?
+* Do you need better performance than exceptions give you? 
+* Do you want to introduce [railway-oriented programming](https://fsharpforfunandprofit.com/rop/)?
+* Are you frustrated with your current interactor / use case / service object implementation?
+* Do you just want to bring something new to your project to make it more appealing?
+* Do you want your development team to get out of their comfort zone and persuade them to learn something new?
+
+Once you've answered those questions _honestly_, we can move on to the next question.
+
+> What larger problems does it solve?
+
+Please take your time to carefully assess the problems your project and business is facing. Talk to your peers, people from other departments and upper management. Talk about their problems, what they'd love to see and _maybe_ you'll find out that you've got the solution. Perhaps not a solution but a part of it. 
+
+Lots of things are easier when you've got allies
+{: .notice--info }
+
+Once you've done those steps, you should have enough evidence that your project needs some change. It may seem like monads are the only solution. Trust me, they're not.
+
+> What are the alternatives? How good would they fit your situation?
+
+Perhaps, you'd be better off with things like [Interactor](https://github.com/collectiveidea/interactor/), [ActiveInteractor](https://github.com/aaronmallen/activeinteractor). They let you implement the same things you could with Result, but in a little different fashion. 
+
+If you're already using Interactor or ActiveInteractor, you might just patch the Context class to make it behave like a Result
+{: .notice--info }
+
+If you're thinking about something greater, you might consider other kinds of architecture or even something like [Eventide](https://eventide-project.org/). In this case, you'll probably have to plan out the great refactoring, plan it out and try and push the idea. I'm in no position to give advice here, as it's a pretty complex task and I can't generalize it.
+
+If you're still looking for a way to organize domain logic, you'll have to learn and teach. Best way to learn is to practise: build a couple of tiny playgrounds. Try using `Result` to organize the domain logic. Speak about it on [dry-rb chat](https://dry-rb.zulipchat.com). 
+
+Once you've learned enough to hold a conversation, gradually introduce yout team to the new approaches. It works well if you have a designated space for sharing knowledge – talks, articles, tutorials, etc. If you don't, you might as well just create one. It's a nice improvement to your _engineering culture_.
+
+
+# The answer
+
+I've covered a lot of ideas in a way that looks like a rant, but haven't gotten to the main point: "should I _really_ use monads?". Here's the answer:
+
+> **It depends**. <br />
+> Will they help you do greater things? Then the answer is yes. <br />
+> Do they seem off-putting and less enjoyable than other things? The answer would be "no".
+
+It's okay if you haven't understood the new tool yet. It's also okay if you didn't like it. 
+
+Here's the thing: the question is actually more of a _stylistic_ preference than something substantial. Decision to use a monad or not is a lot like the decision to use `if` instead of `case`, or `collect` instead of `reduce`. Just like pattern matching lets you express yourself, each monad contributes to expressiveness to your code. 
+
+Use whatever suits you better. Yet, be open-minded.
+
+# References
+
 
 
