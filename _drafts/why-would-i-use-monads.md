@@ -2,6 +2,8 @@
 layout: single
 title: Should I _really_ use monads?
 toc: true
+toc_sticky: true
+toc_levels: 1, 2
 ---
 
 A couple of weeks ago I witnessed a dialogue in a [Ruby chat](https://t.me/rubylang). I'm paraphrasing, but it went like this:
@@ -80,6 +82,164 @@ Those things boil down to four points:
 
 I'll speak about the usefulness and problems in [My own perspective](#my-own-perspective), so let's see if it's idiomatic and/or difficult.
 
+Let me show you a couple of examples that demonstrate many ways to use the library
+
+
+### Writing domain logic
+
+1. Basic usage. Trying to create a record and returning a value depending on the outcome.
+
+```ruby
+# https://github.com/saintprug/rubytalks.org/blob/cb32cff14587e021e71f0e5547765e84cd014c0d/lib/domains/talks/operations/create.rb#L43-L51
+
+def create_talk_speaker(talk_id, speaker_id)
+  talk_speaker = talks_speakers_repo.create(talk_id: talk_id, speaker_id: speaker_id)
+
+  if talk_speaker
+    Success(talk_speaker)
+  else
+    Failure('could not create talk_speaker')
+  end
+end
+```
+
+2. A function that fetches or creates a record. It shows chaining functions using `#fmap` — a method which works similar to `Enumerable#map`, but won't do anything if it's called on a `Failure`
+
+```ruby
+https://github.com/davydovanton/cookie_box/blob/c7e92db9b69b38eb85fb9d7ef1f81706ea4830e6/lib/repositories/libs/get_or_create_repo.rb#L13-L22
+
+
+def call(repo_name)
+  repo_name = truncate(repo_name)
+  repo = repository.find_by_name(repo_name)
+
+  if repo
+    Success(repo)
+  else
+    info_getter.call(repo_name).fmap { |value| create_repository(value) }
+  end
+end
+```
+
+3. The most complex example — composing multiple operations. If one of them fails, the method will return a Failure and rollback the transaction. 
+
+```ruby
+# https://github.com/saintprug/rubytalks.org/blob/cb32cff14587e021e71f0e5547765e84cd014c0d/lib/domains/talks/operations/create.rb#L17-L28
+
+def call(talk_form) # rubocop:disable Metrics/AbcSize
+  talk_form = talk_form.symbolize_keys
+  oembed = yield generate_oembed(talk_form[:link])
+
+  talk_repo.transaction do
+    speakers = yield find_or_create_speakers(talk_form[:speakers])
+    event = yield find_or_create_event(talk_form[:event])
+    talk = yield event ? create_talk(talk_form, oembed, event.id) : create_talk(talk_form, oembed)
+    yield create_talk_speakers(talk.id, speakers)
+    Success(talk)
+  end
+end
+```
+
+4. Working with the computed result. Using `if` with predicates to handle different cases
+
+```ruby
+https://github.com/saintprug/rubytalks.org/blob/fe0a6f2c08f161e9bde9545227be6db5e1346539/lib/util/web/helpers/respond_with.rb#L9-L16
+
+def respond_with(response, result, serializer, status: 200)
+  if result.success?
+    respond_with_success(response, result.value!, with: serializer, status: status)
+  else
+    status = fetch_error(result.failure)[:status]
+    respond_with_failure(response, result.failure, status: status)
+  end
+end
+```
+
+5. Working with the computed result. Using `case` to handle all cases
+
+# FIXME: make a permament URL
+
+```ruby
+# https://github.com/saintprug/retro-board/blob/master/apps/web/controllers/boards/show.rb#L10-L19
+
+
+def call(params)
+  result = operation.call(params.to_h.slice(:id))
+
+  case result
+  when Success { |value| value.is_a?(Board) }
+    @board = result.value!
+  else
+    halt 404, "These aren't the boards you're looking for"
+  end
+end
+```
+
+6. Working with the computed result. Using `#fmap` to access the wrapped data
+
+```ruby
+# https://github.com/davydovanton/cookie_box/blob/c7e92db9b69b38eb85fb9d7ef1f81706ea4830e6/apps/web/controllers/decks/show.rb#L10-L17
+
+
+def call(params)
+  operation.call(params[:id]).fmap do |payload|
+    @deck = payload[:deck]
+    @issues = payload[:issues]
+  end
+
+  status 404, 'Not found' unless abilities['deck.read'].call(current_account, @deck)
+end
+```
+
+7. 
+
+<details markdown="1">
+<summary>Example #1. Not the most elegant, but shows the idea. <code class="highlighter-rouge">#bind</code> will not execute the block if <code class="highlighter-rouge">fetch_post_by_id</code> returns a Failure</summary>
+
+```ruby
+# app/services/approve_post.rb
+
+class ApprovePost
+  include Dry::Monads[:result]
+
+  def call(post_id)
+    fetch_post_by_id(post_id).bind do |post|
+      if post.can_be_approved?
+        Success(post.approve)
+      else 
+        Failure(:can_not_be_approved)
+      end
+    end
+  end
+
+  ...
+end
+
+# app/controllers/post_controller.rb
+
+class PostController
+  ...
+  def approve
+    result = approve_post.call(params[:id])
+
+    if result.success?
+      render ...
+    else
+      render ...
+    end
+  end
+end
+```
+
+</details>
+
+* We'll rarely use `#new` explicitly. You won't use `Success.new(value)` too often.
+  Instead, the library provides constructors as functions: `Success(value)`, `Failure(value)` and so forth.<br />
+  It _may_ seem unfamiliar, but this is actually a pretty idiomatic approach for Ruby. Just look at `#Array`, `#String`, `#Hash` and other methods in `Kernel`
+* Usually, we'll `include` the constructors to our class to use them without the `Dry::Monads` prefix. It looks even more like `Kernel` methods.
+* The `include` syntax looks a bit new: you can cherry-pick the abstractions you need: `include Dry::Monads[:result, :try]`
+* You can chain monads
+
 
 ==== WE NEED CONTENT HERE =====
 
@@ -136,7 +296,7 @@ There's a problem with a lot of monad tutorials, including mine — they focus 
 
 In reality, monads are just simple building blocks. They're a nice addition to your toolset, but you don't need to _know_ that they are monads. It's not important in the grand scheme of things — they only enable you to build greater things, like [railway oriented programming](https://fsharpforfunandprofit.com/rop/).
 
-Another example of a better naming for monads is Python's [returns](https://returns.readthedocs.io/), which was heavily inspired by Ruby's dry-monads. They don't use the name monad anywhere. It's just a library of _primitives_ to write _business logic_. Nothing about endofunctors and category theory.
+Another example of a better naming for monads is Python's [returns](https://returns.readthedocs.io/), which was heavily inspired by Ruby's dry-monads. They don't use the name monad anywhere. It's just a library of _primitives_ to write _business logic_. Nothing about endofunctors and category theory – that's what I love about them.
 
 Monads sound scary and off-putting. They're not that scary, and there's nothing special about them. They just let us do greater things. Let's move on and talk about that.
 
@@ -217,3 +377,5 @@ Use whatever suits you better. Yet, be open-minded.
 * [Concurrent ruby](https://github.com/ruby-concurrency/concurrent-ruby)
 * [Monads in Python](https://returns.readthedocs.io/)
 * [Vitaly Pushkar's article on Error handling with Monads in Ruby](http://nywkap.com/programming/either-monads-ruby.html)
+* [My own article on Do notation and railway oriented programming](/2018/05/27/do-notation-ruby.html)
+* [My own article on monad laws](/2018/09/08/monad-laws-in-ruby.html)
