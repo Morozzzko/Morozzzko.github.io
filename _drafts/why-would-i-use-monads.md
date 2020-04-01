@@ -184,6 +184,8 @@ end
 ```ruby
 # https://github.com/saintprug/retro-board/blob/b66a26a36cfc5ccfe8263fe0af31b3610ce2a896/apps/web/controllers/boards/show.rb#L10-L19
 
+include Dry::Monads::Result::Mixin
+
 def call(params)
   result = operation.call(params.to_h.slice(:id))
 
@@ -216,16 +218,52 @@ end
 ```
 </details>
 
+<details markdown="1"> 
+<summary>
+7. <strong>Working with the computed result.</strong> Using pattern matching.
+</summary>
 
-* We'll rarely use `#new` explicitly. You won't use `Success.new(value)` too often.
-  Instead, the library provides constructors as functions: `Success(value)`, `Failure(value)` and so forth.<br />
-  It _may_ seem unfamiliar, but this is actually a pretty idiomatic approach for Ruby. Just look at `#Array`, `#String`, `#Hash` and other methods in `Kernel`
-* Usually, we'll `include` the constructors to our class to use them without the `Dry::Monads` prefix. It looks even more like `Kernel` methods.
-* The `include` syntax looks a bit new: you can cherry-pick the abstractions you need: `include Dry::Monads[:result, :try]`
-* You can chain monads
+```ruby
+# a modification of example five, taken from saintprug/retro-board
+# it shows a more "modern" syntax for include
+# https://github.com/saintprug/retro-board/blob/b66a26a36cfc5ccfe8263fe0af31b3610ce2a896/apps/web/controllers/boards/show.rb#L10-L19
+
+include Dry::Monads[:result]
+
+def call(params)
+  case operation.call(params.to_h.slice(:id))
+  in Success(Board => board)
+    @board = board
+  else
+    halt 404, "These aren't the boards you're looking for"
+  end
+end
+```
+</details>
 
 
-==== WE NEED CONTENT HERE =====
+Here's a couple of things to notice about those code styles:
+
+**They use blocks more often.** The interfaces use blocks or allow them. Longer chains become a norm, which goes against [current Rubocop defaults](https://rubocop.readthedocs.io/en/latest/cops_style/#stylemultilineblockchain).
+
+**There's no need for unnecessary naming.** Since there's an option to easily chain transformations using `#fmap` and other methods, we can avoid coming up with names we _don't really need_. Don't know about you, but I often frustrated about having to come up with names for intermediate data.
+
+**We don't build objects using `#new`.** Instead, we use constructors that look like `Kernel#Array`, `Kernel#String` and similar methods. It looks pretty much rubyish
+
+**We cherry-pick abstractions we need.** This helps prevent clutter and communicate more clearly. It looks boilerplaty, so folks move the includes to base classes.
+
+**We can cherry-pick using a single `include`.** It's not a new pattern, but an uncommon one. Instead of using `include` multiple times to get each abstraction, we list whatever we need: `[:result, :maybe, :try]`.
+
+**Conditional logic uses predicates.** Nobody really reinvents the wheel, so if you need to add conditional logic — you've still got conditions and methods to check _which_ value you've got.
+
+**There's an extensive support for case and pattern matching.** It enables us to avoid using many built-in interfaces altogether and write expressive and beautiful code. There aren't too many examples, as the features are relatively new. If you've got something to share, please do!
+
+**The library introduces new semantics to `yield`.** Conventionally, we use `yield` whenever we want to call a block. That's exactly what's going on here — we call a block. However, we bring the new semantics. Now, `yield` looks more like `await` in many languages, or similar to `yield` in Python or JavaScript. 
+
+**The “functional” programming part is barely noticable**. None of those examples show us any mathematics-riddled word-buzzing functional programming some people expected to. Sure, it has _some_ features: naming, using blocks, immutable expressions. That's pretty common in Ruby.
+
+In the end, is it idiomatic? I think so. It may be _unfamiliar_ to many developers, but it's idiomatic almost all the way through. Except for the `yield` expression, perhaps. After all, idiomatic just means following the conventions of the language. The library does that most of the time, so there's no problem.
+
 
 ## What about exceptions?
 
