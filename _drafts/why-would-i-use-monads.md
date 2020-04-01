@@ -3,7 +3,6 @@ layout: single
 title: Should I _really_ use monads?
 toc: true
 toc_sticky: true
-toc_levels: 1, 2
 ---
 
 A couple of weeks ago I witnessed a dialogue in a [Ruby chat](https://t.me/rubylang). I'm paraphrasing, but it went like this:
@@ -63,15 +62,21 @@ Some people who share those things are nice, friendly and welcoming; while some 
 
 ## Is Ruby really the right place for those things?
 
-This issue is probably the most popular one. There's actually a lot of reasons for this skepticism:
+This issue is probably the most popular one. There's actually a lot of reasons for this skepticism, let's think about them.
 
-1. Monads are a concept from the category theory. Math. Their representation in software development is mostly `Haskell`, which uses them _heavily_, and it's definitely not a mainstream language. It creates a subconscious association: haskell / monads =  something difficult and clumsy
-2. The `Result` type gets a lot of usage in Rust, Kotlin, Swift, F#, OCaml/ReasonML and Elm too. All of those languages are statically typed and compiled, which enables to do extra static analysis. For example, the compilers may check if you've handled all possible cases. Those checks are nearly impossible to implement in Ruby
-3. Ruby is an object-oriented language. Monads are a concept from functional programming, which may seem a bit odd and counter-intuitive.
-4. When you take a look at dry-monads, you'll see unfamiliar methods like `#bind`, `#fmap`, `#or_fmap`. Those things require some additional learning and are not so trivial
-5. The so-called [do notation](/2018/05/27/do-notation-ruby.html) is a syntactic sugar which looks unfamiliar to Ruby developers
-6. Combining different kinds of monads may be troublesome. As an example, you may treat `Result` as a `Maybe`, which will definitely result in bugs.
-7. It requires extra effort to learn and adapt
+**Monads are a concept from the category theory.** Math. Their representation in software development is mostly `Haskell`, which uses them _heavily_, and it's definitely not a mainstream language. It creates a subconscious association: haskell / monads =  something difficult and clumsy.
+
+**They come from other languages.** The `Result` type gets a lot of usage in Rust, Kotlin, Swift, F#, OCaml/ReasonML and Elm too. All of those languages are statically typed and compiled, which enables to do extra static analysis. For example, the compilers may check if you've handled all possible cases. Those checks are nearly impossible to implement in Ruby.
+
+**Ruby is an object-oriented language.** Monads are a concept from functional programming, which may seem a bit odd and counter-intuitive.
+
+**You'll have to learn a new interface.** When you take a look at dry-monads, you'll see unfamiliar methods like `#bind`, `#fmap`, `#or_fmap`. Those things require some additional learning and are not so trivial.
+
+**There's something we never did before.** The so-called [do notation](/2018/05/27/do-notation-ruby.html) is a syntactic sugar which looks unfamiliar to Ruby developers.
+
+**Combining different kinds of monads may be troublesome.** As an example, you may treat `Result` as a `Maybe`, which will definitely result in bugs.
+
+**It requires extra effort to learn and adapt**. This is one of the most bitter points here. Having to learn may be annoying, and the whole process isn't easy.
 
 Those things boil down to four points:
 
@@ -85,9 +90,11 @@ I'll speak about the usefulness and problems in [My own perspective](#my-own-per
 Let me show you a couple of examples that demonstrate many ways to use the library
 
 
-### Writing domain logic
+<details markdown="1"> 
+<summary>
+1. <strong>Basic usage.</strong> Trying to create a record and returning a value depending on the outcome.
+</summary>
 
-1. Basic usage. Trying to create a record and returning a value depending on the outcome.
 
 ```ruby
 # https://github.com/saintprug/rubytalks.org/blob/cb32cff14587e021e71f0e5547765e84cd014c0d/lib/domains/talks/operations/create.rb#L43-L51
@@ -102,12 +109,15 @@ def create_talk_speaker(talk_id, speaker_id)
   end
 end
 ```
+</details>
 
-2. A function that fetches or creates a record. It shows chaining functions using `#fmap` — a method which works similar to `Enumerable#map`, but won't do anything if it's called on a `Failure`
+<details markdown="1"> 
+<summary>
+2. <strong>Composing multiple operations</strong>. A function that fetches or creates a record. It shows chaining functions using <code class="highlighter-rouge">#fmap</code> — a method which works similar to <code class="highlighter-rouge">Enumerable#map</code>, but won't do anything if it's called on a <code class="highlighter-rouge">Failure</code>
+</summary>
 
 ```ruby
 https://github.com/davydovanton/cookie_box/blob/c7e92db9b69b38eb85fb9d7ef1f81706ea4830e6/lib/repositories/libs/get_or_create_repo.rb#L13-L22
-
 
 def call(repo_name)
   repo_name = truncate(repo_name)
@@ -120,8 +130,12 @@ def call(repo_name)
   end
 end
 ```
+</details>
 
-3. The most complex example — composing multiple operations. If one of them fails, the method will return a Failure and rollback the transaction. 
+<details markdown="1"> 
+<summary>
+3. <strong>Composing multiple operations.</strong> If one of them fails, the method will return a Failure and rollback the transaction. 
+</summary>
 
 ```ruby
 # https://github.com/saintprug/rubytalks.org/blob/cb32cff14587e021e71f0e5547765e84cd014c0d/lib/domains/talks/operations/create.rb#L17-L28
@@ -139,8 +153,12 @@ def call(talk_form) # rubocop:disable Metrics/AbcSize
   end
 end
 ```
+</details>
 
-4. Working with the computed result. Using `if` with predicates to handle different cases
+<details markdown="1"> 
+<summary>
+4. <strong>Working with the computed result.</strong> Using <code class="highlighter-rouge">if</code> with predicates to handle different cases
+</summary>
 
 ```ruby
 https://github.com/saintprug/rubytalks.org/blob/fe0a6f2c08f161e9bde9545227be6db5e1346539/lib/util/web/helpers/respond_with.rb#L9-L16
@@ -155,13 +173,16 @@ def respond_with(response, result, serializer, status: 200)
 end
 ```
 
-5. Working with the computed result. Using `case` to handle all cases
+</details>
 
-# FIXME: make a permament URL
+<details markdown="1"> 
+<summary>
+5. <strong>Working with the computed result.</strong> Using <code class="highlighter-rouge">case</code> to handle all cases
+</summary>
+
 
 ```ruby
-# https://github.com/saintprug/retro-board/blob/master/apps/web/controllers/boards/show.rb#L10-L19
-
+# https://github.com/saintprug/retro-board/blob/b66a26a36cfc5ccfe8263fe0af31b3610ce2a896/apps/web/controllers/boards/show.rb#L10-L19
 
 def call(params)
   result = operation.call(params.to_h.slice(:id))
@@ -174,12 +195,15 @@ def call(params)
   end
 end
 ```
+</details>
 
-6. Working with the computed result. Using `#fmap` to access the wrapped data
+<details markdown="1"> 
+<summary>
+6. <strong>Working with the computed result.</strong> Using <code class="highlighter-rouge">#fmap</code> to access the wrapped data
+</summary>
 
 ```ruby
 # https://github.com/davydovanton/cookie_box/blob/c7e92db9b69b38eb85fb9d7ef1f81706ea4830e6/apps/web/controllers/decks/show.rb#L10-L17
-
 
 def call(params)
   operation.call(params[:id]).fmap do |payload|
@@ -190,48 +214,8 @@ def call(params)
   status 404, 'Not found' unless abilities['deck.read'].call(current_account, @deck)
 end
 ```
-
-7. 
-
-<details markdown="1">
-<summary>Example #1. Not the most elegant, but shows the idea. <code class="highlighter-rouge">#bind</code> will not execute the block if <code class="highlighter-rouge">fetch_post_by_id</code> returns a Failure</summary>
-
-```ruby
-# app/services/approve_post.rb
-
-class ApprovePost
-  include Dry::Monads[:result]
-
-  def call(post_id)
-    fetch_post_by_id(post_id).bind do |post|
-      if post.can_be_approved?
-        Success(post.approve)
-      else 
-        Failure(:can_not_be_approved)
-      end
-    end
-  end
-
-  ...
-end
-
-# app/controllers/post_controller.rb
-
-class PostController
-  ...
-  def approve
-    result = approve_post.call(params[:id])
-
-    if result.success?
-      render ...
-    else
-      render ...
-    end
-  end
-end
-```
-
 </details>
+
 
 * We'll rarely use `#new` explicitly. You won't use `Success.new(value)` too often.
   Instead, the library provides constructors as functions: `Success(value)`, `Failure(value)` and so forth.<br />
