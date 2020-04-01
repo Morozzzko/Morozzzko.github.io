@@ -3,6 +3,8 @@ layout: single
 title: Should I _really_ use monads?
 toc: true
 toc_sticky: true
+header:
+  og_image: "/assets/images/previews/should-i-really-use-monads.png"
 ---
 
 A couple of weeks ago I witnessed a dialogue in a [Ruby chat](https://t.me/rubylang). I'm paraphrasing, but it went like this:
