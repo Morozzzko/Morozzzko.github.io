@@ -262,7 +262,7 @@ Here's a couple of things to notice about those code styles:
 
 **The library introduces new semantics to `yield`.** Conventionally, we use `yield` whenever we want to call a block. That's exactly what's going on here — we call a block. However, we bring the new semantics. Now, `yield` looks more like `await` in many languages, or similar to `yield` in Python or JavaScript. 
 
-**The “functional” programming part is barely noticable**. None of those examples show us any mathematics-riddled word-buzzing functional programming some people expected to. Sure, it has _some_ features: naming, using blocks, immutable expressions. That's pretty common in Ruby.
+**The “functional” programming part is barely noticeable**. None of those examples show us any mathematics-riddled word-buzzing functional programming some people expected to. Sure, it has _some_ features: naming, using blocks, immutable expressions. That's pretty common in Ruby.
 
 In the end, is it idiomatic? I think so. It may be _unfamiliar_ to many developers, but it's idiomatic almost all the way through. Except for the `yield` expression, perhaps. After all, idiomatic just means following the conventions of the language. The library does that most of the time, so there's no problem.
 
