@@ -248,9 +248,9 @@ Here's a couple of things to notice about those code styles:
 
 **They use blocks more often.** The interfaces use blocks or allow them. Longer chains become a norm, which goes against [current Rubocop defaults](https://rubocop.readthedocs.io/en/latest/cops_style/#stylemultilineblockchain).
 
-**There's no need for unnecessary naming.** Since there's an option to easily chain transformations using `#fmap` and other methods, we can avoid coming up with names we _don't really need_. Don't know about you, but I often frustrated about having to come up with names for intermediate data.
+**There's no need for unnecessary naming.** Since there's an option to easily chain transformations using `#fmap` and other methods, we can avoid coming up with names we _don't really need_. I often feel frustrated about having to come up with names for intermediate data..
 
-**We don't build objects using `#new`.** Instead, we use constructors that look like `Kernel#Array`, `Kernel#String` and similar methods. It looks pretty much rubyish
+**We don't build objects using `#new`.** Instead, we use constructors that look like `Kernel#Array`, `Kernel#String` and similar methods. It looks pretty much like the standard Ruby code.
 
 **We cherry-pick abstractions we need.** This helps prevent clutter and communicate more clearly. It looks boilerplaty, so folks move the includes to base classes.
 
@@ -264,7 +264,7 @@ Here's a couple of things to notice about those code styles:
 
 **The “functional” programming part is barely noticeable**. None of those examples show us any mathematics-riddled word-buzzing functional programming some people expected to. Sure, it has _some_ features: naming, using blocks, immutable expressions. That's pretty common in Ruby.
 
-In the end, is it idiomatic? I think so. It may be _unfamiliar_ to many developers, but it's idiomatic almost all the way through. Except for the `yield` expression, perhaps. After all, idiomatic just means following the conventions of the language. The library does that most of the time, so there's no problem.
+In the end, is it idiomatic? I think so. It may be _unfamiliar_ to many developers, but it's idiomatic almost all the way through. Except for the `yield` expression, perhaps. After all, idiomatic just means following the conventions of the language. 
 
 
 ## What about exceptions?
