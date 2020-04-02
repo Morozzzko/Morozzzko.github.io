@@ -39,7 +39,7 @@ A `monad` is just a ~~fancy~~ mathematical name for abstractions that behave in 
 
 [Task](https://dry-rb.org/gems/dry-monads/1.3/task/) is a wrapper around [concurrent ruby's](https://github.com/ruby-concurrency/concurrent-ruby) `Promise`. I've seen folks use it as an easy way to do concurrent IO – download things, write to database, etc. Just take at look at Vasily Kolesnikov's [asynchronous file downloader](https://gist.github.com/v-kolesnikov/c5807aab0ac7ba5d1ba5e31be32e21e6). It receives a list of URLs and creates tasks to download them. Without many low-level asynchronous details.
 
-[Result](https://dry-rb.org/gems/dry-monads/1.3/task/) is the most common monad in a Ruby world. We use it to express result of a function call. It's most useful when the result can be a `Success` or a `Failure`, which works as natural as it sounds. You can just `return Success(with_your_data)` from your function and work with it. If something goes wrong, you would `return Failure("and provide some details")`. 
+[Result](https://dry-rb.org/gems/dry-monads/1.3/result/) is the most common monad in a Ruby world. We use it to express result of a function call. It's most useful when the result can be a `Success` or a `Failure`, which works as natural as it sounds. You can just `return Success(with_your_data)` from your function and work with it. If something goes wrong, you would `return Failure("and provide some details")`. 
 
 There are other monads, but I'll omit them as those are not _that_ common and won't benefit to the story. 
 
