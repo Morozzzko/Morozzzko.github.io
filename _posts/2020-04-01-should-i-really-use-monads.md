@@ -386,7 +386,7 @@ It's okay if you haven't understood the new tool yet. It's also okay if you didn
 
 Here's the thing: the question is actually more of a _stylistic_ preference than something substantial. Decision to use a monad or not is a lot like the decision to use `if` instead of `case`, or `collect` instead of `reduce`. Just like pattern matching lets you express yourself, each monad contributes to expressiveness to your code. 
 
-Use whatever suits you better. Yet, be open-minded.
+**The bottom line:** monads are alright. They're just a low-level detail that help you build something greater. Yet, there are other solutions. Focus on the greater things and use whatever suits you better. Yet, be open-minded about the alternatives. They're alright too.
 
 # Links and references
 
