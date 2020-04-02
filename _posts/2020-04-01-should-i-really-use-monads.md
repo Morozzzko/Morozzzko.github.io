@@ -119,7 +119,7 @@ end
 </summary>
 
 ```ruby
-https://github.com/davydovanton/cookie_box/blob/c7e92db9b69b38eb85fb9d7ef1f81706ea4830e6/lib/repositories/libs/get_or_create_repo.rb#L13-L22
+# https://github.com/davydovanton/cookie_box/blob/c7e92db9b69b38eb85fb9d7ef1f81706ea4830e6/lib/repositories/libs/get_or_create_repo.rb#L13-L22
 
 def call(repo_name)
   repo_name = truncate(repo_name)
@@ -163,7 +163,7 @@ end
 </summary>
 
 ```ruby
-https://github.com/saintprug/rubytalks.org/blob/fe0a6f2c08f161e9bde9545227be6db5e1346539/lib/util/web/helpers/respond_with.rb#L9-L16
+# https://github.com/saintprug/rubytalks.org/blob/fe0a6f2c08f161e9bde9545227be6db5e1346539/lib/util/web/helpers/respond_with.rb#L9-L16
 
 def respond_with(response, result, serializer, status: 200)
   if result.success?
@@ -399,7 +399,10 @@ Use whatever suits you better. Yet, be open-minded.
 * [ActiveInteractor](https://github.com/aaronmallen/activeinteractor)
 * [Interactor](https://github.com/collectiveidea/interactor/)
 * [Concurrent ruby](https://github.com/ruby-concurrency/concurrent-ruby)
-* [Monads in Python](https://returns.readthedocs.io/)
+* [returns: monads in Python](https://returns.readthedocs.io/)
 * [Vitaly Pushkar's article on Error handling with Monads in Ruby](http://nywkap.com/programming/either-monads-ruby.html)
 * [My own article on Do notation and railway oriented programming](/2018/05/27/do-notation-ruby.html)
 * [My own article on monad laws](/2018/09/08/monad-laws-in-ruby.html)
+* [rubytalks.org repo](https://github.com/saintprug/rubytalks.org)
+* [Anton Davydov's cookie box repo](https://github.com/davydovanton/cookie_box/)
+* [Saint P Ruby's retro board](https://github.com/saintprug/retro-board/)
