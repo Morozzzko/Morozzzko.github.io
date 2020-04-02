@@ -89,7 +89,7 @@ Those things boil down to four points:
 
 I'll speak about the usefulness and problems in [My own perspective](#my-own-perspective), so let's see if it's idiomatic and/or difficult.
 
-Let me show you a couple of examples that demonstrate many ways to use the library
+Let me show you a couple of examples that demonstrate many ways to use the library. Labels are collapsible — click on them to see the code.
 
 
 <details markdown="1"> 
