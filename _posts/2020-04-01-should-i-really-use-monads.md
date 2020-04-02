@@ -274,8 +274,8 @@ We use `Result` to express the logic which may fail or not. Let's imagine a simp
 1. We make sure that user has provided username and password. If not, we fail
 2. We make sure the username exists in our system. If not, we fail and suggest them to register
 3. We make sure the password is correct. 
-   a. If not, we try to check if it is one of the user's old passwords. If so, fail and tell them they've changed passwords a while ago.
-   b. If it's just an unknown password, fail and tell them the password is incorrect.
+  * If not, we try to check if it is one of the user's old passwords. If so, fail and tell them they've changed passwords a while ago.
+  * If it's just an unknown password, fail and tell them the password is incorrect.
 4. Make sure the user is not blocked in our system. Fail and warn them about it if they are
 5. Create new session
 
