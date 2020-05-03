@@ -1,6 +1,6 @@
 ---
 layout: single
-title: Being conscious. Error handling and 
+title: "Being conscious: service objects"
 ---
 
 I've been programming for a long time and I've had countless arguments about different things. I'd like to list top four reasons I've had an argument online.
@@ -30,7 +30,7 @@ The post is going to be relatively long, so I'll make each chapter as independen
 
 <!-- excerpt --> 
 
-# What is a service object
+# The purpose of a service object
 
 Service object is a common pattern in Ruby community, but you might also see something similar in other languages. Python's [stories](https://github.com/dry-python/stories) were greatly influenced by [dry-transactions](http://github.com/gems/dry-transactions) and [Trailblazer](http://trailblazer.to/) — some of the tools we could have used for service objects.
 
