@@ -74,7 +74,7 @@ Here's the thing about service object: it's not really a well-documented pattern
 
 There's a lot of ways to categorize the service objects, with different level of detail. I'm going to take a shot adn categorize by the service object behavior.
 
-**The doer** is an service object which has the `-er` suffix in the name. It has a name like `OrderCreator`, `UserRenamer`, `PurchasePlacer` or something similar. This object looks like it's a person fulfilling their job, and usually doesn't exist in the business domain. In some cases, it may clash with the terminology. `OrderCreator` may be both a person who placed the order _and_ a service.
+**The doer** is an service object which has the `-er` suffix in the name. It has a name like `OrderCreator`, `UserRenamer`, `PurchasePlacer` or something similar. This object looks like it's a person fulfilling their job, and usually doesn't exist in the business domain. In some cases, it may clash with the terminology as `OrderCreator` may be both a person who placed the order _and_ a service. The doer usually has one public method named `call`, `perform`, or the one matching its purpose: `create`, `update`, `assign`, etc.
 
 ```ruby
 class OrderCreator
@@ -116,7 +116,7 @@ class OrderPlaced
 end
 ```
 
-**The command** is a lot similar to _the event_, except it's designed as an imperative action in your domain. The object has a name similar to `SubmitApplication`, `SubmitOrder`, `BlockUser`, etc. It may look like _the doer_ except for one major difference: the doer has a poor naming. 
+**The command** is a lot similar to _the event_, except it's designed as an imperative action in your domain. The object has a name similar to `SubmitApplication`, `SubmitOrder`, `BlockUser`, etc. It may look like _the doer_ except for one major difference: the doer has a poor naming. People also call it an “operation”.
 
 ```ruby
 class SubmitOrder
@@ -126,7 +126,7 @@ class SubmitOrder
 end
 ```
 
-Other service object approaches usually fit within one of those four groups. If I've missed out on something, please let me know at igor@morozov.is.
+Other service object approaches usually fit within one of those four groups. If I've missed out on something, please let me know at [igor@morozov.is](mailto:igor@morozov.is).
 
 I'm going to be blunt with you and say that _the doer_ and _the multitool_ are the service objects you should probably throw away and replace them with something else. Let's see what their problem is:
 
@@ -139,9 +139,28 @@ __The multitool__ is a nice attempt at a service object, but has a couple of fun
 
 While I can totally understand the desire to use this design because it extracts and isolates the logic and makes it _feel_ like everything is better, I'd advise everyone to take a deeper look at their own paradigm and see if there are better tools to solve their problems. 
 
-Why did people even have to stray away from the good old object-oriented _model_? Perhaps, there are better approaches in Eventide's [useful object](http://docs.eventide-project.org/user-guide/useful-objects.html#overview), Yegor Bugaenko's [Elegant Objects](https://www.yegor256.com/elegant-objects.html) or Ivan Nemytchenko's [Rails Hurts → Painless Rails](https://railshurts.com/). I'm no expert in any of those things, so I'll speak about useful _service_ objects.
+Why did people even have to stray away from the good old object-oriented _model_? Perhaps, there are better approaches in Eventide's [useful object](http://docs.eventide-project.org/user-guide/useful-objects.html#overview), Yegor Bugaenko's [Elegant Objects](https://www.yegor256.com/elegant-objects.html) or Ivan Nemytchenko's [Rails Hurts → Painless Rails](https://railshurts.com/). I'm no expert in any of those things, so let's speak about useful _service_ objects.
 
-# The helpful ones: the command and the event
+# The helpful kinds: the command and the event
+
+Both the command and the event service objects have a similar design and their only difference is their name. I haven't really explained much how those objects work, so let's rectify it. 
+
+So, the command and the event are the kinds of service objects which serve a simple purpose: to model one concrete business process. Naturally, business processes start if _something happens_ or if someone wants to _perform something_. This is the important distinction. We'd want to use _the event_ in the first case and _the command_ in the second. 
+
+I bet you're going to be writing commands most of the time, unless you're really invested in things like domain-driven design. I've used _the event_ occassionally, and it is definitely a great thing, but it might be a bit difficult to adjust to. Let's see a complex example which uses both kinds of service objects.
+
+**Example:** we're building a multi-sided marketplace for bakers. We don't employ them, but serve as an information medium between them and the customers. If the customer is unhappy, it's our risk. So we introduce the rating system, which looks like this:
+
+1. After a customer receives their order, we send them an email asking to rate the baked goods on a scale from 1 to 5. 
+2. We calculate the baker's rating: we take the last 20 orders and calculate a weighted mean. Most recent orders matter most.
+3. If the rating falls below a certain threshold, the baker enters the “danger zone” .
+4. If the bakers enter the “danger zone” and don't improve their performance within the next three reviews, we stop working with them.
+
+I'll start with the high-level concept and the core collaborators:
+
+1. The customers use mobile/web app which communicates HTTP API. Rating an order is a separate HTTP endpoint
+2. Bakers use their own mobile app with a separate API. It's the main means of communication
+3. Rating calculator is a complex logic, so we just delegate it.
 
 
 
