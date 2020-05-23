@@ -139,9 +139,9 @@ __The multitool__ is a nice attempt at a service object, but has a couple of fun
 
 While I can totally understand the desire to use this design because it extracts and isolates the logic and makes it _feel_ like everything is better, I'd advise everyone to take a deeper look at their own paradigm and see if there are better tools to solve their problems. 
 
-Why did people even have to stray away from the good old object-oriented _model_? Perhaps, there are better approaches in Eventide's [useful object](http://docs.eventide-project.org/user-guide/useful-objects.html#overview), Yegor Bugaenko's [Elegant Objects](https://www.yegor256.com/elegant-objects.html) or Ivan Nemytchenko's [Rails Hurts → Painless Rails](https://railshurts.com/). I'm no expert in any of those things, so let's speak about useful _service_ objects.
+Why did people even have to stray away from the good old object-oriented model and common Rails ways? Perhaps, you're better off using approaches described in Eventide's [useful object](http://docs.eventide-project.org/user-guide/useful-objects.html#overview) manifesto, Yegor Bugaenko's [Elegant Objects](https://www.yegor256.com/elegant-objects.html) or Ivan Nemytchenko's [Rails Hurts → Painless Rails](https://railshurts.com/). I'm no expert in any of those things, so let's speak about useful _service_ objects instead.
 
-# The helpful kinds: the command and the event
+# Practicing with command and the event
 
 Both the command and the event service objects have a similar design and their only difference is their name. I haven't really explained much how those objects work, so let's rectify it. 
 
@@ -149,19 +149,34 @@ So, the command and the event are the kinds of service objects which serve a sim
 
 I bet you're going to be writing commands most of the time, unless you're really invested in things like domain-driven design. I've used _the event_ occassionally, and it is definitely a great thing, but it might be a bit difficult to adjust to. Let's see a complex example which uses both kinds of service objects.
 
-**Example:** we're building a multi-sided marketplace for bakers. We don't employ them, but serve as an information medium between them and the customers. If the customer is unhappy, it's our risk. So we introduce the rating system, which looks like this:
+We're building a multi-sided marketplace for bakers. We don't employ them, but serve as an information medium between them and the customers. If the customer is unhappy, it's our risk. So we introduce the _quality and motivation_ system, which looks like this:
 
 1. After a customer receives their order, we send them an email asking to rate the baked goods on a scale from 1 to 5. 
 2. We calculate the baker's rating: we take the last 20 orders and calculate a weighted mean. Most recent orders matter most.
 3. If the rating falls below a certain threshold, the baker enters the “danger zone” .
 4. If the bakers enter the “danger zone” and don't improve their performance within the next three reviews, we stop working with them.
+5. If the baker has a perfect rating, we'll give them 5% bonus with each rated order.
 
-I'll start with the high-level concept and the core collaborators:
+This logic might be enough to get you started, but let's add a little more context. I'll start with the high-level concept and the core collaborators:
 
 1. The customers use mobile/web app which communicates HTTP API. Rating an order is a separate HTTP endpoint
 2. Bakers use their own mobile app with a separate API. It's the main means of communication
-3. Rating calculator is a complex logic, so we just delegate it.
+3. Rating calculator is a complex logic, so we just delegate it
 
+Since we can only communicate via mobile app, let's assume the “danger zone” is visible in the user interface. It'll enable us to tell bakers exactly how to improve their situation. However, it adds another constraint: we must explicitly toggle the states.
+
+If we try to visualize the whole process, it will look like this:
+
+<figure>
+  <a href="/assets/bpmn/service_objects/rating_workflow.svg" target="_blank">
+    <img src="/assets/bpmn/service_objects/rating_workflow.svg" alt="BPMN representation of the process">
+  </a>
+  <figcaption>A visual representation of the process. Click to open in new tab.</figcaption>
+</figure>
+
+It may seem pretty simple, but don't be fooled: there's a lot of room for failure and waste of time.
+
+Let's dive deep into the design.
 
 
 # Guidelines for helpful service object
