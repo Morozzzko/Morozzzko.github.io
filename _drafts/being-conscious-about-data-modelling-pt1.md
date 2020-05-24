@@ -154,23 +154,37 @@ There's a deeper problem: how do we actually use the objects? How do we build th
 
 {% include figure image_path="/assets/images/posts/service_objects/anton_use.png" alt="A slide from Anton's talk depicting at least 5 ways to use service objects" caption="The problematic variety of ways" %}
 
-I've rearranged the list, starting with the most useful approaches:
+I've rearranged the list and split them in three groups. I'll explain why afterwards
 
-1. Service.new(options).call(params)
-2. Service.new(dependencies).call(params)
-3. Service.call(params) *
-4. Service.new.call(params)
-5. Service.call(params) &ast;&ast;
-6. Service.new(params).call
+**The most helpful** are the ones which give you the most power. They might also be the most pragmatic ones.
 
-You can see that I've listed `Service.call(params)` twice. That's because there are at least three different ways to approach this:
+* Service.new(options).call(params)
+* Service.new(dependencies).call(params)
+* Service.new.call(params) _only if_ it's a shorthand for the first two options
+* Service.call(params) when it's an instance created via the first three options. i.e. `Service = OtherService.new(...)`
 
-1. If you go for approach number one, two or four, you can store an instance in a constant `Service = SomeService.new(...)`. This is pretty good. A solid three
-2. If you feel like you won't benefit from instances, the `.call` approach is good. A solid three
-3. It may be shorthand for any of the other approaches. It _may_ be useful in _some_ cases, but it's just unnecessary redundancy. That's definitely a five
+**Moderately helpful** won't bring you a lot of benefit, but they're still decent if you use them well
+
+* Service.call(params) when you just don't need to instantiate anything. You won't get the benefit of configuration, dependency injection or anything, but it's still a decent piece of logic
+* Service.new.call(params). It's not really helpful if you cant't configure it at all, but oh well. A future-proof design may be helpful though
+
+**Not really helpful** are redundant or just poorly designed. You should probably reconsider when you meet one
+
+* Service.new(params).call
+* Service.call(params) is bad if it's just a shorthand for most of the `new.call` variations
 
 
+This classification is purely opinion-based, yet there's reasoning behind all this. It's mostly based on my own experience in software engineering and a couple of other ideas. It mostly comes from the fact that I like my code to be _deterministic_ and easily modifiable. I'm also a little product-oriented, so I fiddle around with different configurations quite often. 
 
+**Each object must have a reasonable lifetime.** Service objects essentially complex functions and procedures, and their lifetime should _probably_ be similar to one of any other function, module or class. Even if we're into OOP, instantiating and object which can only be used once before discarding it seems to go against the general idea. 
+
+**Logic should be easily extendable.** Especially if we're doing a start-up which is rapidly evolving. Want to pay a 10% bonus instead of a usual 5%? Just configure the service and use it. Handy for rapid and cheap experimenting. Want to refund a user _even though we normally don't_? Just use the service with a different set of policies. Works best if I don't have to write any code to customize it.
+
+**Code should expose bad design** instead of promoting it. Writing an overly complex logic should be possible, yet the code must _look and feel_ overly complex. This way, you'll be able to improve your design before it becomes too time-consuming.
+
+**No mutable state** is a common idea in functional programming and a [not-that-common idea in the OOP world](https://www.yegor256.com/2014/06/09/objects-should-be-immutable.html). It's a bit more verbose, but **verbosity is not a problem**. We'll get better reusability, testability and composability if we follow the rule.
+
+**Services should be composable**. It means we should be able to organize them in a nice pipeline to avoid clumsy interfaces. We can achieve it by returning composable values, like result objects, monads and stuff like this.
 
 
 # Practicing with command and the event
