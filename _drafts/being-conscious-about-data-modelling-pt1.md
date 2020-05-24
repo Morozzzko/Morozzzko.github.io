@@ -1,6 +1,7 @@
 ---
 layout: single
 title: "Being conscious: service objects"
+toc: true
 ---
 
 I've been programming for a long time and I've had countless arguments about different things. I'd like to list top four reasons I've had an argument online.
@@ -141,6 +142,37 @@ While I can totally understand the desire to use this design because it extracts
 
 Why did people even have to stray away from the good old object-oriented model and common Rails ways? Perhaps, you're better off using approaches described in Eventide's [useful object](http://docs.eventide-project.org/user-guide/useful-objects.html#overview) manifesto, Yegor Bugaenko's [Elegant Objects](https://www.yegor256.com/elegant-objects.html) or Ivan Nemytchenko's [Rails Hurts → Painless Rails](https://railshurts.com/). I'm no expert in any of those things, so let's speak about useful _service_ objects instead.
 
+# The many ways to instantiate and use the objects
+
+In his RubyRussia 2019 talk ["The future of dependency management in Ruby"](https://www.youtube.com/watch?v=DfU6H-8qal8) Anton Davydov talked about the problems with service objects and the many ways to use them. The talk was one of the reasons I decided to write the post, so let's talk about the details.
+
+{% include figure image_path="/assets/images/posts/service_objects/anton_name.png" alt="A slide from Anton's talk depicting at least 8 ways to name service object's method" caption="Oh the diversity of methods" %}
+
+It is not really a problem, as you just have to pick whatever works for you and stay consistent about it. I prefer `#call`, but you might want something else. 
+
+There's a deeper problem: how do we actually use the objects? How do we build them? Where do we pass the parameters? What about configuration? What about dependencies? Oh my! Just take a look at the many ways to use service objects. The slide covers probably 99% of known service object usages, so kudos to Anton for putting together the list.
+
+{% include figure image_path="/assets/images/posts/service_objects/anton_use.png" alt="A slide from Anton's talk depicting at least 5 ways to use service objects" caption="The problematic variety of ways" %}
+
+I've rearranged the list, starting with the most useful approaches:
+
+1. Service.new(options).call(params)
+2. Service.new(dependencies).call(params)
+3. Service.call(params) *
+4. Service.new.call(params)
+5. Service.call(params) &ast;&ast;
+6. Service.new(params).call
+
+You can see that I've listed `Service.call(params)` twice. That's because there are at least three different ways to approach this:
+
+1. If you go for approach number one, two or four, you can store an instance in a constant `Service = SomeService.new(...)`. This is pretty good. A solid three
+2. If you feel like you won't benefit from instances, the `.call` approach is good. A solid three
+3. It may be shorthand for any of the other approaches. It _may_ be useful in _some_ cases, but it's just unnecessary redundancy. That's definitely a five
+
+
+
+
+
 # Practicing with command and the event
 
 Both the command and the event service objects have a similar design and their only difference is their name. I haven't really explained much how those objects work, so let's rectify it. 
@@ -176,8 +208,7 @@ If we try to visualize the whole process, it will look like this:
 
 It may seem pretty simple, but don't be fooled: there's a lot of room for failure and waste of time.
 
-Let's dive deep into the design.
-
+Let's dive deeper into the design.
 
 # Guidelines for helpful service object
 
