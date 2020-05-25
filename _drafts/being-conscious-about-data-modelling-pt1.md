@@ -154,19 +154,28 @@ There's a deeper problem: how do we actually use the objects? How do we build th
 
 {% include figure image_path="/assets/images/posts/service_objects/anton_use.png" alt="A slide from Anton's talk depicting at least 5 ways to use service objects" caption="The problematic variety of ways" %}
 
-I've rearranged the list and split them in three groups. I'll explain why afterwards
+Let's make sure we're on the same page before going on.
+
+When we're talking about `params`, we're usually talking about ordinary data that we pass to the object. It's basically just arguments we would normally pass to a method, if we had one.
+
+Dependencies are a bit more tricky. Usually, our service objects can't perform a task on their own. They need to know how to retrieve data from the database, how to send an e-mail, how to run some related logic. It's impractical to implement all of this ourselves, so we _delegate_ it to some external objects, services and modules. _Those_ are the dependencies. They're the owners of the knowledge.
+
+Options are a bit like dependencies, but simple. It's some run-time configuration. Rule of thumb: if you've put some magic numbers or strings in a constant, it's likely one of _those_ options.
+
+
+Now that we're clear about shared terminology, let's speak about the list. I've rearranged it and split the items in three groups. The list is heavily opinionated, so there's an explanation after the list.
 
 **The most helpful** are the ones which give you the most power. They might also be the most pragmatic ones.
 
 * Service.new(options).call(params)
-* Service.new(dependencies).call(params)
-* Service.new.call(params) _only if_ it's a shorthand for the first two options
+* Service.new(dependencies).call(params), which is almost the same as 
+* Service.new.call(params) _only if_ it's a shorthand for the first two options with reasonable defaults
 * Service.call(params) when it's an instance created via the first three options. i.e. `Service = OtherService.new(...)`
 
 **Moderately helpful** won't bring you a lot of benefit, but they're still decent if you use them well
 
 * Service.call(params) when you just don't need to instantiate anything. You won't get the benefit of configuration, dependency injection or anything, but it's still a decent piece of logic
-* Service.new.call(params). It's not really helpful if you cant't configure it at all, but oh well. A future-proof design may be helpful though
+* Service.new.call(params). It's not really helpful if you cant't configure it at all, but oh well. A future-proof design may be helpful though.
 
 **Not really helpful** are redundant or just poorly designed. You should probably reconsider when you meet one
 
@@ -176,7 +185,7 @@ I've rearranged the list and split them in three groups. I'll explain why afterw
 
 This classification is purely opinion-based, yet there's reasoning behind all this. It's mostly based on my own experience in software engineering and a couple of other ideas. It mostly comes from the fact that I like my code to be _deterministic_ and easily modifiable. I'm also a little product-oriented, so I fiddle around with different configurations quite often. 
 
-**Each object must have a reasonable lifetime.** Service objects essentially complex functions and procedures, and their lifetime should _probably_ be similar to one of any other function, module or class. Even if we're into OOP, instantiating and object which can only be used once before discarding it seems to go against the general idea. 
+**Each object must have a reasonable lifetime.** Service objects are essentially complex functions and procedures, and their lifetime should _probably_ be similar to one of any other function, module or class. Even if we're into OOP, instantiating and object which can only be used once before being discarded seems to go against the general idea. 
 
 **Logic should be easily extendable.** Especially if we're doing a start-up which is rapidly evolving. Want to pay a 10% bonus instead of a usual 5%? Just configure the service and use it. Handy for rapid and cheap experimenting. Want to refund a user _even though we normally don't_? Just use the service with a different set of policies. Works best if I don't have to write any code to customize it.
 
@@ -186,6 +195,15 @@ This classification is purely opinion-based, yet there's reasoning behind all th
 
 **Services should be composable**. It means we should be able to organize them in a nice pipeline to avoid clumsy interfaces. We can achieve it by returning composable values, like result objects, monads and stuff like this.
 
+**Our logic should be insighful.** The code should help us figure out how _the world_ works. What are our processes, their limitations, core participants. The complexity of the process, points of pressure, possible bugs and mismatch with the real domain. The code should help us gather the insights 
+
+That said, I've found that I get the most benefit when I'm using a constructor to _configure_ the service object and provide dependencies, and pass the parameters to the `#call` itself. It's a bit more verbose because I have to explicitly declare all dependencies and I have to pass variables around. It brings a great benefit as I can _feel_ that I have to refactor this place when it gets too complex. I also heavily use default dependencies, so I don't have to be _too_ explicit. 
+
+Whenever I feel like there's no need to configure, or when the team has a different convention, I like to use class methods. This way, I'm still getting the benefits of a good lifetime _and_ I get to expose the overly complex design. This works pretty well too.
+
+Other designs, especially the `new(params).call` have failed to meet my expectations. Its only benefit is that I can utilize instance variables to save myself a few taps. I don't want to trade off all the benefits, as they have a greater use than instance variables.
+
+I'll stick to the `new(options/dependencies).call(params)`, as this is the most powerful way to use service objects.
 
 # Practicing with command and the event
 
