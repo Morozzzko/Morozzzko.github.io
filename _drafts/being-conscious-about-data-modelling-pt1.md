@@ -12,7 +12,7 @@ I've been programming for a long time and I've had countless arguments about dif
 
 **How to design domain logic.** It may be an extremely interesting and helpful discussion, or it may turn into a useless argument. When it goes bad, it's usually because we're trying to discuss insignificant details and lower-level things. Where do we put arguments? What about dependency injection? How do we use instance variables? Ughh! 
 
-**Different interpretation of common terminology.** What do we mean when we say “interactor” what about “architecture”? Is it a _state_ when we're just passing values from function to function? Is duck typing _really_ an absence of types? What is a type, anyway? What does it mean to write “object oriented” code? What about “functional” approach? Do we need [immutability in OO design](https://www.yegor256.com/2014/06/09/objects-should-be-immutable.html)? Those topics lead to endless discussions with little output.
+**Different interpretation of common terminology.** What do we mean when we say "interactor" what about "architecture"? Is it a _state_ when we're just passing values from function to function? Is duck typing _really_ an absence of types? What is a type, anyway? What does it mean to write "object oriented" code? What about "functional" approach? Do we need [immutability in OO design](https://www.yegor256.com/2014/06/09/objects-should-be-immutable.html)? Those topics lead to endless discussions with little output.
 
 As much as I love learning about new things, those arguments are extremely energy-draining. I've been thinking: since we're usually reiterating over the same thing, why don't we just dump the knowledge somewhere? That's what I'm going to do.
 
@@ -25,7 +25,7 @@ Right now I want to focus on two larger topics:
 
 This is a first post of the series, and it will cover the first topic: handling errors in domain logic.
 
-We will go through the basics: what are we talking about when we say “service object”. We'll look through different approaches and see which ones bring the most benefit and which ones should probably be put to rest. In the end, I'm going to suggest a working design and a couple of guidelines you can use to improve your logic.
+We will go through the basics: what are we talking about when we say "service object". We'll look through different approaches and see which ones bring the most benefit and which ones should probably be put to rest. In the end, I'm going to suggest a working design and a couple of guidelines you can use to improve your logic.
 
 The post is going to be relatively long, so I'll make each chapter as independent as possible, for continuous reading. 
 
@@ -117,7 +117,7 @@ class OrderPlaced
 end
 ```
 
-**The command** is a lot similar to _the event_, except it's designed as an imperative action in your domain. The object has a name similar to `SubmitApplication`, `SubmitOrder`, `BlockUser`, etc. It may look like _the doer_ except for one major difference: the doer has a poor naming. People also call it an “operation”.
+**The command** is a lot similar to _the event_, except it's designed as an imperative action in your domain. The object has a name similar to `SubmitApplication`, `SubmitOrder`, `BlockUser`, etc. It may look like _the doer_ except for one major difference: the doer has a poor naming. People also call it an "operation".
 
 ```ruby
 class SubmitOrder
@@ -136,7 +136,7 @@ I'm going to be blunt with you and say that _the doer_ and _the multitool_ are t
 __The multitool__ is a nice attempt at a service object, but has a couple of fundamental flaws.
 
 * Similar to _the doer_, the name doesn't capture domain pretty well. I've seen people choose names like `OrderManager` or `OrderService`. Neither of those really exists in the domain.
-* Is it really a “service”, or is it a model in disguise? You may achieve similar level of isolation by extracting the logic to a module / a concern and including it to your model. 
+* Is it really a "service", or is it a model in disguise? You may achieve similar level of isolation by extracting the logic to a module / a concern and including it to your model. 
 
 While I can totally understand the desire to use this design because it extracts and isolates the logic and makes it _feel_ like everything is better, I'd advise everyone to take a deeper look at their own paradigm and see if there are better tools to solve their problems. 
 
@@ -217,8 +217,8 @@ We're building a multi-sided marketplace for bakers. We don't employ them, but s
 
 1. After a customer receives their order, we send them an email asking to rate the baked goods on a scale from 1 to 5. 
 2. We calculate the baker's rating: we take the last 20 orders and calculate a weighted mean. Most recent orders matter most.
-3. If the rating falls below a certain threshold, the baker enters the “danger zone” .
-4. If the bakers enter the “danger zone” and don't improve their performance within the next three reviews, we stop working with them.
+3. If the rating falls below a certain threshold, the baker enters the "danger zone" .
+4. If the bakers enter the "danger zone" and don't improve their performance within the next three reviews, we stop working with them.
 5. If the baker has a perfect rating, we'll give them 5% bonus with each rated order.
 
 This logic might be enough to get you started, but let's add a little more context. I'll start with the high-level concept and the core collaborators:
@@ -227,7 +227,7 @@ This logic might be enough to get you started, but let's add a little more conte
 2. Bakers use their own mobile app with a separate API. It's the main means of communication
 3. Rating calculator is a complex logic, so we just delegate it
 
-Since we can only communicate via mobile app, let's assume the “danger zone” is visible in the user interface. It'll enable us to tell bakers exactly how to improve their situation. However, it adds another constraint: we must explicitly toggle the states.
+Since we can only communicate via mobile app, let's assume the "danger zone" is visible in the user interface. It'll enable us to tell bakers exactly how to improve their situation. However, it adds another constraint: we must explicitly toggle the states.
 
 If we try to visualize the whole process, it will look like this:
 
