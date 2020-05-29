@@ -1,6 +1,6 @@
 ---
 layout: single
-title: "Being conscious: service objects"
+title: "Why do we need service objects and how to make them helpful"
 toc: true
 ---
 
@@ -31,7 +31,7 @@ The post is going to be relatively long, so I'll make each chapter as independen
 
 <!-- excerpt --> 
 
-# Service objects exist for domain logic
+# Our main challenge is domain logic
 
 Service object is a common pattern in Ruby community, but you might also see something similar in other languages. Python's [stories](https://github.com/dry-python/stories) were greatly influenced by [dry-transactions](http://github.com/gems/dry-transactions) and [Trailblazer](http://trailblazer.to/) — some of the tools we could have used for service objects.
 
@@ -43,7 +43,7 @@ Usually, we're building applications that solve a set of problems for a specific
 
 When we're modelling complex processess, we have to make a lot of decisions: what needs to be captured in the model; what are the names and processes; what are the boundaries; what's the shape of our data; how to organize domain logic _well_. Service objects don't answer all of our questions, but they _nudge_ us.
 
-# They nudge us to extract logic
+# Service objects nudge us to organize
 
 One of the most valuable lessons: there are lots of ways to approach modelling your domain, and you're free to combine them.
 
@@ -69,7 +69,7 @@ Sometimes, the processes in our business are a bit more complex to be _reasonabl
 
 Service objects nudge us to to the latter – extract the logic into a function or a procedure. Except, we're using classes and objects instead of "real" functions. Hence the name.
 
-# The many forms of a service object
+# What they look like
 
 Here's the thing about service object: it's not really a well-documented pattern. People try to figure out how to design them in a meaningful way, and they get different results.
 
@@ -142,7 +142,7 @@ While I can totally understand the desire to use this design because it extracts
 
 Why did people even have to stray away from the good old object-oriented model and common Rails ways? Perhaps, you're better off using approaches described in Eventide's [useful object](http://docs.eventide-project.org/user-guide/useful-objects.html#overview) manifesto, Yegor Bugaenko's [Elegant Objects](https://www.yegor256.com/elegant-objects.html) or Ivan Nemytchenko's [Rails Hurts → Painless Rails](https://railshurts.com/). I'm no expert in any of those things, so let's speak about useful _service_ objects instead.
 
-# The many ways to instantiate and use the objects
+# Why some service objects are more useful than others
 
 In his RubyRussia 2019 talk ["The future of dependency management in Ruby"](https://www.youtube.com/watch?v=DfU6H-8qal8) Anton Davydov talked about the problems with service objects and the many ways to use them. The talk was one of the reasons I decided to write the post, so let's talk about the details.
 
