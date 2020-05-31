@@ -181,7 +181,7 @@ Now that we're clear about shared terminology, let's speak about the list. I've 
 
 This classification is purely opinion-based, yet there's reasoning behind all this. It's mostly based on my own experience in software engineering, and a couple of other ideas. It mostly comes from the fact that I like my code to be deterministic and easily modifiable. I'm also a little product-oriented, so I fiddle around with different configuration quite often.
 
-**Each object must have a reasonable lifetime.** Service objects are essentially complex functions and procedures, and their lifetime should _probably_ be similar to one of any other function, module or class. Even if we're into OOP, instantiating and object which can only be used once before being discarded seems to go against the general idea. 
+**Each object must have a reasonable lifetime.** Service objects are essentially complex functions and procedures, and their lifetime should _probably_ be similar to one of any other function, module or class. Even if we're into OOP, instantiating and object which can only be used once before being discarded seems to go against the general idea. Sure, there are cases where the function lifetime should be short, but those cases require extra thought.
 
 **Logic should be easily extendable.** Especially if we're building a start-up which is rapidly evolving. Want to pay your contractors a 10% bonus instead of a usual 5%? Just configure the service and use it. Handy for rapid and cheap experimenting. Want to refund a user _even though we normally don't_? Just use the service with a different set of policies. Works best if I don't have to write any code to customize it.
 
@@ -210,7 +210,7 @@ Other designs, especially the `new(params).call` have failed to meet my expectat
 
 I'll stick to the `new(options/dependencies).call(params)`, as this is the most powerful way to use service objects.
 
-# Practicing with command and the event
+# Practicing with command and the event: rating an order
 
 Both the command and the event service objects have a similar design and their only difference is their name. I haven't really explained much how those objects work, so let's rectify it. 
 
@@ -247,7 +247,7 @@ It may seem pretty simple, but don't be fooled: there's a lot of room for failur
 
 We can see that it's not an atomic process, but a complex and distributed one. Distributed in terms of time and execution, as we can't afford to _just wait_ for seven days. This way, this huge process actually breaks into three smaller ones:
 
-1. The `OrderFinished` handler. We'll need to send an email and wait.
+1. The `OrderCompleted` handler. We'll need to send an email and wait.
 2. The `CustomerSubmittedRating` handler. We'll have to make sure that the rating can be submitted and actually save it to the database. It will emit the `CustomerRatedOrder` event.
 3. The `CustomerRatedOrder` handler. That's where we handle all the specific logic.
 
@@ -262,7 +262,104 @@ We can see that it's not an atomic process, but a complex and distributed one. D
 In some scenarios, we'll have an event bus and some kind of a event-based framework. Perhaps something complex like event sourcing or whatever. This is not our case. Let's imagine we have a bare Rails or a Hanami app with _no_ extra dependencies.
 
 
+TODO: use this some way
 
+```ruby
+module QualityAndMotivation
+  class OrderCompleted
+    attr_reader :send_email
+
+    def initialize(send_email:)
+      @send_email = send_email
+    end
+
+    def call(order)
+      send_email.call(order.user)
+
+      :success
+    end
+  end
+end
+```
+
+```ruby
+module QualityAndMotivation
+  class CustomerSubmittedRating
+    attr_reader :order_rating_repo, :period_to_rate_days
+
+    def initialize(order_rating_repo:, period_to_rate_days:)
+      @order_rating_repo = order_rating_repo
+      @period_to_rate_days = @period_to_rate_days
+    end
+
+    def call(order, rating)
+      if still_eligible_for_rating?(order)
+        recored_rating = order_rating_repo.create(
+          value: rating,
+          order: order
+        )
+
+        {
+          result: :customer_rated_order,
+          rating: recorded_rating
+        }
+      else
+        {
+          result: :rating_no_longer_available, 
+          period_to_rate_days: period_to_rate_days
+        }
+      end
+    end
+
+    private 
+
+    def still_eligible_for_rating?(order)
+      ...
+    end
+  end
+end
+```
+
+```ruby
+module QualityAndMotivation
+  class CustomerRatedOrder
+    attr_reader :block_baker, :show_warning, :remove_warnings, :give_bonus, :block_reason
+
+    def initialize(block_baker:, show_warning:, remove_warnings:, give_bonus:, block_reason:)
+      @block_baker = block_baker 
+      @show_warning = show_warning 
+      @remove_warnings = remove_warnings 
+      @give_bonus = give_bonus 
+      @block_reason = block_reason 
+    end
+
+    def call(order)
+      baker_old_rating = order.baker
+
+      baker_new_rating = baker_old_rating.recalculate_rating
+      
+      decision = decide_how_to_handle_change(baker_old_rating, baker_new_rating)
+
+      case decision
+      when :block
+        block_baker.call(baker_new_rating, reason: block_reason)
+      when :show_warnings
+        show_warning.call(baker_new_rating)
+      when :rating_recovered
+        remove_warnings.call(baker_new_rating)
+      when :reward
+        give_bonus.call(baker_new_rating)
+      end
+    end
+
+    private
+
+    def decide_how_to_handle_change(baker_old_rating, baker_new_rating)
+      ...
+    end
+  end
+end
+```
 
 # Guidelines for helpful service object
 
@@ -276,6 +373,145 @@ Here's my own set of rules that help me build and maintain service objects. Thos
 
 **Use constructor to configure the concrete service.** This includes passing dependencies and magic values you'd put in constants. It enables you to tweak your logic whenever you need it. 
 
+
+# How to take it a step further
+
+I've shown the raw process that illustrates the general ideas. What we have in our real applications is usually different. It happens because of two reasons: 
+
+* it's not pragmatic to follow every rule in the book
+* we use this approach in combination with other tools 
+
+I'm gonna talk about some examples off the top of my head.
+
+## Use sensible defaults
+
+You can probably use default behavior 90% of the time. It gets frustrating to type in thd default dependencies everywhere. What if the default changes? Should we `grep` across the project and replace all occurrences? No way.
+
+Default values in the constructor are a good option if you feel like the added verbosity is too much
+
+```ruby
+# Before: no defaults, have to pass them every time
+
+def initialize(block_baker:, show_warning:, remove_warnings:, give_bonus:, block_reason:)
+  @block_baker = block_baker 
+  @show_warning = show_warning 
+  @remove_warnings = remove_warnings 
+  @give_bonus = give_bonus 
+  @block_reason = block_reason 
+end
+
+# After. Example 1: Sharing defaults across instances
+
+def initialize(
+  block_baker: BlockBaker.new, 
+  show_warning: ShowWarning.new, 
+  remove_warnings: RemoveWarnings.new, 
+  give_bonus: GiveBonus.new,
+  block_reason: :low_quality_auto
+)
+  @block_baker = block_baker 
+  @show_warning = show_warning 
+  @remove_warnings = remove_warnings 
+  @give_bonus = give_bonus 
+  @block_reason = block_reason
+end
+
+# After. Example 2: Building new defaults for each instance
+
+def initialize(block_baker: nil, show_warning: nil, remove_warnings: nil, give_bonus: nil, block_reason: nil)
+  @block_baker = block_baker || BlockBaker.new
+  @show_warning = show_warning  || ShowWarning.new
+  @remove_warnings = remove_warnings  || RemoveWarnings.new
+  @give_bonus = give_bonus  || GiveBonus.new
+  @block_reason = block_reason || :low_quality_auto
+end
+```
+
+## Reduce boilerplate setup with gems
+
+Writing constructors gets tedious, so it's natural to reduce the boilerplate using a domain-specific language or external gems.
+
+I like the DSL provided by [dry-initializer](https://dry-rb.org/gems/dry-initializer/3.0/) as it's plain enough and integrates with dry-rb ecosystem. You can use other gems, though.
+
+See how it looks:
+
+```ruby
+# Before
+
+class MyClass
+  attr_reader :block_baker, :show_warning, :remove_warnings, :give_bonus, :block_reason
+
+  def initialize(block_baker: nil, show_warning: nil, remove_warnings: nil, give_bonus: nil, block_reason: nil)
+    @block_baker = block_baker || BlockBaker.new
+    @show_warning = show_warning  || ShowWarning.new
+    @remove_warnings = remove_warnings  || RemoveWarnings.new
+    @give_bonus = give_bonus  || GiveBonus.new
+    @block_reason = block_reason || :low_quality_auto
+  end
+end
+
+# After
+
+class MyClass
+  extend Dry::Initializer
+
+  option :block_baker, default: -> { BlockBaker.new }
+  option :show_warning, default: -> { ShowWarning.new }
+  option :remove_warnings, default: -> { RemoveWarnings.new }
+  option :give_bonus, default: -> { GiveBonus.new }
+  option :block_reason, default: -> { :low_quality_auto }
+end
+```
+
+Usually, the end result has the same number of lines, but the main benefit is that you don't have to type the same thing four times: one time in `attr_reader`, one in constructor signature, and two in the constructor body. This leads to the silliest of bugs, so we can avoid then. A reduced visual clutter is a bonus, too.
+
+## Make use of result objects and railway oriented programming
+
+Result objects are a common pattern in Ruby community, yet there are way too many options to implement them.
+
+Please refer to Vitaly Pushkar's article ["Error handling with Monads in Ruby"](https://nywkap.com/programming/either-monads-ruby.html)
+
+However, it's not the only way to implement result objects. I'll cover it in a separate topic
+
+I've also had my own articles: 
+
+* Monads are just a tool [](/2020/04/01/should-i-really-use-monads.html)
+* Railway oriented programing with do notation (an old one) [](/2018/05/27/do-notation-ruby.html)
+## Know when to avoid railway oriented programming
+
+See
+
+https://fsharpforfunandprofit.com/posts/against-railway-oriented-programming/
+
+## Think about automated dependency management
+
+See dry-container, dry-auto_inject and dry-system
+
+
+## A short lifetime may be reasonable too
+
+In [Why some service objects are more useful than others](#why-some-service-objects-are-more-useful-than-others) I mentioned that each object must have a reasonable lifetime. I explained that since service objects are essentially functions, their lifetime should be similar to a function's lifetime. Which is almost equal to the duration of Ruby process.
+
+However, this is not the universal truth, as there are cases when a shorter lifetime is more desirable:
+
+**Fixing memory leaks.** Shorter lifetime hels if a dependency allocates memory which is never freed. Adding a shorer lifecycle will probably help Ruby free the memory. It's not the only solution, but it's a quick one.
+
+**Context-dependent logic.** Let's say you have a multi-tenant SaaS project. Each piece of logic will be associated with one of your tenants. Now, there are two common ways to approach this:
+
+1. Pass the context around. It's a solution, but I bet you'll get tired of it pretty quickly.
+2. Make context a dependency. This way, you won't have to pass it with _absolutely every_ method call. Especially helpful if you've [thought about automated dependency management](#think-about-automated-dependency-management), which will do most of the work for you.
+
+In this scenario, I'd rather choose the second path, as it's just tiresome to pass the context around.Moreover, allocating dedicaded functions for all of your tenants sounds crazy. Imagine having thousands of `two_plus_two` functions, one for each tenant. No.
+
+**Lack of tools in the project.** If I know I want to have one instance per process, I'll probably store it somewhere. However, it requires some organizational work: picking an approach, choosing a library, enforcing the convention. This is not always justifiable in the moment, so it's alright to cut the corner here and leave the work to the future you.
+
+
+
+
+
+## Visualize your dependencies
+
+See dry-system and https://github.com/dry-rb/dry-system-dependency_graph
 
 
 
