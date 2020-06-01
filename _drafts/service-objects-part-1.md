@@ -39,7 +39,7 @@ Let's step back a little and see why we need to care about the logic at all, and
 
 Usually, we're building applications that solve a set of problems for a specific business. Sometimes its logic is trivial, but usually it's something a sophisticated system that backs a complex business. Sometimes the software _is_ the product that we sell. Either way, the logic becomes complex quite easily.
 
-When we're modelling complex processess, we have to make a lot of decisions: what needs to be captured in the model; what are the names and processes; what are the boundaries; what's the shape of our data; how to organize domain logic _well_. Service objects don't answer all of our questions, but they _nudge_ us.
+When we're modelling complex processes, we have to make a lot of decisions: what needs to be captured in the model; what are the names and processes; what are the boundaries; what's the shape of our data; how to organize domain logic _well_. Service objects don't answer all of our questions, but they _nudge_ us.
 
 # Service objects nudge us to organize
 
@@ -58,7 +58,7 @@ Sometimes, the processes in our business are a bit more complex to be _reasonabl
 
 **Create a new model.** It works best if the model matches the real-world domain. It's reasonable to have a `JobApplication` which can be accepted or rejected.
 
-**Use different models in different contexts.** It's easier to make decisions when we contextualize things. This way, simiar entities have different behavior, depending on the context.
+**Use different models in different contexts.** It's easier to make decisions when we contextualize things. This way, similar entities have different behavior, depending on the context.
 
 **Extract the logic** into a function / procedure. It feels quite natural to have an option to call `hire_candidate`. 
 
@@ -67,7 +67,7 @@ Sometimes, the processes in our business are a bit more complex to be _reasonabl
 
 Service objects nudge us to to the latter – extract the logic into a function or a procedure. Except, we're using classes and objects instead of "real" functions. Hence the name "service objects". 
 
-It's not a silver bullet by any chance, but it's a nice tool which you can combine with other approches to build better sofware.
+It's not a silver bullet by any chance, but it's a nice tool which you can combine with other approaches to build better software.
 
 # What they look like
 
@@ -191,7 +191,7 @@ This classification is purely opinion-based, yet there's reasoning behind all th
 
 **Services should be composable**. It means we should be able to organize them in a nice pipeline to avoid clumsy interfaces. We can achieve it by returning composable values, like result objects, monads and stuff like this.
 
-**Our logic should be insighful.** The code should help us figure out how the world works. We need to learn about our processes, their limitations and core participants. The complexity of the process, points of pressure, possible bugs and likely mismatch with the real-world domain. The code should help us gather the insights instead of ofsucating them.
+**Our logic should be insighful.** The code should help us figure out how the world works. We need to learn about our processes, their limitations and core participants. The complexity of the process, points of pressure, possible bugs and likely mismatch with the real-world domain. The code should help us gather the insights instead of obfsucating them.
 
 That said, I've found that I get the most benefit when I'm using a constructor to configure the service object and provide dependencies, and pass the input parameters to the `#call` itself. It's a bit more verbose because I have to explicitly declare all dependencies and I have to pass variables around. It brings a great benefit as I can _feel_ that I have to refactor this place when it gets too complex. I also heavily use default dependencies, so I don't have to be _too_ explicit. 
 
@@ -235,14 +235,14 @@ reward_baker.call(other_order)
 
 Service objects are a large enough topic, and I can't cover them in one post. If I do, only a few people will have the time to read it – it's going to be too overwhelming. So I'm going to release at least two parts: "the practice" and "the next level". 
 
-The practice will be a design exercise where we model a business process and illustrate decisions and trade-off of service objects. 
+The practice will be a design exercise where we model a business process and illustrate decisions and trade-offs of service objects. 
 
 In "The next level" I'll talk about techniques which will help you get more from service objects: reduce boilerplate, organize a pipeline, and gather more insights. Afterwards I'll address some of the flaws. I'll finish it with a small guideline on designing service objects.
 
 
 # The rabbit hole
 
-If you want to go down the rabbit hole and discover more youself, feel free to dig the resources I've mentioned and some other. Make sure to theck the first two articles. They criticize service objects and provide nice alternatives — those may be extremely helpful for you too.
+If you want to go down the rabbit hole and discover more yourself, feel free to dig the resources I've mentioned and some other. Make sure to check the first two articles. They criticize service objects and provide nice alternatives — those may be extremely helpful for you too.
 
 Avdi Grimm [highlights the possible problems](https://avdi.codes/service-objects/) of service objects and provides alternatives. The "Domain-driven design" part is important, you should totally read it.
 
