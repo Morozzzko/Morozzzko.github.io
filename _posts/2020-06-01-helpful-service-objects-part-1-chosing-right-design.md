@@ -1,6 +1,6 @@
 ---
 layout: single
-title: Designing helpful service objects. Choosing the right design
+title: Designing helpful service objects. Part 1. Choosing the right design
 toc: true
 header:
   og_image: "/assets/images/posts/service_objects/part_one.png"
