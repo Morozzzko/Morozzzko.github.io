@@ -2,6 +2,8 @@
 layout: single
 title: "Designing helpful service objects. Choosing the right design"
 toc: true
+header:
+  og_image: "/assets/images/posts/service_objects/part_one.png"
 ---
 
 I've been programming for a long time and I've had countless arguments about different things. I'd like to list top four reasons I've had an argument online.
