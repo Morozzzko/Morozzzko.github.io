@@ -248,7 +248,7 @@ Avdi Grimm [highlights the possible problems](https://avdi.codes/service-objects
 
 Jason Swett wrote a [nice piece](https://www.codewithjason.com/rails-service-objects/) addressing service objects and their problem. 
 
-Toptal has a [solid article on service objects](https://www.toptal.com/ruby-on-rails/rails-service-objects-tutorial) which gives some advise on good designs. You may notice that I don't agree with it, but it's alright. You may like their reasoning more. Check it out!
+Toptal has a [solid article on service objects](https://www.toptal.com/ruby-on-rails/rails-service-objects-tutorial) which gives some advise on good designs. You may notice that I don't agree with it, but it's alright. You may like their reasoning more. Check it out.
 
 [Ivan Nemytchenko's book on Painless Rails](https://railshurts.com/). If you like Rails, but not quite, this book might help you improve your game without service objects.
 
@@ -262,7 +262,7 @@ Toptal has a [solid article on service objects](https://www.toptal.com/ruby-on-r
 
 [How Python devs implemented the idea](https://github.com/dry-python/stories)
 
-[Most strict linter for Python](https://github.com/wemake-services/wemake-python-styleguide). I want something like this in Ruby. Hopefully, [Standard](https://github.com/testdouble/standard) will help with that!
+[Most strict linter for Python](https://github.com/wemake-services/wemake-python-styleguide). I want something like this in Ruby. Hopefully, [Standard](https://github.com/testdouble/standard) will help with that.
 
 [Yegor Bugaenko's blog](https://www.yegor256.com/2014/06/09/objects-should-be-immutable.html) contains a lot of controversial and thought-provoking content. One of the ideas is that immutable objects should be a default in the object-oriented paradigm.
 
