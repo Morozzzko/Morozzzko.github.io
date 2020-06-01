@@ -21,11 +21,25 @@ $base0d: #268bd2 !default;
 $base0e: #6c71c4 !default;
 $base0f: #d33682 !default;
 
+$reddit-color: #ff4500;
+
 @import "minimal-mistakes/skins/{{ site.minimal_mistakes_skin | default: 'default' }}"; // skin
 @import "minimal-mistakes"; // main partials
 
 ul li,
 ol li {
   margin-bottom: 0;
+}
+
+.btn--reddit {
+  @include yiq-contrasted($reddit-color);
+
+  &:visited {
+    @include yiq-contrasted($reddit-color);
+  }
+
+  &:hover {
+    @include yiq-contrasted(mix(#000, $reddit-color, 20%));
+  }
 }
 

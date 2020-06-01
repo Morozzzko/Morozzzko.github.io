@@ -4,6 +4,7 @@ title: "Railway Oriented programming in Ruby: do notation vs dry-transaction"
 date: "2018-05-27 13:25:00 +0300"
 header:
   og_image: "/assets/images/previews/do_notation.png"
+reddit_comment_url: https://www.reddit.com/r/ruby/comments/8mzne8/railway_oriented_programming_in_ruby_do_notation/
 ---
 
 Railway oriented programming is a design pattern which helps us
