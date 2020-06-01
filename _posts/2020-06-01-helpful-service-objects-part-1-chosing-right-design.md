@@ -1,11 +1,11 @@
 ---
 layout: single
-title: "Designing helpful service objects. Choosing the right design"
+title: Designing helpful service objects. Choosing the right design
 toc: true
 header:
   og_image: "/assets/images/posts/service_objects/part_one.png"
+date: 2020-06-01 21:57 +0300
 ---
-
 I've been programming for a long time and I've had countless arguments about different things. I'd like to list top four reasons I've had an argument online.
 
 **Style guide.** Thankfully, the number of arguments reduces as I mature, but I'm still spending a lot of time on them. I'd rather have an extremely opinionated styleguide and just stop talking about it. Something like [wemake-python-styleguide](https://github.com/wemake-services/wemake-python-styleguide), but for Ruby. 
