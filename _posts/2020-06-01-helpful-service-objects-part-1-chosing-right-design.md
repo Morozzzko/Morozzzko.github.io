@@ -5,6 +5,7 @@ toc: true
 header:
   og_image: "/assets/images/posts/service_objects/part_one.png"
 date: 2020-06-01 21:57 +0300
+reddit_comment_url: "https://www.reddit.com/r/ruby/comments/gvbrg2/designing_helpful_service_objects_part_1_choosing/"
 ---
 I've been programming for a long time and I've had countless arguments about different things. I'd like to list top four reasons I've had an argument online.
 
