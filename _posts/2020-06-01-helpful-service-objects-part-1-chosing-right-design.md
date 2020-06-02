@@ -259,6 +259,8 @@ Toptal has a [solid article on service objects](https://www.toptal.com/ruby-on-r
 
 [Useful objects](http://docs.eventide-project.org/user-guide/useful-objects.html#overview) manifesto by eventide
 
+Hanami guide has a [decent article on the pattern](https://guides.hanamirb.org/architecture/interactors/) and how to use it.
+
 [dry-transactions](http://github.com/gems/dry-transactions) — a once-popular gem, now deprecated. It's a DSL for domain logic, which essentially implements the "service object" idea.
 
 [Trailblazer](http://trailblazer.to/) was aimed to simplify our lives and domain logic, and brought a lot of new ideas to Ruby world
