@@ -235,11 +235,11 @@ reward_baker.call(other_order)
 
 # What's going to happen next
 
-Service objects are a large enough topic, and I can't cover them in one post. If I do, only a few people will have the time to read it – it's going to be too overwhelming. So I'm going to release at least two parts: "the practice" and "the next level". 
+Service objects are a large enough topic, and I can't cover them in one post. If I do, only a few people will have the time to read it – it's going to be too overwhelming. So I'm going to release at least two more parts: "the practice" and "the next level". 
 
-The practice will be a design exercise where we model a business process and illustrate decisions and trade-offs of service objects. 
+The practice will be a design exercise where we model a business process and illustrate decisions and trade-offs of service objects. It's going to show how to use the event and the handler.
 
-In "The next level" I'll talk about techniques which will help you get more from service objects: reduce boilerplate, organize a pipeline, and gather more insights. Afterwards I'll address some of the flaws. I'll finish it with a small guideline on designing service objects.
+In "The next level" I'll talk about techniques which will help you get more from service objects: reduce boilerplate, organize a pipeline, and gather more insights. Afterwards I'll address some of the flaws. I'll finish it with a small guideline on designing service objects. I'll also address some of my claims about the design decisions.
 
 
 # The rabbit hole
