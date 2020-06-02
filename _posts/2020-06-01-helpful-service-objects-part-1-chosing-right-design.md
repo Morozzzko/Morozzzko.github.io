@@ -245,7 +245,7 @@ In "The next level" I'll talk about techniques which will help you get more from
 
 # The rabbit hole
 
-If you want to go down the rabbit hole and discover more yourself, feel free to dig the resources I've mentioned and some other. Make sure to check the first two articles. They criticize service objects and provide nice alternatives — those may be extremely helpful for you too.
+If you want to go down the rabbit hole and discover more yourself, feel free to dig through the resources I've mentioned below. Make sure to check the first two articles. They criticize service objects and provide nice alternatives — those may be extremely helpful for you too.
 
 Avdi Grimm [highlights the possible problems](https://avdi.codes/service-objects/) of service objects and provides alternatives. The "Domain-driven design" part is important, you should totally read it.
 
