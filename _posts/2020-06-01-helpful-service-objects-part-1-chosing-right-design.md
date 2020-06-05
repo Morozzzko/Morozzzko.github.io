@@ -261,7 +261,7 @@ Toptal has a [solid article on service objects](https://www.toptal.com/ruby-on-r
 
 Hanami guide has a [decent article on the pattern](https://guides.hanamirb.org/architecture/interactors/) and how to use it.
 
-[dry-transactions](http://github.com/gems/dry-transactions) — a once-popular gem, now deprecated. It's a DSL for domain logic, which essentially implements the "service object" idea.
+[dry-transactions](http://github.com/gems/dry-transactions) — a once-popular gem, which used to be deprecated, but right now it's going throw a rework. It's a DSL for domain logic, which essentially implements the "service object" and "railway oriented programming" ideas in a nice way
 
 [Trailblazer](http://trailblazer.to/) was aimed to simplify our lives and domain logic, and brought a lot of new ideas to Ruby world
 
