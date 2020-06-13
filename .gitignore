@@ -7,3 +7,4 @@ _site
 .rvmrc
 .DS_STORE
 node_modules
+tmp-assets
