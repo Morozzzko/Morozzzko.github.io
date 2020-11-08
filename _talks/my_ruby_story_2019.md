@@ -2,6 +2,7 @@
 layout: single
 title: My Ruby Story
 author_profile: true
+date: 2019-05-14
 ---
 
 [My Ruby Story](https://devchat.tv/my-ruby-story/) is a podcast that discovers stories of 
