@@ -1,7 +1,7 @@
 ---
 layout: single
 title: "Saint P Ruby Meetup 2020 Fall [RU]"
-slides: "/slides/saint_p_meetup_2020/"
+slides: "/assets/slides/saint_p_meetup_2020/"
 youtube: https://www.youtube.com/embed/tYUNIJg7wl0?start=1411"
 author_profile: true
 date: 2020-10-29
@@ -27,6 +27,6 @@ I've proposed a solution to some of the problems — to develop a mental model w
 
 Afterwards, I've illustrated how the model easily gives us a natural way to think about architecture. The same technique enables us to illustrate architecture with no technology except for pen and paper.
 
-Slide deck is available [on my website](/slides/saint_p_meetup_2020).
+Slide deck is available [on my website](/assets/slides/saint_p_meetup_2020).
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/tYUNIJg7wl0?start=1411" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
