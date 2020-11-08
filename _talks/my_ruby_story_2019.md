@@ -15,8 +15,6 @@ I explained how I got into programming in general, and how I've become a Ruby de
 
 <audio src="https://devchat.cachefly.net/my-ruby-story/MRS_088_Igor_Morozov.mp3" controls></audio>
 
-<!-- excerpt -->
-
 ## TL;DL
 
 * Wanted to become a programmer since I was around 9 because “programmers make games”

@@ -24,11 +24,11 @@ However, I've managed to cover those topics:
 - How to make errors a first-class concern in your application
 - Working with the Result monad in Ruby
 
-<!-- excerpt -->
-
-Slide deck is available [here](/slides/euruko-2018).
+Slide deck is available [on this website](/slides/euruko-2018).
 
 <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/v-H9nK8hqfE" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
+<!-- excerpt -->
 
 ## Links and references
 
