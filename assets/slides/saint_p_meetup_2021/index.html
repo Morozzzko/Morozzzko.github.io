@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title>reveal-md</title>
+    <link rel="stylesheet" href="./css/reveal.css" />
+    <link rel="stylesheet" href="./css/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="./css/highlight/zenburn.css" />
+    <link rel="stylesheet" href="./css/print/paper.css" type="text/css" media="print" />
+
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template">
+
+<style type="text/css">
+  .hljs {
+    background: transparent;
+  }
+
+  .reveal pre {
+    box-shadow: none;
+  }
+
+  .reveal blockquote {
+    background: transparent;
+    border: none;
+  }
+
+  img {
+    max-height: 600px !important;
+    width: auto !important;
+  }
+
+  .green {
+    color: lightgreen;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    text-transform: none !important;
+  }
+</style>
+
+## Кулстори про CLI
+</script></section><section  data-markdown><script type="text/template">
+## Я — Игорь
+
+* В руби с 2016
+* Писал на всяком, в основном на руби
+* Не очень хорош с рельсой
+* ❤️  энтерпрайзную разработку
+* Делаю Bookmate.com
+</script></section><section  data-markdown><script type="text/template">
+## Иногда надо делать CLI
+
+И это бывает больно
+</script></section><section  data-markdown><script type="text/template">
+## А зачем?
+</script></section><section  data-markdown><script type="text/template">
+## А зачем?
+
+* Оптимизировать рутину
+* Шорткаты
+</script></section><section  data-markdown><script type="text/template">
+## Шорткаты
+
+```bash
+# Было
+
+npx reveal-md slide-sources/saint_p_lightning/index.md  \
+    --static assets/slides/saint_p_meetup_2021 \
+    --static-dirs=slide-sources/saint_p_lightning/img
+
+# Стало
+
+make slides-2021-saint-p
+```
+</script></section><section  data-markdown><script type="text/template">
+## Мейк — это хорошо
+</script></section><section  data-markdown><script type="text/template">
+<figure>
+<img src="img/makefile.png" />
+<figcaption><a href="https://malefile.site">makefile.site</a></figcaption>
+</figure>
+</script></section><section  data-markdown><script type="text/template">
+## А что с рутиной?
+
+* Сходи туда
+* Скачай то
+* Распакуй
+* Переименуй
+* Выстави значения
+</script></section><section  data-markdown><script type="text/template">
+## Шелл скриптинг не всегда хорош
+
+На fish хорош, а вот на (ba|z)sh не очень
+</script></section><section  data-markdown><script type="text/template">
+## Альтернативы — библиотеки для CLI
+
+* argparse
+* click
+* thor
+* hanami-cli → dry-cli
+
+</script></section><section  data-markdown><script type="text/template">
+
+## Не люблю чувствовать себя тупым
+
+Самое важное требование к библиотекам
+</script></section><section  data-markdown><script type="text/template">
+## Тор не помогает
+
+```ruby
+class MyCLI < Thor
+  desc "hello NAME", "say hello to NAME"
+  def hello(name)
+    puts "Hello #{name}"
+  end
+end
+
+MyCLI.start(ARGV)
+```
+</script></section><section  data-markdown><script type="text/template">
+## method_defined — хорошо
+
+Но не очень просто
+</script></section><section  data-markdown><script type="text/template">
+## А как тестить?
+
+Очевидно: запускать и смотреть на stdout
+Не очень очевидно: запускать через rspec/minitest и тоже тестить
+</script></section><section  data-markdown><script type="text/template">
+## dry-cli: теперь проще
+
+
+```ruby
+module MyCLI
+  extend Dry::CLI::Registry
+
+  class Hello < Dry::CLI::Command
+    desc "say hello to NAME"
+    argument :name
+
+    def call(name:, **)
+      puts "Hello #{name}"
+    end
+  end
+
+  register 'hello', Hello
+end
+
+Dry::CLI.new(MyCLI).call
+```
+</script></section><section  data-markdown><script type="text/template">
+## Больше текста, проще кот
+
+Your mileage may vary, though
+</script></section><section  data-markdown><script type="text/template">
+## А ещё там меньше интеграций
+
+Спросить у пользователя ввести что-нибудь? Ставь tty-shell
+
+Нужны цвета? Ставь tty-color
+</script></section><section  data-markdown><script type="text/template">
+# Спасибо
+
+* https://dry-rb.org/gems/dry-cli/
+* https://makefile.site
+* http://whatisthor.com/
+
+</script></section></div>
+    </div>
+
+    <script src="./js/reveal.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+      // Optional libraries used to extend on reveal.js
+      var deps = [
+        { src: './plugin/markdown/marked.js', condition: function() { return !!document.querySelector('[data-markdown]'); } },
+        { src: './plugin/markdown/markdown.js', condition: function() { return !!document.querySelector('[data-markdown]'); } },
+        { src: './plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+        { src: './plugin/zoom-js/zoom.js', async: true },
+        { src: './plugin/notes/notes.js', async: true },
+        { src: './plugin/math/math.js', async: true }
+      ];
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        dependencies: deps
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal.getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"transition":"none","slideNumber":"c/t"}, queryOptions);
+    </script>
+
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+</html>
