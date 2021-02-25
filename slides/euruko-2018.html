@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <title>
+      
+        Ducks and Monads: Wonders of Ruby types | Igor writing about things
+      
+    </title>
+
+    <!-- Description -->
+    
+      <meta name="description" content="EuRuKo 2018" />
+    
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="/vendor/reveal.js/css/reveal.css"/>
+    
+      <link rel="stylesheet" href="/vendor/reveal.js/css/theme/white.css" id="theme"/>
+    
+
+    
+      <link rel="stylesheet" href="/vendor/highlight.js/atom-one-light.css" id="theme"/>
+    
+
+
+    <!-- Code syntax highlighting -->
+    <!-- <link rel="stylesheet" href="/vendor/reveal.js/lib/css/zenburn.css"/> -->
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? '/vendor/reveal.js/css/print/pdf.css' : '/vendor/reveal.js/css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <link rel="canonical" href="https://www.morozov.is/slides/euruko-2018">
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="reveal">
+      <div class="slides">
+        <script>
+document.addEventListener(
+  "DOMContentLoaded",
+  () => Reveal.configure({ slideNumber: 'c/t' })
+);
+</script>
+
+<style>
+  h1, h2, h3, h4, h5, h6 {
+    text-transform: none !important;
+  }
+
+  .reveal div.slide-number {
+    background: none;
+    color: black;
+  }
+
+  .reveal pre code.ruby {
+    font-size: 1.0em;
+    line-height: 1.5em;
+    max-height: none;
+  }
+</style>
+
+<section>
+  <h1>Ducks and Monads</h1>
+  <h2>Wonders of Ruby Types</h2>
+</section>
+
+<section>
+  <h2>Hey, I'm Igor</h2>
+  <p>/'<span style="font-family: monospace;">iːgɔːɹ</span>/</p>
+</section>
+
+<section>
+  <h2>I'm a polyglot programmer at Qlean.ru</h2>
+</section>
+
+<section>
+  <h2>I don't trust myself</h2>
+</section>
+
+<section>
+  <h2>There are four reasons I don't trust myself</h2>
+</section>
+
+<section>
+  <h2>
+    undefined is not a function
+  </h2>
+</section>
+
+<section>
+  <h2>
+    N&nbsp;+&nbsp;1
+  </h2>
+</section>
+
+<section>
+  <h2>
+    I mess up business logic
+  </h2>
+</section>
+
+<section>
+  <h2>
+    I forget to close a bracket
+  </h2>
+</section>
+
+<section>
+  <h2>
+    I forget some details
+  </h2>
+</section>
+
+<section>
+  <h2>I have to double-check my code</h2>
+  <p>
+    New hobby: finding the right tools
+  </p>
+</section>
+
+<section>
+  <h2>Tools to write type-safe Ruby code</h2>
+</section>
+
+<section>
+  <h2>Dynamic typing is not an excuse to be reckless</h2>
+</section>
+
+<section>
+  <h2>2 out of 10 most common errors are about types</h2>
+</section>
+
+<section>
+  <h2>Silent data corruption: <br />JSON in Rails</h2>
+  <pre>
+    <code class="ruby" data-trim="">
+      value = "{\"foo\":\"bar\"}"
+
+      # Rails 4
+      my_model.value = value # =&gt; { foo: "bar" }
+
+      # Rails 5
+      my_model.value = value # =&gt; "{\"foo\":\"bar\"}"
+    </code>
+
+  </pre>
+</section>
+
+<section>
+  <h2>We have to use the right libraries</h2>
+</section>
+
+<section>
+  <h2>
+    Writing code is easier than fixing it
+  </h2>
+</section>
+
+<section>
+  <h2>
+    Every object has a type
+  </h2>
+</section>
+
+<section>
+  <h2>What's a type, anyway?</h2>
+  <ul>
+    <li>Syntactic</li>
+    <li>Representation</li>
+    <li>Representation and behavior</li>
+    <li>Value space</li>
+    <li><strong>Value space and behavior</strong></li>
+  </ul>
+</section>
+
+<section>
+  <h3>
+    <q>
+      A type is a set of values which a variable can possess and a set of functions that one can apply to these values.
+    </q>
+  </h3>
+</section>
+
+<section>
+  <h2>
+    We learn to consider all possible values
+  </h2>
+</section>
+
+<section>
+  <h2>
+    nil does not belong to every type
+  </h2>
+</section>
+
+<section>
+  <h2>
+    ActiveSupport teaches us to be reckless
+  </h2>
+</section>
+
+<section>
+  <h2>
+    <code>blank?</code> and <code>present?</code><br />are bad for your code
+  </h2>
+</section>
+
+<section>
+  <h2>
+    We have to think about design of our data
+  </h2>
+</section>
+
+<section>
+  <h2>
+    Being careful is not enough
+  </h2>
+</section>
+
+<section>
+  <h2><q>dry-types is a simple and extendable type system for Ruby</q></h2>
+</section>
+
+<section>
+  <h2>Data constructors</h2>
+  <pre>
+    <code class="ruby" data-trim="">
+      Types::Strict::String["foo"] # =&gt; "foo"
+      Types::Strict::String[nil] # =&gt; Dry::Types::ConstraintError:
+      # nil violates constraints
+
+      Types::Optional::Strict::String[nil] # =&gt; nil
+    </code>
+
+  </pre>
+</section>
+
+<section>
+  <h2>Complex definitions</h2>
+  <pre>
+    <code class="ruby" data-trim="">
+      IntArray = Types::Strict::Array.of(Types::Strict::Integer)
+
+      Enum = Types::Strict::String.enum('foo', 'bar')
+
+      Timestamp = Types::Strict::String | Types::Strict::Time
+
+      MyHash = Types::Strict::Hash.schema(
+        foo: Types.Instance(MyClass),
+        bar: Types::Strict::Float
+      )
+    </code>
+
+  </pre>
+</section>
+
+<section>
+  <h2>dry-types won't change your architecture</h2>
+</section>
+
+<section>
+  <img style="border: none; max-width: 400px; max-height: auto" src="/assets/images/slides/euruko/hanami.png" />
+  <h2>Trying out dry-types: Hanami</h2>
+</section>
+
+<section>
+  <h2>Enhancing your application with dry-types</h2>
+
+  <ul>
+    <li>Describe your data using dry-types</li>
+    <li>Use those definitions in constructors</li>
+    <li>Use them in setters</li>
+    <li>(hard) Use dry-struct for domain models</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Three steps to type safety</h2>
+
+  <ul>
+    <li>Stop using ActiveSupport</li>
+    <li>Consider all possible values</li>
+    <li>Use strict constructors</li>
+  </ul>
+</section>
+
+<section>
+  <h2>
+    Expressing errors with types
+  </h2>
+</section>
+
+<section>
+  <h2>
+    Errors are not that exceptional
+  </h2>
+</section>
+
+<section>
+  <h2>
+    Types can facilitate error handling
+  </h2>
+</section>
+
+<section>
+  <h1>Monads in Ruby</h1>
+</section>
+
+<section>
+  <h2>Monads are similar to musical instruments</h2>
+</section>
+
+<section>
+  <h2>
+    A monad is a result object with a few rules
+  </h2>
+</section>
+
+<section>
+  <h2>Result (Either) monad</h2>
+</section>
+
+<section>
+  <h2><code class="haskell">type Result a b = Failure a | Success b</code></h2>
+</section>
+
+<section>
+  <h2>Using Result</h2>
+  <pre>
+    <code class="ruby" data-trim="">
+      require 'dry/monads/result'
+
+      include Dry::Monads::Result
+
+      Success(1).success # =&gt; 1
+      Success(1).success? # =&gt; true
+
+      Failure("abc").failure # =&gt; "abc"
+      Failure("abc").failure? # =&gt; true
+    </code>
+
+  </pre>
+</section>
+
+<section>
+  <h2>Computations: bind</h2>
+  <pre>
+    <code class="ruby" data-trim="">
+      Success(1).bind do |value|
+        if value.positive?
+          Failure("Welp")
+        else
+          Success(value + 3)
+        end
+      end # =&gt; Failure("Welp")
+    </code>
+
+  </pre>
+</section>
+
+<section>
+  <h2>Handling errors: or</h2>
+  <pre>
+    <code class="ruby" data-trim="">
+      Failure(:not_found).or do |error|
+        case error
+        when :not_found
+          Failure(:db_error)
+        else
+          Success("Yay!")
+        end
+      end # =&gt; Failure(:db_error)
+    </code>
+
+  </pre>
+</section>
+
+<section>
+  <h2>Non-monadic computations: fmap</h2>
+  <pre>
+    <code class="ruby" data-trim="">
+      Success(1).fmap do |value|
+        "The value is #{value}"
+      end # =&gt; Success("The value is 1")
+
+      Failure(1).fmap do |value|
+        "The value is #{value}"
+      end # =&gt; Failure(1)
+    </code>
+
+  </pre>
+</section>
+
+<section>
+  <h2>Escaping the context: <br />value_or</h2>
+  <pre>
+    <code class="ruby" data-trim="">
+      Success(-5).bind do |x|
+        if x.positive?
+          Success(x)
+        else
+          Failure("Something went wrong")
+        end
+      end.value_or { nil } # =&gt; nil
+    </code>
+
+  </pre>
+</section>
+
+<section>
+  <h2>Unwrapping</h2>
+  <pre>
+    <code class="ruby" data-trim="">
+      Failure(
+        "Something went wrong"
+      ).value_or(&amp;:itself) # =&gt; "Something went wrong"
+    </code>
+
+  </pre>
+</section>
+
+<section>
+  <h2>Do notation</h2>
+  <pre>
+    <code class="ruby" data-trim="">
+      class Operation
+        include Dry::Monads::Do.for(:call)
+        include Dry::Monads::Result
+
+        def call(name)
+          user = yield find_by_name(name)
+
+          contract = yield find_contract(user)
+
+          Success(contract.new(
+            amount: contract.amount + 100
+          ))
+        end
+      end
+    </code>
+
+  </pre>
+</section>
+
+<section>
+  <h1>Recap</h1>
+</section>
+
+<section>
+  <h2>Types help us design our applications</h2>
+</section>
+
+<section>
+  <h2>ActiveSupport may be bad for our code</h2>
+</section>
+
+<section>
+  <h2>Use dry-types for a type-safe application design</h2>
+</section>
+
+<section>
+  <h2>Monads help us handle errors gracefully</h2>
+</section>
+
+<section>
+  <h2>Useful links and references</h2>
+  <ul>
+    <li><a href="http://dry-rb.org/gems/dry-types/">
+      dry-rb.org
+    </a></li>
+    <li><a href="https://solnic.codes/2016/11/02/duck-typing-vs-type-safety-in-ruby/">solnic.codes</a></li>
+    <li><a href="http://hanamirb.org/">hanamirb.org</a></li>
+    <li>
+      <a href="https://fsharpforfunandprofit.com/rop/">
+        Railway Oriented Programming
+      </a>
+    </li>
+    <li><a href="https://books.google.ru/books/about/Abstract_Types_Defined_as_Classes_of_Var.html?id=gKP1SQAACAAJ&amp;redir_esc=y">Parnas, Weiss and Shore on data types</a></li>
+    <li>
+      <a href="http://trailblazer.to/gems/operation/2.0/">
+        Trailblazer operations
+      </a>
+    </li>
+    <li>
+      <a href="https://www.morozov.is/2018/05/27/do-notation-ruby.html">Do notation in Ruby</a>
+    </li>
+  </ul>
+</section>
+
+<section>
+  <h1>Thank you! ❤</h1>
+  <p>
+    I would love to hear from you
+    <br />
+    igor@morozov.is
+  </p>
+</section>
+
+      </div>
+    </div>
+
+    <script src="/vendor/reveal.js/lib/js/head.min.js"></script>
+    <script src="/vendor/reveal.js/js/reveal.js"></script>
+    <script>
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        
+          transition: 'none',
+        
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: '/vendor/reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: '/vendor/reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: '/vendor/reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: '/vendor/reveal.js/plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: '/vendor/reveal.js/plugin/zoom-js/zoom.js', async: true },
+          { src: '/vendor/reveal.js/plugin/notes/notes.js', async: true }
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>

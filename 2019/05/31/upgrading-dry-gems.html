@@ -1,0 +1,828 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.21.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>dry-rb 1.0: upgrading validations, types and schemas - Igor writing about things</title>
+<meta name="description" content="I’m enthusiastic about dry-rb gems. Actually, I’ve never worked on Ruby projects without a dry-rb gem. However, some people are sceptical, as a lot of core dry-rb gems are still in their 0.x phase, which leads to a lot of breaking changes and hours of refactoring.  I’m happy to see dry-rb mature: dry-monads entered 1.0 phase in Summer 2018, and now two more libraries hit v1.0 milestones: dry-types and dry-struct; and dry-validation is in its 1.0 RC phase.  I haven’t updated my dry-rb gems for a couple of months, so I’ve missed a lot of breaking changes. Finally, I decided to upgrade the gems and write about the process. I’ll take a swing at automating my upgrade process as much as I can.">
+
+
+  <meta name="author" content="Igor Morozov">
+  
+  <meta property="article:author" content="Igor Morozov">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Igor writing about things">
+<meta property="og:title" content="dry-rb 1.0: upgrading validations, types and schemas">
+<meta property="og:url" content="https://www.morozov.is/2019/05/31/upgrading-dry-gems.html">
+
+
+  <meta property="og:description" content="I’m enthusiastic about dry-rb gems. Actually, I’ve never worked on Ruby projects without a dry-rb gem. However, some people are sceptical, as a lot of core dry-rb gems are still in their 0.x phase, which leads to a lot of breaking changes and hours of refactoring.  I’m happy to see dry-rb mature: dry-monads entered 1.0 phase in Summer 2018, and now two more libraries hit v1.0 milestones: dry-types and dry-struct; and dry-validation is in its 1.0 RC phase.  I haven’t updated my dry-rb gems for a couple of months, so I’ve missed a lot of breaking changes. Finally, I decided to upgrade the gems and write about the process. I’ll take a swing at automating my upgrade process as much as I can.">
+
+
+
+  <meta property="og:image" content="https://www.morozov.is/assets/images/previews/upgrading_dry_gems.png">
+
+
+
+
+
+  <meta property="article:published_time" content="2019-05-31T06:48:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="https://www.morozov.is/2019/05/31/upgrading-dry-gems.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Igor Morozov",
+      "url": "https://www.morozov.is/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Igor writing about things Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <a href="/">
+          <img src="/assets/images/bio-photo.jpg" alt="Igor Morozov" itemprop="image">
+        </a>
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <a href="/"><h3 class="author__name" itemprop="name">Igor Morozov</h3></a>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>I’m a software engineer familiar with Ruby, Python, JavaScript and ReasonML.
+<br />
+I’m enthusiastic about functional programming, Ruby, DDD and emotions.
+<br />
+I’m not much of a Rails person. dry-rb, mostly.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:igor@morozov.is">
+            <meta itemprop="email" content="igor@morozov.is" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/morozzzko" itemprop="sameAs" rel="nofollow noopener noreferrer">
+            <i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/igor-morozov" itemprop="sameAs" rel="nofollow noopener noreferrer">
+            <i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/Morozzzko" itemprop="sameAs" rel="nofollow noopener noreferrer">
+            <i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+<li>
+  <a href="/talks" itemprop="sameAs">
+    <i class="fas fa-chalkboard-teacher" aria-hidden="true"></i> Talks
+  </a>
+</li>
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="dry-rb 1.0: upgrading validations, types and schemas">
+    <meta itemprop="description" content="I’m enthusiastic about dry-rb gems. Actually, I’ve never worked on Ruby projects without a dry-rb gem. However, some people are sceptical, as a lot of core dry-rb gems are still in their 0.x phase, which leads to a lot of breaking changes and hours of refactoring.I’m happy to see dry-rb mature: dry-monads entered 1.0 phase in Summer 2018, and now two more libraries hit v1.0 milestones: dry-types and dry-struct; and dry-validation is in its 1.0 RC phase.I haven’t updated my dry-rb gems for a couple of months, so I’ve missed a lot of breaking changes. Finally, I decided to upgrade the gems and write about the process. I’ll take a swing at automating my upgrade process as much as I can.">
+    <meta itemprop="datePublished" content="2019-05-31T06:48:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">dry-rb 1.0: upgrading validations, types and schemas
+</h1>
+          
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          9 minute read
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>I’m enthusiastic about <a href="https://dry-rb.org/">dry-rb gems</a>. Actually, I’ve never worked on Ruby projects without a dry-rb gem. However, some people are sceptical, as a lot of core dry-rb gems are still in their <code class="language-plaintext highlighter-rouge">0.x</code> phase, which leads to a lot of breaking changes and hours of refactoring.</p>
+
+<p>I’m happy to see dry-rb mature: dry-monads entered 1.0 phase in Summer 2018, and now <a href="https://dry-rb.org/news/2019/04/23/dry-types-and-dry-struct-1-0-0-released/">two more libraries</a> hit v1.0 milestones: dry-types and dry-struct; and dry-validation is in its 1.0 RC phase.</p>
+
+<p>I haven’t updated my dry-rb gems for a couple of months, so I’ve missed a lot of breaking changes. Finally, I decided to upgrade the gems and write about the process. I’ll take a swing at <em>automating</em> my upgrade process as much as I can.</p>
+
+<!-- excerpt -->
+
+<h2 id="prerequisites">Prerequisites</h2>
+
+<p>Here’s what my dry-rb gems look like:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ bundle list | grep dry
+  * dry-auto_inject (0.4.6)
+  * dry-configurable (0.7.0)
+  * dry-container (0.6.0)
+  * dry-core (0.4.7)
+  * dry-equalizer (0.2.1)
+  * dry-events (0.1.0)
+  * dry-inflector (0.1.2)
+  * dry-initializer (2.5.0)
+  * dry-logic (0.4.2)
+  * dry-matcher (0.7.0)
+  * dry-monads (1.2.0)
+  * dry-struct (0.6.0)
+  * dry-transaction (0.13.0)
+  * dry-types (0.13.2)
+  * dry-validation (0.12.1)
+</code></pre></div></div>
+
+<p>I’ve got 15 gems, but I only care about four of them: monads, types, struct and validation. Since monads are up-to-date, I’m only going to talk about types, struct and validation.</p>
+
+<p>In this post, I’ll try to give a step-by-step guide that will <em>simplify</em> the upgrading process. It won’t give a 100% working solutions, but it will probably save you a couple of hours.</p>
+
+<p><strong>Note</strong>. I use macOS with GNU sed (<code class="language-plaintext highlighter-rouge">gsed</code>) instead of built-in <code class="language-plaintext highlighter-rouge">sed</code> command. So if you want to follow my instructions, install it via <code class="language-plaintext highlighter-rouge">brew install gnu-sed</code>. Since I’m using <a href="https://fishshell.com/">fish</a> instead of <code class="language-plaintext highlighter-rouge">bash</code> / <code class="language-plaintext highlighter-rouge">zsh</code>, some commands might need slight modifications to work.</p>
+
+<p><strong>Note</strong>. I wrote this article while upgrading the dry-rb gems on my project. I decided to do it gradually — so you might encounter some redundant steps. If you do, please contact me via email and I’ll upgrade it.</p>
+
+<h2 id="dry-validation-to-dry-schema">dry-validation to dry-schema</h2>
+
+<p>The gem we knew as <code class="language-plaintext highlighter-rouge">dry-validation</code> has evolved from a complex schema validation &amp; coercion into a high-level contract DSL with domain logic.</p>
+
+<p>Meanwhile, it has become so complex they decided to break it down into two gems: dry-validation and <a href="https://solnic.codes/2019/01/31/introducing-dry-schema/">dry-schema</a>. The latter provides the old functionality of <code class="language-plaintext highlighter-rouge">dry-validation</code> — the schema validations, coercions, and they fixed <em>all</em> known issues. <code class="language-plaintext highlighter-rouge">dry-validation</code> adds domain rules and validations on top of that.</p>
+
+<p>I don’t want to go around and update everything manually, so I’m going to replace <code class="language-plaintext highlighter-rouge">dry-validation</code> with <code class="language-plaintext highlighter-rouge">dry-schema</code> as much as I can, and manually refactor the rest.</p>
+
+<p><strong>Step 1</strong>. Upgrade dry-validation to <code class="language-plaintext highlighter-rouge">0.13</code>. It’s the last version before the switch, so if your builds pass — you’re good to go. You’ll have to update dry-types to <code class="language-plaintext highlighter-rouge">0.14</code> too.</p>
+
+<p><strong>Step 2</strong>. Replace dry-validation with equivalent dry-schema version (0.1.0) and replace all <code class="language-plaintext highlighter-rouge">Dry::Validation</code> occurrences with <code class="language-plaintext highlighter-rouge">Dry::Schema</code>. Also replace all <code class="language-plaintext highlighter-rouge">Dry::Validation.Schema</code> with <code class="language-plaintext highlighter-rouge">Dry::Validation.define</code>.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ bundle remove dry-validation &amp;&amp; bundle add dry-schema --version 0.1.0`
+$ grep -rl 'Dry::Validation' ./**/*.rb | xargs gsed -i 's/Dry::Validation/Dry::Schema/g'
+$ grep -rl 'Dry::Schema.Schema' ./**/*.rb | xargs gsed -i 's/Dry::Schema.Schema/Dry::Schema.define/g'
+</code></pre></div></div>
+
+<p>If you’ve used <a href="https://dry-rb.org/gems/dry-validation/extensions/struct/">struct extension</a>, don’t forget to search for <code class="language-plaintext highlighter-rouge">Dry::Schema.load_extensions</code> and remove <code class="language-plaintext highlighter-rouge">:struct</code> from the list.</p>
+
+<p><strong>Step 3</strong>. Replace <code class="language-plaintext highlighter-rouge">.each(&amp;:type?)</code> predicates with <code class="language-plaintext highlighter-rouge">.each(:type?)</code>. The same goes for <code class="language-plaintext highlighter-rouge">maybe</code>, <code class="language-plaintext highlighter-rouge">filled</code> and <code class="language-plaintext highlighter-rouge">value</code>. You might get <code class="language-plaintext highlighter-rouge">ArgumentError: no receiver given</code> if you don’t.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\.\(filled\|value\|each\|maybe\)(&amp;/.\1(/g'
+</code></pre></div></div>
+
+<p><strong>Step 4</strong>. Refactor schemas that use <a href="https://dry-rb.org/gems/dry-validation/0.13/array-as-input/">arrays as input</a>.</p>
+
+<p>The feature has been removed and it’s not coming back until dry-schema 1.0. Here’s <a href="https://github.com/dry-rb/dry-schema/issues/22">an issue</a> with the feature.</p>
+
+<p>The refactoring will look like this:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Before</span>
+
+<span class="no">ItemSchema</span> <span class="o">=</span> <span class="no">Dry</span><span class="o">::</span><span class="no">Schema</span><span class="o">.</span><span class="no">Params</span> <span class="k">do</span>
+  <span class="n">each</span> <span class="k">do</span>
+    <span class="n">schema</span> <span class="k">do</span>
+      <span class="n">required</span><span class="p">(</span><span class="n">item_id</span><span class="p">).</span><span class="nf">filled</span><span class="p">(</span><span class="ss">:int?</span><span class="p">)</span>
+      <span class="n">required</span><span class="p">(</span><span class="n">option_ids</span><span class="p">).</span><span class="nf">each</span><span class="p">(</span><span class="ss">:int?</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">ItemSchema</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="n">input</span><span class="p">)</span>
+
+<span class="c1"># After</span>
+
+<span class="no">ItemSchema</span> <span class="o">=</span> <span class="no">Dry</span><span class="o">::</span><span class="no">Schema</span><span class="o">.</span><span class="no">Params</span> <span class="k">do</span>
+  <span class="n">required</span><span class="p">(</span><span class="ss">:input</span><span class="p">).</span><span class="nf">each</span> <span class="k">do</span>
+    <span class="n">schema</span> <span class="k">do</span>
+      <span class="n">required</span><span class="p">(</span><span class="ss">:item_id</span><span class="p">).</span><span class="nf">filled</span><span class="p">(</span><span class="ss">:int?</span><span class="p">)</span>
+      <span class="n">required</span><span class="p">(</span><span class="ss">:option_ids</span><span class="p">).</span><span class="nf">each</span><span class="p">(</span><span class="ss">:int?</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+
+<span class="no">ItemSchema</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="ss">input: </span><span class="n">input</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>Step 5</strong>. Check you’ve ever inherited from <code class="language-plaintext highlighter-rouge">Dry::Validation</code> schemas. If you did, do the following transformations:</p>
+
+<ol>
+  <li>Rename classes</li>
+</ol>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">Dry::Validation::Schema::Params</code> → <code class="language-plaintext highlighter-rouge">Dry::Schema::Params</code></li>
+  <li><code class="language-plaintext highlighter-rouge">Dry::Validation::Schema::JSON</code> → <code class="language-plaintext highlighter-rouge">Dry::Schema::JSON</code></li>
+  <li><code class="language-plaintext highlighter-rouge">Dry::Validation::Schema</code> → <code class="language-plaintext highlighter-rouge">Dry::Schema</code></li>
+</ul>
+
+<ol>
+  <li>Replace <code class="language-plaintext highlighter-rouge">define!</code> block with <code class="language-plaintext highlighter-rouge">define</code></li>
+  <li>Move <code class="language-plaintext highlighter-rouge">configure</code> block under <code class="language-plaintext highlighter-rouge">define</code></li>
+</ol>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="c1"># Before:</span>
+
+<span class="k">class</span> <span class="nc">ApplicationSchema</span> <span class="o">&lt;</span> <span class="no">Dry</span><span class="o">::</span><span class="no">Validation</span><span class="o">::</span><span class="no">Schema</span><span class="o">::</span><span class="no">Params</span>
+  <span class="n">configure</span> <span class="k">do</span>
+    <span class="n">config</span><span class="p">.</span><span class="nf">messages</span> <span class="o">=</span> <span class="ss">:i18n</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="c1"># After:</span>
+
+<span class="k">class</span> <span class="nc">ApplicationSchema</span> <span class="o">&lt;</span> <span class="no">Dry</span><span class="o">::</span><span class="no">Schema</span><span class="o">::</span><span class="no">Params</span>
+  <span class="n">define</span> <span class="k">do</span>
+    <span class="n">config</span><span class="p">.</span><span class="nf">messages</span> <span class="o">=</span> <span class="ss">:i18n</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>And update its subclasses:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Before</span>
+
+<span class="k">class</span> <span class="nc">MySchema</span> <span class="o">&lt;</span> <span class="no">ApplicationSchema</span>
+  <span class="n">configure</span> <span class="k">do</span>
+    <span class="n">config</span><span class="p">.</span><span class="nf">messages</span> <span class="o">=</span> <span class="ss">:yaml</span>
+  <span class="k">end</span>
+
+  <span class="n">define!</span> <span class="k">do</span>
+    <span class="o">...</span>
+    <span class="c1"># your params go here</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="c1"># After</span>
+
+<span class="k">class</span> <span class="nc">MySchema</span> <span class="o">&lt;</span> <span class="no">ApplicationSchema</span>
+  <span class="n">define</span> <span class="k">do</span>
+    <span class="n">config</span><span class="p">.</span><span class="nf">messages</span> <span class="o">=</span> <span class="ss">:yaml</span>
+
+    <span class="o">...</span>
+    <span class="c1"># your params go here</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p><strong>Step 6</strong>. Update DSL inheritance.</p>
+
+<p>Replace <code class="language-plaintext highlighter-rouge">Dry::Schema.Params(BaseClass)</code> with <code class="language-plaintext highlighter-rouge">Dry::Schema.Params(parent: BaseClass)</code>.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/Dry::Schema\(\(::\)\|\.\)\(Params\|JSON\|Schema\)(\([[:alnum:]]*\))/Dry::Schema\1\3(parent: \4)/g'
+</code></pre></div></div>
+
+<p><strong>Before you proceed</strong> Skip steps 7 and 8 if you’ve never used <a href="https://dry-rb.org/gems/dry-validation/0.13/type-specs/">type specs API</a>.</p>
+
+<p><strong>Step 7</strong>. Remove <code class="language-plaintext highlighter-rouge">config.type_specs</code> from your schemas</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ grep -rl 'config.type_specs' ./**/*.rb | xargs gsed -i '/config\.type_specs/d'
+</code></pre></div></div>
+
+<p><strong>Step 8</strong>. Remove type spec usages from <code class="language-plaintext highlighter-rouge">required</code> and <code class="language-plaintext highlighter-rouge">optional</code>.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\(required\|optional\)(\(:[[:alnum:]_]*\), [[:print:]]*)\(\.\|$\)/\1(\2)\3/g'
+</code></pre></div></div>
+
+<h2 id="updating-dry-schema-to-03">Updating dry-schema to 0.3</h2>
+
+<p><strong>Step 9</strong>. Update your gemfile to specify <code class="language-plaintext highlighter-rouge">gem 'dry-schema', '~&gt; 0.3.0'</code> and run <code class="language-plaintext highlighter-rouge">bundle install</code></p>
+
+<p><strong>Step 10</strong>. If you’re using I18n, move <code class="language-plaintext highlighter-rouge">errors</code> under <code class="language-plaintext highlighter-rouge">dry_schema</code> namespace. This way,</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">en</span><span class="pi">:</span>
+  <span class="na">errors</span><span class="pi">:</span>
+    <span class="s">array?</span><span class="pi">:</span> <span class="s">must be an array</span>
+</code></pre></div></div>
+
+<p>will turn into</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">en</span><span class="pi">:</span>
+  <span class="na">dry_schema</span><span class="pi">:</span>
+    <span class="na">errors</span><span class="pi">:</span>
+      <span class="s">array?</span><span class="pi">:</span> <span class="s">must be an array</span>
+</code></pre></div></div>
+
+<p><strong>Step 11</strong>. Find any <code class="language-plaintext highlighter-rouge">schema</code> macro usages and replace them with <code class="language-plaintext highlighter-rouge">hash</code>, as <code class="language-plaintext highlighter-rouge">schema</code> no longer prepends <code class="language-plaintext highlighter-rouge">value(:hash?)</code> check.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Before</span>
+
+<span class="n">required</span><span class="p">(</span><span class="ss">:foo</span><span class="p">).</span><span class="nf">schema</span> <span class="k">do</span>
+<span class="k">end</span>
+
+<span class="c1"># After</span>
+
+<span class="n">required</span><span class="p">(</span><span class="ss">:foo</span><span class="p">).</span><span class="nf">hash</span> <span class="k">do</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/schema \(do\|{\)/hash \1/g'
+</code></pre></div></div>
+
+<p><strong>Step 12</strong>. Find any <code class="language-plaintext highlighter-rouge">each</code> macro usages and replace them with <code class="language-plaintext highlighter-rouge">array</code> to add type check. Since Ruby has a <code class="language-plaintext highlighter-rouge">Enumerable#each</code> function, we can’t automate it, but we can still find possible occurrences:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ grep -rl 'Schema' ./**/*.rb | xargs grep -n 'each \(do\|{\)'
+</code></pre></div></div>
+
+<p>Feel free to skip if you feel like you don’t need type checks.</p>
+
+<p><strong>Step 13</strong>. Load <a href="https://dry-rb.org/gems/dry-schema/extensions/hints/">hints extension</a> if you use monads or <code class="language-plaintext highlighter-rouge">.messages</code>.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Dry</span><span class="o">::</span><span class="no">Schema</span><span class="p">.</span><span class="nf">load_extensions</span><span class="p">(</span><span class="ss">:hints</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="the-leap-towards-100">The leap towards 1.0.0</h2>
+
+<p><strong>Step 14</strong>. Update dry-struct, dry-types and dry-schema and run <code class="language-plaintext highlighter-rouge">bundle install</code>.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">gem</span> <span class="s1">'dry-schema'</span><span class="p">,</span> <span class="s1">'~&gt; 1.1.0'</span>
+<span class="n">gem</span> <span class="s1">'dry-struct'</span><span class="p">,</span> <span class="s1">'~&gt; 1.0.0'</span>
+<span class="n">gem</span> <span class="s1">'dry-types'</span><span class="p">,</span> <span class="s1">'~&gt; 1.0.0'</span>
+</code></pre></div></div>
+
+<p><strong>Step 15</strong>. Replace <code class="language-plaintext highlighter-rouge">Dry::Types.module</code> with <code class="language-plaintext highlighter-rouge">Dry.Types(default: :nominal)</code></p>
+
+<p>If you’ve never used nominal types (i.e. <code class="language-plaintext highlighter-rouge">Types::Hash</code>, <code class="language-plaintext highlighter-rouge">Types::Integer</code>), feel free to use <code class="language-plaintext highlighter-rouge">Dry.Types</code> instead.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ gsed -i 's/Dry::Types\.module/Dry.Types(default: :nominal)/g' ./**/*.rb
+</code></pre></div></div>
+
+<p><strong>Step 16</strong>. Replace legacy hash schemas with new ones. See https://dry-rb.org/gems/dry-types/0.15/hash-schemas/</p>
+
+<p><strong>Step 17</strong>. Update error message config</p>
+
+<ol>
+  <li>Replace <code class="language-plaintext highlighter-rouge">config.messages</code> with <code class="language-plaintext highlighter-rouge">config.messages.backend</code></li>
+  <li>Replace <code class="language-plaintext highlighter-rouge">config.messages_file = '/path/to/my/errors.yml'</code> with <code class="language-plaintext highlighter-rouge">config.messages.load_paths &lt;&lt; '/path/to/my/errors.yml'</code></li>
+  <li>Replace <code class="language-plaintext highlighter-rouge">config.namespace = :user</code> with <code class="language-plaintext highlighter-rouge">config.messages.namespace = :user</code></li>
+</ol>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/config\.messages =/config.messages.backend =/g'
+$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/config\.messages_file =/config.messages.load_paths &lt;&lt;/g'
+$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/config\.namespace =/config.messages.namespace =/g'
+</code></pre></div></div>
+
+<p><strong>Step 18</strong>. Symbolize all string keys</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\(required\|optional\)(\(\'\|"\)\([[:alnum:]_]*\)\(\'\|"\)/\1(:\3/g'
+</code></pre></div></div>
+
+<p><strong>Step 19</strong>. Replace <code class="language-plaintext highlighter-rouge">Types.Definition</code> with <code class="language-plaintext highlighter-rouge">Types.Nominal</code></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ gsed -i 's/Types\.Definition/Types.Nominal/' ./**/*.rb
+</code></pre></div></div>
+
+<p><strong>Step 20</strong>. If you rely on <code class="language-plaintext highlighter-rouge">Types::Params</code> and <code class="language-plaintext highlighter-rouge">Types::JSON</code> not to raise an exception on invalid input, decorate the definitions with <code class="language-plaintext highlighter-rouge">.lax</code></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ gsed -i 's/Types::JSON::\([[:alnum:]]*\)/Types::JSON::\1.lax/g' ./**/*.rb
+$ gsed -i 's/Types::Params::\([[:alnum:]]*\)/Types::Params::\1.lax/g' ./**/*.rb
+</code></pre></div></div>
+
+<p><strong>Step 21</strong>. Replace <code class="language-plaintext highlighter-rouge">:type?</code> predicates with type checks wherever you need this</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\(filled\|maybe\|value\)(:str?/\1(:string/g'
+$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\(filled\|maybe\|value\)(:int?/\1(:integer/g'
+$ grep -rl 'Schema' ./**/*.rb | xargs gsed -i 's/\(filled\|maybe\|value\)(:date?/\1(:date/g'
+</code></pre></div></div>
+
+<p><strong>Step 22</strong>. <code class="language-plaintext highlighter-rouge">Result#{messages, errors, hints}</code> now return <code class="language-plaintext highlighter-rouge">MessageSet</code>, which can be converted to <code class="language-plaintext highlighter-rouge">Hash</code>. So we need to go and update the usages <em>everywhere</em>. Also <code class="language-plaintext highlighter-rouge">Result#to_monad</code> now wraps entire <code class="language-plaintext highlighter-rouge">Result</code> object, so we have to update our code.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Before</span>
+
+<span class="n">render</span> <span class="ss">errors: </span><span class="no">Schema</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="n">params</span><span class="p">).</span><span class="nf">errors</span>
+<span class="n">render</span> <span class="ss">errors: </span><span class="no">Schema</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="n">params</span><span class="p">).</span><span class="nf">to_monad</span><span class="p">.</span><span class="nf">failure</span>
+
+<span class="c1"># After</span>
+
+<span class="n">render</span> <span class="ss">errors: </span><span class="no">Schema</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="n">params</span><span class="p">).</span><span class="nf">errors</span><span class="p">.</span><span class="nf">to_h</span>
+<span class="n">render</span> <span class="ss">errors: </span><span class="no">Schema</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="n">params</span><span class="p">).</span><span class="nf">to_monad</span><span class="p">.</span><span class="nf">failure</span><span class="p">.</span><span class="nf">errors</span><span class="p">.</span><span class="nf">to_h</span>
+</code></pre></div></div>
+
+<p>I’ve used the scripts to help me look and trace those values:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ grep -rl 'Schema' ./**/*.rb | xargs grep -n '\.messages'
+$ grep -rl 'Schema' ./**/*.rb | xargs grep -n '\.errors'
+$ grep -rl 'Schema' ./**/*.rb | xargs grep -n '\.to_monad'
+$ grep -rl 'Schema' ./**/*.rb | xargs grep -n '\.failure'
+$ grep -rl 'Schema' ./**/*.rb | xargs grep -n '\.value_or'
+$ grep -rl 'Schema' ./**/*.rb | xargs grep -n '\.value!'
+</code></pre></div></div>
+
+<h2 id="refactoring-to-dry-validation">Refactoring to dry-validation</h2>
+
+<p>The steps above should be good enough to update most of the features, but if you ‘ve ever used <a href="https://dry-rb.org/gems/dry-validation/0.13/high-level-rules/">high-level rules</a>, <a href="https://dry-rb.org/gems/dry-validation/0.13/custom-validation-blocks/">validation blocks</a>, you have two options: either remove those features from your schemas, or use dry-validation 1.0. I decided to refactor most of my schemas, that’s what came out of it.</p>
+
+<p>There are things to keep in mind during the update:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">dry-validation</code> is a library to validate <em>domain</em> logic and rules. The core concept is a <code class="language-plaintext highlighter-rouge">Contract</code>.</li>
+  <li>All contracts must be instantiated — no more <code class="language-plaintext highlighter-rouge">Schema.call</code>. We need to use <code class="language-plaintext highlighter-rouge">Contract.new.call</code> now</li>
+  <li>The idiomatic way to define a contract is to use standard Ruby syntax: <code class="language-plaintext highlighter-rouge">class Contract &lt; Dry::Validation::Contract</code> as opposed to dry-schema’s <code class="language-plaintext highlighter-rouge">Dry::Schema.Params { }</code></li>
+</ul>
+
+<p><strong>Step 23</strong>. Update dependency injection. The new version uses <a href="http://dry-rb.org/gems/dry-initializer/">dry-initializer</a> under the hood, so it works like this:</p>
+
+<ul>
+  <li>use <code class="language-plaintext highlighter-rouge">option</code> for keyword arguments</li>
+  <li>use <code class="language-plaintext highlighter-rouge">param</code> for positional arguments</li>
+</ul>
+
+<p>You’ll have to pass the arguments when you instantiate the method</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Before</span>
+
+<span class="no">Schema</span> <span class="o">=</span> <span class="no">Dry</span><span class="o">::</span><span class="no">Validation</span><span class="o">.</span><span class="no">Schema</span> <span class="k">do</span>
+  <span class="n">configure</span> <span class="k">do</span>
+    <span class="n">option</span> <span class="ss">:repo</span>
+  <span class="k">end</span>
+
+  <span class="o">...</span>
+<span class="k">end</span>
+
+<span class="no">Schema</span><span class="p">.</span><span class="nf">with</span><span class="p">(</span><span class="ss">repo: </span><span class="n">my_repo</span><span class="p">).</span><span class="nf">call</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+<span class="c1"># After</span>
+
+<span class="k">class</span> <span class="nc">Contract</span> <span class="o">&lt;</span> <span class="no">Dry</span><span class="o">::</span><span class="no">Validation</span><span class="o">::</span><span class="no">Contract</span>
+  <span class="n">option</span> <span class="ss">:repo</span>
+<span class="k">end</span>
+
+<span class="n">contract</span> <span class="o">=</span> <span class="no">Contract</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">repo: </span><span class="n">repo</span><span class="p">)</span>
+<span class="n">contract</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>I used the script to find the files I need to refactor:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ grep -rl 'Schema' ./**/*.rb | xargs grep -n 'option :[[:alnum:]_]*$'
+</code></pre></div></div>
+
+<p><strong>Step 24</strong>. Rewrite rules and validations. I can’t provide a comprehensive migration guide because I’ve just refactored everything and tried to make my specs pass without giving it much thought.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Before</span>
+
+
+<span class="k">class</span> <span class="nc">CreditCardSchema</span> <span class="o">&lt;</span> <span class="no">Dry</span><span class="o">::</span><span class="no">Validation</span><span class="o">::</span><span class="no">Schema</span><span class="o">::</span><span class="no">Params</span>
+  <span class="n">configure</span> <span class="k">do</span>
+    <span class="n">config</span><span class="p">.</span><span class="nf">type_specs</span> <span class="o">=</span> <span class="kp">true</span>
+  <span class="k">end</span>
+
+  <span class="n">define!</span> <span class="k">do</span>
+    <span class="n">required</span><span class="p">(</span><span class="ss">:number</span><span class="p">,</span> <span class="ss">:string</span><span class="p">).</span><span class="nf">filled</span><span class="p">(</span><span class="ss">format?: </span><span class="sr">/\A\d{13,19}\z/</span><span class="err">)
+    r</span><span class="sr">e</span><span class="n">quired</span><span class="p">(</span><span class="ss">:month</span><span class="p">,</span> <span class="ss">:string</span><span class="p">).</span><span class="nf">filled</span><span class="p">(</span><span class="ss">format?: </span><span class="sr">/\A(0?[1-9]|1[012])\z/</span><span class="err">)
+
+    val</span><span class="sr">i</span><span class="n">date</span><span class="p">(</span><span class="ss">expired: </span><span class="sx">%i[year month]</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="o">|</span>
+      <span class="no">Date</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="s2">"20</span><span class="si">#{</span><span class="n">year</span><span class="si">}</span><span class="s2">"</span><span class="p">.</span><span class="nf">to_i</span><span class="p">,</span> <span class="n">month</span><span class="p">.</span><span class="nf">to_i</span><span class="p">).</span><span class="nf">end_of_month</span> <span class="o">&gt;=</span> <span class="no">Date</span><span class="p">.</span><span class="nf">current</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="c1"># After</span>
+<span class="k">class</span> <span class="nc">CreditCardSchema</span> <span class="o">&lt;</span> <span class="no">Dry</span><span class="o">::</span><span class="no">Validation</span><span class="o">::</span><span class="no">Contract</span>
+  <span class="n">params</span> <span class="k">do</span>
+    <span class="n">required</span><span class="p">(</span><span class="ss">:month</span><span class="p">).</span><span class="nf">filled</span><span class="p">(</span><span class="ss">:string</span><span class="p">,</span> <span class="ss">format?: </span><span class="sr">/\A(0?[1-9]|1[012])\z/</span><span class="err">)
+    r</span><span class="sr">e</span><span class="n">quired</span><span class="p">(</span><span class="ss">:year</span><span class="p">).</span><span class="nf">filled</span><span class="p">(</span><span class="ss">:string</span><span class="p">,</span> <span class="ss">format?: </span><span class="sr">/\A\d{2}\z/</span><span class="err">)
+  </span><span class="sr">en</span><span class="n">d</span>
+
+  <span class="n">rule</span><span class="p">(</span><span class="ss">:year</span><span class="p">,</span> <span class="ss">:month</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">year</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="ss">:year</span><span class="p">]</span>
+    <span class="n">month</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="ss">:month</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="no">Date</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="s2">"20</span><span class="si">#{</span><span class="n">year</span><span class="si">}</span><span class="s2">"</span><span class="p">.</span><span class="nf">to_i</span><span class="p">,</span> <span class="n">month</span><span class="p">.</span><span class="nf">to_i</span><span class="p">).</span><span class="nf">end_of_month</span> <span class="o">&lt;</span> <span class="no">Date</span><span class="p">.</span><span class="nf">now</span>
+      <span class="n">key</span><span class="p">(</span><span class="ss">:expired</span><span class="p">).</span><span class="nf">failure</span><span class="p">(</span><span class="ss">:expired</span><span class="p">)</span>
+      <span class="c1"># ^ a little duplication here to produce the expected error message</span>
+      <span class="c1"># without refactoring anything else</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>I used this script to search for all schemas that need rewriting:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ grep -rl 'Schema' ./**/*.rb | xargs grep -n 'rule\|validate('
+</code></pre></div></div>
+
+<p><strong>Step 25</strong> (optional). If you’re using Reform, you’re in for a disappointment, especially if you’ve been using its <code class="language-plaintext highlighter-rouge">dry-validation</code> DSL.</p>
+
+<p>We have Reform 2.2.4 with ActiveModel validations, so we <a href="https://github.com/Qlean/reform/">forked it</a> and removed all the dry-validation stuff. Feel free to fork and use!</p>
+
+<p><strong>Step 26</strong>. Fix the rest of failing specs. All done!</p>
+
+<h2 id="recap">Recap</h2>
+
+<p>The upgrade process took me about 3 work days of refactoring, and I was glad I learned basic <code class="language-plaintext highlighter-rouge">sed</code> to help me — it’s annoying to do so much manual work.</p>
+
+<p>However, I think the improvements are worth it. The ones I like the most:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">dry-types</code> is stricter and less verbose now — if you’re not including nominal types, then <code class="language-plaintext highlighter-rouge">Types::String</code> is the same as <code class="language-plaintext highlighter-rouge">Types::Strict::String</code></li>
+  <li>The known dry-validation bugs were fixed</li>
+  <li>Decreased complexity of schema validations</li>
+  <li>New library to design domain validations and contracts</li>
+</ul>
+
+<p>I urge you to try the new dry-rb gems — and write about your experience. If you’ve upgraded your gems and wrote a post about your journey and update process — please send me an email and I’ll add a link to your page. And of course, it would be great to see new contributions to <a href="https://github.com/dry-rb/dry-rb.org">official docs</a>.</p>
+
+<h2 id="references">References</h2>
+
+<ul>
+  <li><a href="https://solnic.codes/2019/01/31/introducing-dry-schema/">Introducing dry-schema</a> @ solnic.codes</li>
+  <li><a href="https://discourse.dry-rb.org/t/plans-for-dry-validation-dry-schema-a-new-gem/215">How it all started</a></li>
+  <li><a href="https://dry-rb.org/gems/dry-schema/">dry-schema</a></li>
+  <li><a href="https://dry-rb.org/gems/dry-validation/">dry-validation</a></li>
+  <li><a href="https://dry-rb.org/gems/dry-types/1.0/">dry-types</a></li>
+</ul>
+
+<p><strong>Update (01.06.2019)</strong>. <a href="https://github.com/flash-gordon">flash-gordon</a> pointed out that you don’t need to wrap config into the <code class="language-plaintext highlighter-rouge">configure</code> block. So I’ve replaced</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">define</span> <span class="k">do</span>
+  <span class="n">configure</span> <span class="k">do</span>
+    <span class="n">config</span><span class="p">.</span><span class="nf">xxx</span> <span class="o">=</span> <span class="n">yyy</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>with a less nested version:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="n">define</span> <span class="k">do</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">xxx</span> <span class="o">=</span> <span class="n">yyy</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p><strong>Update (07.06.2019)</strong>. <a href="https://github.com/solnic/">solnic</a> pointed out that I made a typo in <strong>Step 10</strong>: it used to say <code class="language-plaintext highlighter-rouge">dry_struct</code> instead of <code class="language-plaintext highlighter-rouge">dry_schema</code>. I’ve updated the step accordingly.</p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-05-31T06:48:00+00:00">May 31, 2019</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+        <a href="https://www.reddit.com/r/ruby/comments/bviy5r/dryrb_10_upgrading_validations_types_and_schemas/" class="btn btn--reddit" title="Discuss @ Reddit">
+            <i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> See discussion @ Reddit</span>
+        </a>
+    
+
+    <a href="https://twitter.com/intent/tweet?text=dry-rb+1.0%3A+upgrading+validations%2C+types+and+schemas%20https%3A%2F%2Fwww.morozov.is%2F2019%2F05%2F31%2Fupgrading-dry-gems.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+    <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.morozov.is%2F2019%2F05%2F31%2Fupgrading-dry-gems.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fwww.morozov.is%2F2019%2F05%2F31%2Fupgrading-dry-gems.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/2019/01/11/partial-application-in-ruby.html" class="pagination--pager" title="Partial application in Ruby
+">Previous</a>
+    
+    
+      <a href="/2020/04/01/should-i-really-use-monads.html" class="pagination--pager" title="Should I really use monads?
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2021 Igor Morozov. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

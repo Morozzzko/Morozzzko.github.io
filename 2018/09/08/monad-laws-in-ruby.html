@@ -1,0 +1,579 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.21.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Monad laws in Ruby - Igor writing about things</title>
+<meta name="description" content="I’ve been using monads in Ruby since May 2016, but I haven’t really understood the theoretical basis for them. I thought about learning Haskell, but I gave up pretty soon: I didn’t think I would benefit from it. Moreover, we started using ReasonML in Planado, which improved my functional programming skills to the point I didn’t really need a new functional language in my life. Why bother with learning Haskell when you know Ruby and Reason, right?  In early 2018, I became curious about theoretical aspects of functional programming, especially the monad laws. That’s when I realized that I really needed Haskell, mainly because everyone used it in their articles. It was extremely annoying because I couldn’t even read the code. How was I going to apply those things in Ruby if I can’t even understand what they’re saying? So I got a little help.  I grabbed my laptop and a friend who knows Haskell and figured out how to describe the three monad laws using Ruby’s dry-monads gem.">
+
+
+  <meta name="author" content="Igor Morozov">
+  
+  <meta property="article:author" content="Igor Morozov">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Igor writing about things">
+<meta property="og:title" content="Monad laws in Ruby">
+<meta property="og:url" content="https://www.morozov.is/2018/09/08/monad-laws-in-ruby.html">
+
+
+  <meta property="og:description" content="I’ve been using monads in Ruby since May 2016, but I haven’t really understood the theoretical basis for them. I thought about learning Haskell, but I gave up pretty soon: I didn’t think I would benefit from it. Moreover, we started using ReasonML in Planado, which improved my functional programming skills to the point I didn’t really need a new functional language in my life. Why bother with learning Haskell when you know Ruby and Reason, right?  In early 2018, I became curious about theoretical aspects of functional programming, especially the monad laws. That’s when I realized that I really needed Haskell, mainly because everyone used it in their articles. It was extremely annoying because I couldn’t even read the code. How was I going to apply those things in Ruby if I can’t even understand what they’re saying? So I got a little help.  I grabbed my laptop and a friend who knows Haskell and figured out how to describe the three monad laws using Ruby’s dry-monads gem.">
+
+
+
+  <meta property="og:image" content="https://www.morozov.is/assets/images/previews/monad_laws.png">
+
+
+
+
+
+  <meta property="article:published_time" content="2018-09-08T10:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="https://www.morozov.is/2018/09/08/monad-laws-in-ruby.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Igor Morozov",
+      "url": "https://www.morozov.is/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Igor writing about things Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <a href="/">
+          <img src="/assets/images/bio-photo.jpg" alt="Igor Morozov" itemprop="image">
+        </a>
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <a href="/"><h3 class="author__name" itemprop="name">Igor Morozov</h3></a>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>I’m a software engineer familiar with Ruby, Python, JavaScript and ReasonML.
+<br />
+I’m enthusiastic about functional programming, Ruby, DDD and emotions.
+<br />
+I’m not much of a Rails person. dry-rb, mostly.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:igor@morozov.is">
+            <meta itemprop="email" content="igor@morozov.is" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/morozzzko" itemprop="sameAs" rel="nofollow noopener noreferrer">
+            <i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/igor-morozov" itemprop="sameAs" rel="nofollow noopener noreferrer">
+            <i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/Morozzzko" itemprop="sameAs" rel="nofollow noopener noreferrer">
+            <i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+<li>
+  <a href="/talks" itemprop="sameAs">
+    <i class="fas fa-chalkboard-teacher" aria-hidden="true"></i> Talks
+  </a>
+</li>
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Monad laws in Ruby">
+    <meta itemprop="description" content="I’ve been using monads in Ruby since May 2016, but I haven’t really understood the theoretical basis for them. I thought about learning Haskell, but I gave up pretty soon: I didn’t think I would benefit from it. Moreover, we started using ReasonML in Planado, which improved my functional programming skills to the point I didn’t really need a new functional language in my life. Why bother with learning Haskell when you know Ruby and Reason, right?In early 2018, I became curious about theoretical aspects of functional programming, especially the monad laws. That’s when I realized that I really needed Haskell, mainly because everyone used it in their articles. It was extremely annoying because I couldn’t even read the code. How was I going to apply those things in Ruby if I can’t even understand what they’re saying? So I got a little help.I grabbed my laptop and a friend who knows Haskell and figured out how to describe the three monad laws using Ruby’s dry-monads gem.">
+    <meta itemprop="datePublished" content="2018-09-08T10:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Monad laws in Ruby
+</h1>
+          
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          5 minute read
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>I’ve been using monads in Ruby since May 2016, but I haven’t really understood the theoretical basis for them. I thought about learning Haskell, but I gave up pretty soon: I didn’t think I would benefit from it. Moreover, we started using ReasonML in Planado, which improved my functional programming skills to the point I didn’t really need a new functional language in my life. Why bother with learning Haskell when you know Ruby and Reason, right?</p>
+
+<p>In early 2018, I became curious about theoretical aspects of functional programming, especially the monad laws. That’s when I realized that I <em>really</em> needed Haskell, mainly because everyone used it in their articles. It was extremely annoying because I couldn’t even read the code. How was I going to apply those things in Ruby if I can’t even understand what they’re saying? So I got a little help.</p>
+
+<p>I grabbed my laptop and a friend who knows Haskell and figured out how to describe the three monad laws using Ruby’s <a href="https://dry-rb.org/gems/dry-monads/1.0/">dry-monads</a> gem.</p>
+
+<!-- excerpt -->
+
+<h2 id="monads">Monads</h2>
+
+<p>Monad is a concept from category theory. Some people describe it as a “monoid in the category of endofunctors”, some call it “computation context”, and some just call them “result objects”. I believe that each of those definitions is correct to some extent. However, neither of them explain the practical side of monads.</p>
+
+<p>As of September 2018, dry-monads gem contains 5 monads:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">Maybe</code> — for nil-safe computations</li>
+  <li><code class="language-plaintext highlighter-rouge">Result</code> – for expressing errors using types and result objects</li>
+  <li><code class="language-plaintext highlighter-rouge">Try</code> – to describe computations which may result in an exception</li>
+  <li><code class="language-plaintext highlighter-rouge">List</code> – for idiomatic typed lists</li>
+  <li><code class="language-plaintext highlighter-rouge">Task</code> – for asynchronous operations</li>
+</ul>
+
+<p>I guess that <code class="language-plaintext highlighter-rouge">Result</code> is the most popular monad in Ruby, especially since railway-oriented programming has become such a hot topic in Ruby. So I will use it to describe what’s going on.</p>
+
+<h2 id="result">Result</h2>
+
+<p>Result, also known as Either, is a monad helpful for building computations that might fail at some point. It is one of the most important parts of railway-oriented programming. Result has two constructors: <code class="language-plaintext highlighter-rouge">Failure(a)</code> and <code class="language-plaintext highlighter-rouge">Success(b)</code>. Both of those constructors encapsulate a value of type <code class="language-plaintext highlighter-rouge">a</code> or <code class="language-plaintext highlighter-rouge">b</code>.</p>
+
+<p>Result has a lot of useful methods, but there’s one that’s the most important: <code class="language-plaintext highlighter-rouge">#bind</code> – an essential part of monads. It lets us compose computations by applying a block to a value inside the <code class="language-plaintext highlighter-rouge">Success</code>.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'dry/monads/result'</span>
+<span class="kp">extend</span> <span class="no">Dry</span><span class="o">::</span><span class="no">Monads</span><span class="o">::</span><span class="no">Result</span><span class="o">::</span><span class="no">Mixin</span>
+
+<span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+  <span class="no">Success</span><span class="p">(</span><span class="n">x</span><span class="p">).</span><span class="nf">bind</span> <span class="k">do</span> <span class="o">|</span><span class="n">value</span><span class="o">|</span>
+    <span class="no">Success</span><span class="p">(</span><span class="n">value</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+  <span class="k">end</span><span class="p">.</span><span class="nf">bind</span> <span class="k">do</span> <span class="o">|</span><span class="n">value</span><span class="o">|</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mi">50</span>
+      <span class="no">Failure</span><span class="p">(</span><span class="ss">:number_too_large</span><span class="p">)</span>
+    <span class="k">else</span>
+      <span class="no">Success</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">foo</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="c1"># =&gt; Success(25)</span>
+
+<span class="n">foo</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="c1"># =&gt; Failure(:number_too_large)</span>
+</code></pre></div></div>
+
+<p>A couple of things to keep in mind when working with <code class="language-plaintext highlighter-rouge">#bind</code>:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">Failure#bind</code> doesn’t do anything – it’s a no-op. Use <code class="language-plaintext highlighter-rouge">Failure#or</code> as an alternative.</li>
+  <li>The block <em>must</em> return a <code class="language-plaintext highlighter-rouge">Result</code>. Technically, it can return any value – a number, a string, a <code class="language-plaintext highlighter-rouge">Maybe</code> monad – but your code will break if you fail to follow the rule.</li>
+</ul>
+
+<h2 id="three-axioms">Three axioms</h2>
+
+<p>Practically, a monad is a data type which obeys three axioms called ”monad laws”:</p>
+
+<ul>
+  <li>Left identity: <code class="language-plaintext highlighter-rouge">return a &gt;&gt;= f ≡ f a</code></li>
+  <li>Right identity <code class="language-plaintext highlighter-rouge">m &gt;&gt;= return ≡ m</code></li>
+  <li>Associativity: <code class="language-plaintext highlighter-rouge">(m &gt;&gt;= f) &gt;&gt;= g ≡ m &gt;&gt;= ( \x -&gt; f x &gt;&gt;= g)</code></li>
+</ul>
+
+<p>Those things sound pretty basic when you know Haskell and category theory, but might get extremely complicated if you don’t.</p>
+
+<p>The first problem I’ve had with those laws: I couldn’t even read them because I didn’t know haskell. Here’s a cheatsheet that helped me read and understand the formulae:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">≡</code> means that expressions are the same</li>
+  <li><code class="language-plaintext highlighter-rouge">return</code> is a default constructor. For <code class="language-plaintext highlighter-rouge">Result</code>, <code class="language-plaintext highlighter-rouge">return</code> is the <code class="language-plaintext highlighter-rouge">#Success</code> method</li>
+  <li><code class="language-plaintext highlighter-rouge">&gt;&gt;=</code> is a bind operator. In Ruby, it’s a method <code class="language-plaintext highlighter-rouge">#bind</code>.</li>
+  <li><code class="language-plaintext highlighter-rouge">\x -&gt; ...</code> is an anonymous function. Read <code class="language-plaintext highlighter-rouge">-&gt; (x) { ... }</code></li>
+  <li><code class="language-plaintext highlighter-rouge">f</code> is a function that accepts a value and returns <code class="language-plaintext highlighter-rouge">Result</code></li>
+  <li><code class="language-plaintext highlighter-rouge">m</code> is a value of type <code class="language-plaintext highlighter-rouge">Result</code></li>
+</ul>
+
+<h2 id="left-identity">Left identity</h2>
+
+<p>Left identity is an axiom which states that <code class="language-plaintext highlighter-rouge">return a &gt;&gt;= f</code> is identical to <code class="language-plaintext highlighter-rouge">f a</code>.</p>
+
+<p>To see what that means, let’s say we have a function <code class="language-plaintext highlighter-rouge">f</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">f</span> <span class="o">=</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="p">{</span> <span class="no">Success</span><span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<p>There are two ways to call use the function:</p>
+
+<ul>
+  <li>Call it using plain Ruby</li>
+  <li>Wrap an argument into a monad and pass the function to <code class="language-plaintext highlighter-rouge">#bind</code></li>
+</ul>
+
+<p>The law says that those are equal:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Success</span><span class="p">(</span><span class="mi">5</span><span class="p">).</span><span class="nf">bind</span><span class="p">(</span><span class="o">&amp;</span><span class="n">f</span><span class="p">)</span> <span class="c1"># =&gt; Success(25)</span>
+<span class="n">f</span><span class="o">.</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="c1"># =&gt; Success(25)</span>
+</code></pre></div></div>
+
+<p>Voilà! That’s it. Putting the value in the default context (<code class="language-plaintext highlighter-rouge">Success</code>) and feeding it to a function is the same as applying the function to the value.</p>
+
+<p>What it means:</p>
+
+<ul>
+  <li>there’s nothing special about <code class="language-plaintext highlighter-rouge">#bind</code> – it’s just a fancy method call</li>
+  <li>if you need to use a monadic function, you don’t need to wrap the argument into a monad</li>
+</ul>
+
+<h2 id="right-identity">Right identity</h2>
+
+<p>Right identity states that <code class="language-plaintext highlighter-rouge">m &gt;&gt;= return</code> is the same as <code class="language-plaintext highlighter-rouge">m</code>.</p>
+
+<p>That means that if we have a <code class="language-plaintext highlighter-rouge">Result</code> object and try to bind it to a <code class="language-plaintext highlighter-rouge">#Success</code>, the operation won’t change anything.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Success</span><span class="p">(</span><span class="mi">2</span><span class="p">).</span><span class="nf">bind</span><span class="p">(</span><span class="o">&amp;</span><span class="nb">method</span><span class="p">(</span><span class="ss">:Success</span><span class="p">))</span>
+<span class="c1"># =&gt; Success(2)</span>
+
+<span class="no">Success</span><span class="p">(</span><span class="mi">2</span><span class="p">).</span><span class="nf">bind</span><span class="p">(</span><span class="o">&amp;</span><span class="no">Dry</span><span class="o">::</span><span class="no">Monads</span><span class="o">::</span><span class="no">Success</span><span class="p">)</span>
+<span class="c1"># =&gt; Success(2)</span>
+
+<span class="no">Failure</span><span class="p">(</span><span class="mi">2</span><span class="p">).</span><span class="nf">bind</span><span class="p">(</span><span class="o">&amp;</span><span class="nb">method</span><span class="p">(</span><span class="ss">:Success</span><span class="p">))</span>
+<span class="c1"># =&gt; Failure(2)</span>
+</code></pre></div></div>
+
+<p>I haven’t figured out the practical value of this yet. If you have any ideas, send me an email at <a href="mailto:igor@morozov.is">igor@morozov.is</a>.</p>
+
+<h2 id="associativity">Associativity</h2>
+
+<p>The fanciest of the three, associativity axiom states that <code class="language-plaintext highlighter-rouge">(m &gt;&gt;= f) &gt;&gt;= g</code> and <code class="language-plaintext highlighter-rouge">m &gt;&gt;= ( \x -&gt; f x &gt;&gt;= g)</code> are the same.</p>
+
+<p>The trickiest part for me was <code class="language-plaintext highlighter-rouge">\x -&gt; f x &gt;&gt;= g</code>, which turned out to be an anonymous function which accepts <code class="language-plaintext highlighter-rouge">x</code> and has a body <code class="language-plaintext highlighter-rouge">f x &gt;&gt;= g</code>.</p>
+
+<p>This is how the Ruby equivalent of the law would look like:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># prerequisites</span>
+
+<span class="n">m</span> <span class="o">=</span> <span class="no">Success</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="p">{</span> <span class="no">Success</span><span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="p">}</span>
+<span class="n">g</span> <span class="o">=</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="p">{</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">50</span> <span class="p">?</span> <span class="no">Success</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="p">:</span> <span class="no">Failure</span><span class="p">(</span><span class="ss">:number_too_large</span><span class="p">)</span> <span class="p">}</span>
+
+<span class="c1"># (m &gt;&gt;= f) &gt;&gt;= g</span>
+
+<span class="p">(</span><span class="n">m</span><span class="p">.</span><span class="nf">bind</span><span class="p">(</span><span class="o">&amp;</span><span class="n">f</span><span class="p">)).</span><span class="nf">bind</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g</span><span class="p">)</span>
+<span class="c1"># =&gt; Success(4)</span>
+
+<span class="c1"># m &gt;&gt;= ( \x -&gt; f x &gt;&gt;= g)</span>
+
+<span class="n">m</span><span class="p">.</span><span class="nf">bind</span> <span class="k">do</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span>
+  <span class="n">f</span><span class="o">.</span><span class="p">(</span><span class="n">x</span><span class="p">).</span><span class="nf">bind</span><span class="p">(</span><span class="o">&amp;</span><span class="n">g</span><span class="p">)</span>
+<span class="k">end</span> <span class="c1"># =&gt; Success(4)</span>
+</code></pre></div></div>
+
+<p>To put it the other way: if you have a chain of computations, it doesn’t matter how you nest them – the result would always stay the same.</p>
+
+<h2 id="recap">Recap</h2>
+
+<p>A monad is a powerful construct from category theory which can be used as mathematically sound result objects. In Ruby, <a href="https://dry-rb.org/gems/dry-monads/1.0/">dry-monads</a> is the de-facto standard gem, which gives us the <code class="language-plaintext highlighter-rouge">Result</code> (<code class="language-plaintext highlighter-rouge">Either</code>), <code class="language-plaintext highlighter-rouge">Maybe</code>, <code class="language-plaintext highlighter-rouge">Task</code>, <code class="language-plaintext highlighter-rouge">Try</code> and <code class="language-plaintext highlighter-rouge">List</code> monads.</p>
+
+<p>To be called a monad, the data type must conform to three axioms called “monad laws”:</p>
+
+<blockquote>
+  <p><strong>Left identity</strong>: wrapping a value into a monad and binding it to a function is the same as applying the function to the value.</p>
+</blockquote>
+
+<blockquote>
+  <p><strong>Right identity</strong>: feeding a monadic value to a default constructor doesn’t do anything.</p>
+</blockquote>
+
+<blockquote>
+  <p><strong>Associativity</strong>: you can nest your computations and binds however you like.</p>
+</blockquote>
+
+<p>While those laws have little to no practical value for a casual user, reading about the principles behind it all might help you join the world of functional programming and category theory. Definitely helps me!</p>
+
+<p>Cheers!</p>
+
+<h2 id="references">References</h2>
+
+<ul>
+  <li><a href="https://fsharpforfunandprofit.com/rop/">Best resource on Railway Oriented Programming</a></li>
+  <li><a href="https://lambdacast.com">Lambdacast: good podcast for FP beginners</a></li>
+  <li><a href="https://miklos-martin.github.io/learn/fp/2016/03/10/monad-laws-for-regular-developers.html">Miklós Martin on monad Laws</a></li>
+  <li><a href="http://learnyouahaskell.com/a-fistful-of-monads#monad-laws">A fistful of monads</a></li>
+  <li><a href="https://wiki.haskell.org/Monad_laws">Haskell wiki</a></li>
+  <li><a href="https://dry-rb.org/gems/dry-monads/1.0/">dry-monads</a></li>
+  <li><a href="http://trailblazer.to/gems/operation/2.0/">Trailblazer operations</a></li>
+  <li><a href="https://github.com/dry-rb/dry-transaction">dry-transaction</a></li>
+</ul>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2018-09-08T10:00:00+00:00">September 8, 2018</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+        <a href="https://www.reddit.com/r/ruby/comments/9efqtf/monad_laws_in_ruby/" class="btn btn--reddit" title="Discuss @ Reddit">
+            <i class="fab fa-fw fa-reddit" aria-hidden="true"></i><span> See discussion @ Reddit</span>
+        </a>
+    
+
+    <a href="https://twitter.com/intent/tweet?text=Monad+laws+in+Ruby%20https%3A%2F%2Fwww.morozov.is%2F2018%2F09%2F08%2Fmonad-laws-in-ruby.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+    <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.morozov.is%2F2018%2F09%2F08%2Fmonad-laws-in-ruby.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fwww.morozov.is%2F2018%2F09%2F08%2Fmonad-laws-in-ruby.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/2018/05/27/do-notation-ruby.html" class="pagination--pager" title="Railway Oriented programming in Ruby: do notation vs dry-transaction
+">Previous</a>
+    
+    
+      <a href="/2019/01/11/partial-application-in-ruby.html" class="pagination--pager" title="Partial application in Ruby
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2021 Igor Morozov. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

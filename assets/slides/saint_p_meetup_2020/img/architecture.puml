@@ -1,0 +1,55 @@
+@startuml(id=Bakersinc-Container)
+title Bakers inc. - Containers
+
+skinparam {
+  shadowing false
+  arrowFontSize 10
+  defaultTextAlignment center
+  wrapWidth 200
+  maxMessageSize 100
+}
+hide stereotype
+top to bottom direction
+skinparam rectangle<<1>> {
+  BackgroundColor #08427b
+  FontColor #ffffff
+  BorderColor #052E56
+}
+skinparam rectangle<<3>> {
+  BackgroundColor #438dd5
+  FontColor #ffffff
+  BorderColor #2E6295
+  roundCorner 20
+}
+skinparam rectangle<<4>> {
+  BackgroundColor #438dd5
+  FontColor #ffffff
+  BorderColor #2E6295
+  roundCorner 20
+}
+skinparam rectangle<<5>> {
+  BackgroundColor #438dd5
+  FontColor #ffffff
+  BorderColor #2E6295
+  roundCorner 20
+}
+skinparam rectangle<<6>> {
+  BackgroundColor #438dd5
+  FontColor #ffffff
+  BorderColor #2E6295
+  roundCorner 20
+}
+left to right direction
+rectangle "==User\n<size:10>[Person]</size>" <<1>> as 1
+package "Bakers inc.\n[Software System]" {
+  rectangle "==Backend\n<size:10>[Container: Roda, rom-rb]</size>" <<5>> as 5
+  rectangle "==Database\n<size:10>[Container]</size>" <<6>> as 6
+  rectangle "==Mobile App\n<size:10>[Container: React Native]</size>" <<4>> as 4
+  rectangle "==SPA\n<size:10>[Container: React]</size>" <<3>> as 3
+}
+5 .[#707070].> 6 : "Reads from and writes to"
+4 .[#707070].> 5 : "Fetches & sends data"
+3 .[#707070].> 5 : "Fetches & sends data"
+1 .[#707070].> 4 : "Uses"
+1 .[#707070].> 3 : "Uses"
+@enduml

@@ -1,0 +1,377 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.21.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>My Ruby Story - Igor writing about things</title>
+<meta name="description" content="My Ruby Story is a podcast that discovers stories of  Ruby developers from around the world. This show is a great source of inspiration for new developers, as it shows the incredible variety of reasons people got into professional software engineering.  I was featured in My Ruby Story episode #088, where I explained how I got into programming in general, and how I’ve become a Ruby developer.    TL;DL     Wanted to become a programmer since I was around 9 because “programmers make games”   Started with scripts and game modes San Andreas Multiplayer   Advanced into web development with PHP, jQuery   Learned different languages in parallel, including in university   Fell in love with Python   Tried to get a job as Python developer, they offered Ruby. I accepted   Links     https://devchat.tv/my-ruby-story/mrs-088-igor-morozov/">
+
+
+  <meta name="author" content="Igor Morozov">
+  
+  <meta property="article:author" content="Igor Morozov">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Igor writing about things">
+<meta property="og:title" content="My Ruby Story">
+<meta property="og:url" content="https://www.morozov.is/talks/my-ruby-story-2019">
+
+
+  <meta property="og:description" content="My Ruby Story is a podcast that discovers stories of  Ruby developers from around the world. This show is a great source of inspiration for new developers, as it shows the incredible variety of reasons people got into professional software engineering.  I was featured in My Ruby Story episode #088, where I explained how I got into programming in general, and how I’ve become a Ruby developer.    TL;DL     Wanted to become a programmer since I was around 9 because “programmers make games”   Started with scripts and game modes San Andreas Multiplayer   Advanced into web development with PHP, jQuery   Learned different languages in parallel, including in university   Fell in love with Python   Tried to get a job as Python developer, they offered Ruby. I accepted   Links     https://devchat.tv/my-ruby-story/mrs-088-igor-morozov/">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2019-05-14T00:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="https://www.morozov.is/talks/my-ruby-story-2019">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Igor Morozov",
+      "url": "https://www.morozov.is/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Igor writing about things Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <a href="/">
+          <img src="/assets/images/bio-photo.jpg" alt="Igor Morozov" itemprop="image">
+        </a>
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <a href="/"><h3 class="author__name" itemprop="name">Igor Morozov</h3></a>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>I’m a software engineer familiar with Ruby, Python, JavaScript and ReasonML.
+<br />
+I’m enthusiastic about functional programming, Ruby, DDD and emotions.
+<br />
+I’m not much of a Rails person. dry-rb, mostly.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:igor@morozov.is">
+            <meta itemprop="email" content="igor@morozov.is" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/morozzzko" itemprop="sameAs" rel="nofollow noopener noreferrer">
+            <i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/igor-morozov" itemprop="sameAs" rel="nofollow noopener noreferrer">
+            <i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/Morozzzko" itemprop="sameAs" rel="nofollow noopener noreferrer">
+            <i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+<li>
+  <a href="/talks" itemprop="sameAs">
+    <i class="fas fa-chalkboard-teacher" aria-hidden="true"></i> Talks
+  </a>
+</li>
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="My Ruby Story">
+    <meta itemprop="description" content="My Ruby Story is a podcast that discovers stories of Ruby developers from around the world. This show is a great source of inspiration for newdevelopers, as it shows the incredible variety of reasons people got into professionalsoftware engineering.I was featured in My Ruby Story episode #088, whereI explained how I got into programming in general, and how I’ve become a Ruby developer.TL;DL  Wanted to become a programmer since I was around 9 because “programmers make games”  Started with scripts and game modes San Andreas Multiplayer  Advanced into web development with PHP, jQuery  Learned different languages in parallel, including in university  Fell in love with Python  Tried to get a job as Python developer, they offered Ruby. I acceptedLinks  https://devchat.tv/my-ruby-story/mrs-088-igor-morozov/">
+    <meta itemprop="datePublished" content="2019-05-14T00:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">My Ruby Story
+</h1>
+          
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p><a href="https://devchat.tv/my-ruby-story/">My Ruby Story</a> is a podcast that discovers stories of 
+Ruby developers from around the world. This show is a great source of inspiration for new
+developers, as it shows the incredible variety of reasons people got into professional
+software engineering.</p>
+
+<p>I was featured in <a href="https://devchat.tv/my-ruby-story/mrs-088-igor-morozov/">My Ruby Story episode #088</a>, where
+I explained how I got into programming in general, and how I’ve become a Ruby developer.</p>
+
+<audio src="https://devchat.cachefly.net/my-ruby-story/MRS_088_Igor_Morozov.mp3" controls=""></audio>
+
+<h2 id="tldl">TL;DL</h2>
+
+<ul>
+  <li>Wanted to become a programmer since I was around 9 because “programmers make games”</li>
+  <li>Started with scripts and game modes San Andreas Multiplayer</li>
+  <li>Advanced into web development with PHP, jQuery</li>
+  <li>Learned different languages in parallel, including in university</li>
+  <li>Fell in love with Python</li>
+  <li>Tried to get a job as Python developer, they offered Ruby. I accepted</li>
+</ul>
+
+<h2 id="links">Links</h2>
+
+<ul>
+  <li><a href="https://devchat.tv/my-ruby-story/mrs-088-igor-morozov/">https://devchat.tv/my-ruby-story/mrs-088-igor-morozov/</a></li>
+</ul>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-05-14T00:00:00+00:00">May 14, 2019</time></p>
+
+
+      </footer>
+
+      
+
+      
+  <nav class="pagination">
+    
+      <a href="/talks/ruby-rogues-2019" class="pagination--pager" title="Ruby Rogues
+">Previous</a>
+    
+    
+      <a href="/talks/saint-p-meetup-2020" class="pagination--pager" title="Saint P Ruby Meetup 2020 Fall [RU]
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2021 Igor Morozov. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>
