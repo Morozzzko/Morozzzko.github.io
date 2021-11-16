@@ -13,7 +13,9 @@ I've had countless arguments about software engineering, and "service objects" a
 * _The practice_
 * The next level
 
-Right now, I want to demonstrate how to demonstrate how to apply those principles _in practice_.
+Right now, I want to demonstrate how to demonstrate how to apply those principles _in practice_. 
+
+This article may read like a tutorial on adding service objects to Rails app.
 
 <!-- excerpt -->
 
@@ -134,11 +136,11 @@ This should be enough for the whole client-server communication.
 In real life, we'll also have multiple ways to communicate that the baker has entered the "danger zone" or that they've been blocked. Let's assume that this communication goes through push notifications and text messages, and never queried via API.
 
 
-# Implementation: HTTP / controllers
+# Implementation: bridge to existing code
 
-In this part we'll draft the controller code and explain what's going on there.
+Aside from writing a lot of new code, we need to integrate into existing Ruby code. Let's see how we deal with it.
 
-Here's how order-completion part looks right now:
+Here's an existing order-completion code. We've had it before starting work on the feature:
 
 ```ruby
 # app/controllers/api/bakers/orders_controller.rb
@@ -156,162 +158,277 @@ module API
 end
 ```
 
-There's not much to this code: it calls a method to complete the order. Right now we need two things: write the code which sends the email, and _call it_.
+There's not much to this code: it calls a method to complete the order. 
 
-There are several ways to do that:
+Right now we need two things: write the code which sends the email, and _call it_. There are several ways to do that:
 
 **Call from controller**. We can call our service object right after we call `order.complete!`. It will become a burder right after you use `#complete!` in any other context. 
 
-**Callbacks**. If a model has a callback for `order_completed`, then it _might_ be a solution. It's very likely that your team doesn't like callbacks, but they may work _perfectly_ in some codebases. 
+**Callbacks**. If a model has a callback for `order_completed`, then it _might_ be a solution. It's very likely that your team doesn't like callbacks, but they may work perfectly in _some_ codebases. 
 
 **Event bus**. wisper, dry-events, kafka, zeromq, redis, sidekiq – whatever floats your boat. In this approach, `order#complete!` will publish an event. I prefer this solution even in monoliths. However, our app doesn't have an event bus, so we'll skip this option.
 
 **Call from `#complete!`**. This is probably the most suitable solution here, as it makes sure that we get the same predictable behavior everywhere. It _looks_ worse than callbacks or event bus, but it'll work for most teams.
 
-Let's see the code which handles the first part: sending the email.
+There are also other ways and DSLs like [AASM](https://github.com/aasm/aasm) which may trigger the code.
+
+Either way, here's what it might look like:
 
 ```ruby
-# app/operations/quality_and_motivation/order_completed.rb
+# app/models/order.rb
+
+class Order < ApplicationRecord
+  def complete!
+    ...
+    on_completed
+  end
+
+  private
+
+  def on_completed
+    # what has to go there?
+  def
+end
+```
+
+Now, we'll need to write some code which we'll call inside `on_completed`. 
+
+Before we go on, we need to figure out the naming. Since we're developing "quality and motivation" features, let's put it in the corresponding module: `QualityAndMotivation`. 
+
+We've got at least two options of naming our class:
+
+* `SendReviewEmailToCustomer`, which is verbose, but clearly indicates what's going on
+* `OrderCompleted`, which doesn't tell us _what's_ going on inside, but tells us _when_ the logic should be called
+
+I suggest we use `OrderCompleted`, practically making it an _event_. I prefer this way for a number of reasons.
+
+**The name makes it easier to search** related files. Whenever we want to find all things which happen when order is completed, we can just search for files containing `OrderCompleted` and dig from there.
+
+**Project becomes easier to explore**. The name is an answer to "When exactly do we use the code?". 
+
+There's a significant downside, though.
+
+**You have to dig in to figure out what it does**. Usually when we see a method call, we can figure out the side-effects and what exactly the method does. If we see `SendReviewEmailToCustomer`, then it's obvious what's going on. With `OrderComplete`? Not so much. 
+
+It's okay, though. It helps us figure out _the important_ parts of the process. Otherwise, we'd have to ask "is sending review email to customer a crucial part of order completing process?".
+
+So here's the last reason to use event-centered naming:
+
+**It helps us tell what's important and what's not**. If you decide to test `Order#complete`, you _know_ you can just stub `QualityAndMotivation::OrderCompleted` to do nothing. 
+
+
+```ruby
+# app/<we_will_decide_later>/quality_and_motivation/order_completed.rb
 
 module QualityAndMotivation
   class OrderCompleted
-    attr_reader :send_email, :template_name
+    attr_reader :send_email
 
-    def initialize(send_email:, template_name:)
+    def initialize(send_email:)
       @send_email = send_email
-      @template_name = template_name
     end
 
+    # we'll discuss parts above later
+
     def call(order)
-      send_email.call(order.user, template_name)
+      send_email.call(
+        order.user, 
+        template: 'order_completed', 
+        locals: { baker_names: ..., scheduled_at: order.scheduled_at }
+      )
 
       :success
     end
   end
 end
 
+# app/models/order.rb
+
+class Order < ...
+  ...
+  def on_completed
+    QualityAndMotivation::OrderCompleted.new(
+      send_email: SendEmail.new,
+    ).call(self)
+  end
+end
 ```
 
-We've got two important parts here: the `OrderCompleted` handler and the controller. 
+That's it. We've integrated new code into an existing process. Let's recap
 
-**The handler** is just a service object which receives two options:
+* We named our service object after an event. The namespace represents the _context_ in which we handle the event – quality and motivation
+* We've decided to put a call to our service object to a model method. It's okay because we don't have an event bus or other service objects
+* We _have not_ given a name to the _directory_ for the newly created files
+* We don't handle any errors. If email sending fails, the controller will handle it manually
 
-1. The `send_email` component, which is a callable instance. We expect that it's a function to send an email to a user. It sends an email using a provided email template.
-2. The email template name
+# Implementation: all-new code
 
-It doesn't do anything except send an email with the given template, and return `:success` to indicate that everything went smoothly.
+Now we need to implement the new logic: which will handle newly received logic. There are two parts: a service object and controller.
 
-I don't want to use exceptions or anything else in the logic, so I'm using trivial data structures to return values.
-{: .notice-info }
-
-**The controller** class stores the configured service object in a constant, and calls it after the event has happened.
-
-This logic is pretty straightforward. `OrderCompleted` looks like callback and its nature is pretty close, except it doesn't just happen manually and you have a total control.
-
-Controller for rating the order is going to look similar:
+Controller will look pretty straightforward: it just instantiates service object and calls it, handling the result in a way.
 
 ```ruby
-# app/controllers/web/orders/rating_controller.rb
-module Web
-  module Orders
-    class RatingController < ApplicationController
-      CustomerSubmittedRating = QualityAndMotivation::CustomerSubmittedRating.new(order_rating_repo: Order, period_to_rate_days: 7)
+# app/controllers/api/customers/orders/rating_controller.rb
 
-      def complete
-        CustomerSubmittedRating.call(current_order, rating)
+module API
+  module Customers
+    module Orders
+      class RatingController < ApplicationController
+        def complete
+          case customer_submitted_rating.call(current_order, prepared_params[:rating])
+          in :period_to_rate_expired
+            render ...
+          in :success
+            render ...
+          end
+        end
 
-        render ...
-      end
+        private
 
-      private
+        def customer_submitted_rating
+          QualityAndMotivation::CustomerSubmittedRating.new(order_rating: OrderRating, period_to_rate_days: 7)
+        end
 
-      def rating
-        params.require(:rating)
+        def prepared_params
+          params.require(:rating)
+        end
       end
     end
   end
 end
 ```
 
-
-// ///////// TODO
-
+Here's how  `CustomerSubmittedRating` service object might look: it accepts or rejects the rating, considering the duration between current time and rating.
 
 ```ruby
 module QualityAndMotivation
   class CustomerSubmittedRating
-    attr_reader :order_rating_repo, :period_to_rate_days
+    attr_reader :period_to_rate_days, :order_rating
 
-    def initialize(order_rating_repo:, period_to_rate_days:)
-      @order_rating_repo = order_rating_repo
-      @period_to_rate_days = @period_to_rate_days
+    def initialize(period_to_rate_days:, order_rating:)
+      @period_to_rate_days = period_to_rate_days
+      @order_rating = order_rating
     end
 
     def call(order, rating)
-      if still_eligible_for_rating?(order)
-        recored_rating = order_rating_repo.create(
-          value: rating,
-          order: order
-        )
-
-        {
-          result: :customer_rated_order,
-          rating: recorded_rating
-        }
+      if within_period_to_rate?
+        order_rating.create!(order: order, rating: rating)
+        :success
       else
-        {
-          result: :rating_no_longer_available, 
-          period_to_rate_days: period_to_rate_days
-        }
+        :period_to_rate_expired
       end
-    end
-
-    private 
-
-    def still_eligible_for_rating?(order)
-      ...
     end
   end
 end
 ```
 
+In real life we may get a constraint error because we can't submit the rating for the same order twice. We omit this because we don't want to add too many details.
+{: .notice }
+
+
+Here's one last thing: we still haven't implemented the logic which actually recalculates the rating and does something. I won't bother you with the actual code, as it'll look like this:
+
 ```ruby
-module QualityAndMotivation
-  class CustomerRatedOrder
-    attr_reader :block_baker, :show_warning, :remove_warnings, :give_bonus, :block_reason
+def call(order)
+  baker = order.baker
+  old_rating, new_rating = recalculate_rating(baker)
 
-    def initialize(block_baker:, show_warning:, remove_warnings:, give_bonus:, block_reason:)
-      @block_baker = block_baker 
-      @show_warning = show_warning 
-      @remove_warnings = remove_warnings 
-      @give_bonus = give_bonus 
-      @block_reason = block_reason 
-    end
+  if ...
+  else ...
+  end
+end
+```
 
-    def call(order)
-      baker_old_rating = order.baker
+We haven't addressed an important questions: how do we call this code?
 
-      baker_new_rating = baker_old_rating.recalculate_rating
-      
-      decision = decide_how_to_handle_change(baker_old_rating, baker_new_rating)
 
-      case decision
-      in :block
-        block_baker.call(baker_new_rating, reason: block_reason)
-      in :show_warnings
-        show_warning.call(baker_new_rating)
-      in :rating_recovered
-        remove_warnings.call(baker_new_rating)
-      in :reward
-        give_bonus.call(baker_new_rating)
+  // ///////// TODO
+
+
+  ```ruby
+  module QualityAndMotivation
+    class CustomerSubmittedRating
+      attr_reader :order_rating_repo, :period_to_rate_days, :subscribers
+
+      def initialize(order_rating_repo:, period_to_rate_days:, subscribers:)
+        @order_rating_repo = order_rating_repo
+        @period_to_rate_days = period_to_rate_days
+        @subscribers = subscribers
+      end
+
+      def call(order, rating)
+        if still_eligible_for_rating?(order)
+          recored_rating = order_rating_repo.create(
+            value: rating,
+            order: order
+          )
+
+          call_subscribers(order, recorded_rating)
+
+          {
+            result: :customer_rated_order,
+            rating: recorded_rating
+          }
+        else
+          {
+            result: :rating_no_longer_available, 
+            period_to_rate_days: period_to_rate_days
+          }
+        end
+      end
+
+      private 
+
+      def call_subscribers(order, recorded_rating)
+        subscribers.map do |subscriber|
+          subscriber.call(order.id, recorded_rating.id)
+        end
+      end
+
+      def still_eligible_for_rating?(order)
+        ...
       end
     end
+  end
+  ```
 
-    private
+  ```ruby
+  module QualityAndMotivation
+    class CustomerRatedOrder
+      attr_reader :block_baker, :show_warning, :remove_warnings, :give_bonus, :block_reason
 
-    def decide_how_to_handle_change(baker_old_rating, baker_new_rating)
-      ...
-    end
+      def initialize(block_baker:, show_warning:, remove_warnings:, give_bonus:, block_reason:)
+        @block_baker = block_baker 
+        @show_warning = show_warning 
+        @remove_warnings = remove_warnings 
+        @give_bonus = give_bonus 
+        @block_reason = block_reason 
+      end
+
+      def call(order)
+        baker_old_rating = order.baker
+
+        baker_new_rating = baker_old_rating.recalculate_rating
+        
+        decision = decide_how_to_handle_change(baker_old_rating, baker_new_rating)
+
+        case decision
+        in :block
+          block_baker.call(baker_new_rating, reason: block_reason)
+        in :show_warnings
+          show_warning.call(baker_new_rating)
+        in :rating_recovered
+          remove_warnings.call(baker_new_rating)
+        in :reward
+          give_bonus.call(baker_new_rating)
+        end
+      end
+
+      private
+
+      def decide_how_to_handle_change(baker_old_rating, baker_new_rating)
+        ...
+      end
   end
 end
 ```
