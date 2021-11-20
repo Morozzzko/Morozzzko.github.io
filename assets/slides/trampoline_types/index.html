@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title>reveal-md</title>
+    <link rel="shortcut icon" href="./favicon.ico"/>
+    <link rel="stylesheet" href="./dist/reveal.css" />
+    <link rel="stylesheet" href="./dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="./css/highlight/zenburn.css" />
+
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template">
+
+<style type="text/css">
+  .hljs {
+    background: transparent;
+  }
+
+  .reveal pre {
+    box-shadow: none;
+  }
+
+  .reveal blockquote {
+    background: transparent;
+    box-shadow: none;
+    border: none;
+  }
+
+  img {
+    max-height: 600px !important;
+    width: auto !important;
+  }
+
+  .green {
+    color: lightgreen;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    text-transform: none !important;
+  }
+</style>
+
+# О типах
+
+<aside class="notes"><p>Всем привет!</p>
+<p>Сегодня мы поговорим немножко о типах в программировании, но для начала я расскажу кто я, зачем я и почему я вообще вам это рассказываю.</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+## Я — Игорь
+
+* Рубист, но писал на всяком
+* Прикатил из Зеленограда
+* Делал Planado, Qlean и Bookmate
+* Делаю Shore в Мюнхене
+* ФП, ООП, DDD, модульные монолиты, C4 model
+* Python, JavaScript, ReasonML, Elixir, Elm
+* Энтерпрайз разработчик
+</script></section><section  data-markdown><script type="text/template">
+## Моя квалификация
+
+... это сутки срачей о типах
+</script></section><section  data-markdown><script type="text/template">
+## Моя задача
+
+* Рассказать о боли
+* Рассказать немного теории о типах
+* Показать прикольные штуки
+* Узнать что-то новое от вас
+
+<aside class="notes"><p>что-то рассказать</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+### Слабая / Строгая 
+
+vs 
+
+### Статическая&nbsp;/&nbsp;Динамическая
+
+Такая разная типизация
+
+<aside class="notes"><p>Когда говорят о типизации, люди слишком часто путают слабую/строгую и статическую/динамическую типизацию. Ничего страшного, сейчас посмотрим и познаем разницу.</p>
+<p>Когда мы говорим о статической и динамической типизации, самая важная характеристика — это в какой момент мы получаем достоверную информацию о типе переменной.</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+## Узнаем тип переменной...
+
+... когда запустим
+
+... или когда скомпилируем
+
+<aside class="notes"><p>Варианта обычно два:</p>
+<ol>
+<li>Когда запустим программу, тогда и узнаем</li>
+<li>Когда скомпилируем программу</li>
+</ol>
+<p>Вот первыый случай, с запуском программы — это динамическая типизация, а второй — с компиляцией — это статическая типизация.</p>
+<p>Т.е. в статических языках обычно есть компилятор, который знает, где какой тип, а у динамических такой роскоши нет.</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+## Десятки тысяч человекочасов
+
+На споры о том, _когда_ надо знать тип
+
+<aside class="notes"><p>Примерно 95% срачей о типах — именно об этом. Представьте — сотни и тысячи человекочасов потрачены на споры, хотим ли мы знать типы ДО запуска программы, или ПОСЛЕ.</p>
+<p>И на самом деле, я могу понять — динамическая типизация даёт достаточно гибкости, свободы, а статическая типизация даёт чуть более быструю обратную связь и</p>
+<p>Но на самом деле, это всё такая вкусовщина, и меня в этом всём печалит бесполезность этой дискуссии. Люди могут писать на любом динамическом языке, и рекомендуют &quot;любителям типов&quot; перейти на Go.</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+## Дело не в компиляторе
+
+<aside class="notes"><p>Меня в этом всём бесит то, на каком уровне люди мыслят. Ну ведь дело не в том, когда мы вычисляем типы, и не в том, есть ли у нас компилятор. Есть куда более интересные критерии, чем просто статичность и динамичность.</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+## Строгость и слабость типизации
+
+<aside class="notes"><p>Например, строгость и слабость типизации. Её очень часто путают со статичностью, а зря. Обычно мы не можем однозначно отнести язык к «строготипизированным» или «слаботипизированным». Но можем замечать вещи, характерные для слабой типизации.</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+GH: denysdovhan/wtfjs
+
+```javascript
+// JavaScript
+
+[1, 2, 3] + [4, 5, 6]; // -> '1,2,34,5,6'
+
+{} + [] // -> 0
+[] + {} // -> '[object Object]'
+```
+
+
+<aside class="notes"><p>Экстремальный пример — Джаваскрипт. Он слаботипизированый, и вы можете делать что угодно с чем угодно, и гарантированно получите непонятный результат. Например, можете сложить пустую строку с пустым массивом. Или пустой массив с пустой строкой. И получить абсолютно другой результат. Джаваскрипт это кладезь мемов — <code>[object Object]</code></p>
+</aside></script></section><section  data-markdown><script type="text/template">
+```python
+# Python 3.9.6
+
+True - 100 # => 99
+
+# ???
+
+# это «логично» так как булеан — это инт
+
+isinstance(True, int) # => True
+```
+
+<aside class="notes"><ul>
+<li>Ещё как пример слабости типизации — в питоне можно из «Правды» вычесть 100 и получить что-то, кроме ошибки. В рубях нельзя, в кложе нельзя, а в питоне можно. 
+```</li>
+</ul>
+</aside></script></section><section  data-markdown><script type="text/template">
+```python
+# Python 3.9.6
+
+"100" + 100 
+# => TypeError: can only concatenate str (not "int") to str
+
+# Строгость!
+```
+
+<aside class="notes"><p>но при этом, в том же питоне есть элементы строгости: например, нельзя сложить строку 100 и число 100.</p>
+<p>Нужно явно сказать, чего мы хотели — либо сложить два числа, либо конкатенировать строку.</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+## Неявные преобразования 
+
+Это — признаки слабой типизации
+
+<aside class="notes"><p>Вообще, признаки слабости типизации — неявность преобразований между типами. Чем больше возможностей «случайно» сменить тип и не заметить, тем слабее типизация, и тем меньше мы можем доверять своему языку. А чем меньше мы доверяем языку, тем больше нам приходится думать, следить за лишним и дебажить. Потому что если что-то пропустим — получим испорченные данные.</p>
+<p>И вот мы видим: слабость или строгость системы типов — это важная штука. Но мы крайне редко видим, как кто-то в чате срётся за строгость. Вместо этого мы видим холивары о статической и динамической типизации.</p>
+<p>Но ладно. Я вроде показал разницу между статическими языками и строгими языками</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+Статическая / динамическая — когда узнаём 
+
+Строгая / слабая — когда и как преобразуем
+
+<aside class="notes"><p>Статические и динамические языки — это о том, когда нам становится известен тип. Либо на этапе компиляции, либо во время запуска</p>
+<p>Строгие и слабые — это о явных и неявных преобразованиях типов</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+
+## Что ещё?
+</script></section><section  data-markdown><script type="text/template">
+## Опциональная статическая типизация
+
+Динамика + аннотации + статический анализ
+
+<aside class="notes"><p>Но на самом деле, кроме статики и динамики есть ещё опциональная статическая типизация. Её идея в том, чтобы взять динамический язык, добавить в него возможность указать типы, и дать инструмент, который будет их проверять. Прям как компилятор, но не компилятор.</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+## Optional / gradual static typing
+
+JavaScript: TypeScript (\*), Flow (†)
+
+Python: mypy
+
+Ruby: sorbet, rbs
+
+Racket: Typed Racket
+
+<aside class="notes"><p>Так работает питон, лет 5 назад работал джаваскрипт с флоу, сейчас так работает руби, рэкет, и ещё куча разных языков. </p>
+<p>Я считаю, что это крутая штука. Нравится — проверяй типы. Не нравится — не проверяй. Договоритесь в команде и делайте так, как вам нравится. </p>
+<p>Но есть люди, кто с этим не согласен и считают, что нужно либо писать без них, либо уходить писать на Go.</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+> «Идите писать на Go если вам нужны типы»
+
+<small>— Эксперты в чатиках</small>
+
+<aside class="notes"><p>И вот вроде бы всё хорошо. Ведь, возможно, они на самом деле правы и нам лучше писать на гошечке, а не на питоне/руби/ноде?</p>
+<p>Ведь го — это неплохой язык, статически типизированный</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+<!-- .slide: data-background="img/go.jpg" data-background-size="contain" -->
+
+<aside class="notes"><p>и всё бы хорошо, но не совсем</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+## Кроме Go
+
+Haskell, Kotlin, Swift, C++, Rust, Scala, Java, C#, F#, OCaml, Crystal
+
+<aside class="notes"><p>и вот может показаться, что они все плюс-минус похожие</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+<!-- .slide: data-background="img/escobar.jpg" data-background-size="contain" -->
+
+<aside class="notes"><p>все статические, в разной степени строгие, но ведь между ними явно есть какие-то различия. </p>
+<p>можно смотреть на экосистему, применение, производительность, но сегодня нас интересуют системы типов.</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+## Parnas, Weiss, Shore
+
+Дали 5 определений понятию «тип данных» в 1976
+
+<aside class="notes"><p>Определение типов данных даже придумывать не надо. В 1976 году три академика собрались и нашли всё за нас. Они вывели 5 определений по тому, в каких смыслах юзают понятие о типах данных. Их можно почитать в википедии, а я сфокусируюсь на самом полезном из них:</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+> A type is a set of values which a variable can possess and a set of functions that one can apply to these values.
+
+<small>Value space and behavior</small>
+
+<aside class="notes"><p>Тип данных это множество возможных значений переменной И множество функций, которые можно применить к этим значениям.</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+## uint32
+
+V: от 0 по 2<sup>32</sup> - 1
+
+|V|: 2<sup>32</sup>
+
+Функции: pow, sqrt, -, +, \*, /, ...
+</script></section><section  data-markdown><script type="text/template">
+## String
+
+V: "", "a", "ae3123", ...
+
+|V|: ℵ<sub>0</sub>
+
+Функции: split, gsub, match?, length, ...
+
+
+<aside class="notes"><p><a href="https://dingo.sbs.arizona.edu/~langendoen/LING501/LING501set.htm">https://dingo.sbs.arizona.edu/~langendoen/LING501/LING501set.htm</a></p>
+<p>Алеф-нуль потому что у нас в строках конечный алфавит</p>
+<p>Эта теория пригодится нам чуть позже, но сейчас я хочу донести одну важную мысль:</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+## Данные не могут существовать без типов
+
+<aside class="notes"><p>если мы работаем с какими-то данными, то они обязательно имеют какой-то тип</p>
+<p>мы не можем работать с данными неизвестных типов просто потому что если мы не знаем тип, то мы не можем знать, какие функции можно использовать, а какие нельзя</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+## На что смотреть в системах типов
+</script></section><section  data-markdown><script type="text/template">
+## §1. Вывод типов
+</script></section><section  data-markdown><script type="text/template">
+```ocaml
+// OCaml. Статически типизированный язык
+
+let timesTwo value = value * 2
+let _ = List.map timesTwo [1; 2; 3; 4]
+
+```
+</script></section><section  data-markdown><script type="text/template">
+
+## §2. Higher-order functions
+
+Можно ли передавать функции в функции?
+
+
+<aside class="notes"></aside></script></section><section  data-markdown><script type="text/template">
+```javascript
+// JavaScript
+
+const timesTwo = (value) => value * 2
+
+[1, 2, 3, 4].map(timesTwo) // => [2, 4, 6, 8]
+```
+</script></section><section  data-markdown><script type="text/template">
+```kotlin
+// Kotlin
+
+fun timesTwo(input: Int): Int {
+    return input * 2
+}
+
+arrayOf(1, 2, 3, 4).map(::timesTwo);
+
+// или с более модным синтаксисом 
+
+arrayOf(1, 2, 3, 4).map { it * 2 };
+```
+
+<aside class="notes"><p>ценность функций высшего порядка в том, что это повышает выразительность и даёт строить более сложные абстракции</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+```java
+// Java: < 8
+
+
+List<Integer> rawNumbers = Arrays.asList(1, 2, 3, 4);
+
+List<Integer> multipliedNumbers = new ArrayList<>();
+for (Integer value : rawNumbers) {
+    multipliedNumbers.add(value * 2);
+}
+```
+
+<aside class="notes"><p>просто посмотрите как это было в джаве, пока не появились более удобные лямбды и стримы.</p>
+<p>Простой процесс «возьми список и умножь каждый элемент на 2» происходил с явным созданием промежуточного списка и вообще очень императивно. Но это ладно.</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+## §3. Частичное применение функций
+
+```ocaml
+// OCaml 
+
+let multiply left right = left * right
+let timesTwo = multiply 2
+
+let _ = List.map timesTwo [1; 2; 3; 4]
+```
+</script></section><section  data-markdown><script type="text/template">
+
+## §4. Алгебра типов
+
+Если типы — множества, то их можно комбинировать
+</script></section><section  data-markdown><script type="text/template">
+## Типы-произведения
+
+```
+// OCaml 
+type person = {
+  name: string;
+  admin: bool;}
+
+let _ = { name = "Igor"; admin = false }
+```
+</script></section><section  data-markdown><script type="text/template">
+## Типы-произведения
+
+|person| = |string| × |bool| = ℵ<sub>0</sub> × 2 = ℵ<sub>0</sub>
+</script></section><section  data-markdown><script type="text/template">
+## Типы-произведения
+
+person = { ("", false), ("", true), ("a", false), ("a", true) ... }
+</script></section><section  data-markdown><script type="text/template">
+## Произведения есть везде
+</script></section><section  data-markdown><script type="text/template">
+## А суммы — не везде
+</script></section><section  data-markdown><script type="text/template">
+## А что, если?..
+
+value = { 1, 2, 3, 4, 5, ... , 2<sup>32</sup> -1 , true, false }
+</script></section><section  data-markdown><script type="text/template">
+## Уже было в C-мпсонах
+
+```cpp
+// C++
+union Data {
+   std::int32_t i;
+   bool a
+};  
+```
+</script></section><section  data-markdown><script type="text/template">
+## Как узнать, что внутри
+```cpp
+union Data {
+   std::int32_t IntValue;
+   bool BoolValue
+};  
+
+enum TypeInside { INTEGER, BOOLEAN };
+
+struct TaggedData { 
+  TypeInside tag;
+  Data value;
+};
+
+TaggedData value = { INTEGER, 3 }
+
+```
+</script></section><section  data-markdown><script type="text/template">
+## Эргономика получше
+
+```rust
+// Rust
+enum Data { 
+    Boolean(bool),
+    Integer(u32) 
+}
+
+fn main() {
+    let value = Data::Boolean(true);
+    
+    match value {
+        Data::Boolean(_) => println!("It's a boolean!"),
+        Data::Integer(_) => println!("It's an integer!")
+    }
+}
+```
+</script></section><section  data-markdown><script type="text/template">
+## Тип-сумма
+
+|Data| = |bool| + |u32| = 2 + 2<sup>32</sup> = 4 294 967 298
+
+</script></section><section  data-markdown><script type="text/template">
+ИЛИ одно, ИЛИ другое — сумма / union / variant 
+
+И одно, И другое — произведение / структура
+</script></section><section  data-markdown><script type="text/template">
+## Суммы — невозможность войти в невалидное состояние
+
+<aside class="notes"><p>Контрагент: либо юрлицо, либо физлицо, но не всё вместе</p>
+<p>Контактные данные: либо имейл, либо телефон, либо всё вместе</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+## Контактные данные
+
+```ocaml
+type contactInfoSum =
+  | Phone of string
+  | Email of string
+  | PhoneAndEmail of string * string
+
+```
+
+```ocaml
+type contactInfoProd = {
+  phone: option(string);
+  email: option(string);}
+```
+
+<aside class="notes"><p>основное преимущество суммы над произведением: нельзя создать структуру, где нет ни телефона, ни имейла</p>
+<p>ну и ещё такая форма структуры помогает лучше передать замысел и ограничения предметной области</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+## §5. Проверка на полноту
+
+Проверяет ли if / case / switch, что вы обработали _все_ возможные варианты
+</script></section><section  data-markdown><script type="text/template">
+```rust
+// Rust
+enum Data { 
+    Boolean(bool),
+    Integer(u32) 
+}
+
+fn main() {
+    let value = Data::Boolean(true);
+    
+    match value {
+        Data::Boolean(_) => println!("It's a boolean!"),
+    // => non-exhaustive patterns: `Integer(_)` not covered
+    }
+}
+```
+</script></section><section  data-markdown><script type="text/template">
+## А ещё...
+
+Полиморфизм, алгебраические эффекты, надёжность, чистота
+</script></section><section  data-markdown><script type="text/template">
+## Завершаем
+</script></section><section  data-markdown><script type="text/template">
+## Типы — это больше, чем наличие компилятора
+
+Это ещё ...
+</script></section><section  data-markdown><script type="text/template">
+
+## ... явные и неявные преобразования
+
+Слабость / строгость типизации зависит от этого
+</script></section><section  data-markdown><script type="text/template">
+## ... множество значений
+
+и множество функций, которые можно к ним применить
+</script></section><section  data-markdown><script type="text/template">
+## ... вывод типов
+
+Зачем их писать, если можно вывести?
+</script></section><section  data-markdown><script type="text/template">
+## ... функции высшего порядка
+
+```[1, 2, 3].map(x => x * x)```
+</script></section><section  data-markdown><script type="text/template">
+## ... частичное применение функций
+
+</script></section><section  data-markdown><script type="text/template">
+## ... типы-произведения
+
+когда нам нужна структурка из нескольких полей
+</script></section><section  data-markdown><script type="text/template">
+## ... типы-суммы
+
+когда нам нужно, чтобы было либо одно, либо другое
+</script></section><section  data-markdown><script type="text/template">
+## ... проверка на полноту
+
+Вдруг мы забыли обработать какое-то значение?
+</script></section><section  data-markdown><script type="text/template">
+## Хочется статики — пишите на том, что нравится
+
+Не Go единым
+</script></section><section  data-markdown><script type="text/template">
+## Изучайте типы
+
+И спорьте о них с умом
+</script></section><section  data-markdown><script type="text/template">
+## Спасибо!
+</script></section><section  data-markdown><script type="text/template">
+## Что почитать
+
+* lexi-lambda.github.io
+* Domain Modelling Made Functional
+</script></section></div>
+    </div>
+
+    <script src="./dist/reveal.js"></script>
+
+    <script src="./plugin/markdown/markdown.js"></script>
+    <script src="./plugin/highlight/highlight.js"></script>
+    <script src="./plugin/zoom/zoom.js"></script>
+    <script src="./plugin/notes/notes.js"></script>
+    <script src="./plugin/math/math.js"></script>
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath
+        ]
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"transition":"none","slideNumber":"c/t"}, queryOptions);
+    </script>
+
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+</html>
