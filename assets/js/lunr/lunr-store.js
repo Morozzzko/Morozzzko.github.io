@@ -40,28 +40,4 @@ var store = [{
         "tags": [],
         "url": "/slides/euruko-2018",
         "teaser": null
-      },{
-        "title": "EuRuKo 2018",
-        "excerpt":"On August 24th, 2018 I gave a talk at the EuRuKo 2018 conference in Vienna. I named my talk ”Ducks and Monads: Wonders of Ruby Types” because I wanted to speak about Ruby’s type system and how we can use types to build type-safe applications. Spoiler alert: there was nothing...","categories": [],
-        "tags": [],
-        "url": "/talks/euruko-2018",
-        "teaser": null
-      },{
-        "title": "Ruby Rogues",
-        "excerpt":"In Ruby Rogues episode #407 we discussed functional programming in Ruby. I talked about the tools I use every day, and the ideas behind them. We also discussed the application of functional programming in an object-oriented language and the reasons to use different paradigms in Ruby.     ","categories": [],
-        "tags": [],
-        "url": "/talks/ruby-rogues-2019",
-        "teaser": null
-      },{
-        "title": "My Ruby Story",
-        "excerpt":"My Ruby Story is a podcast that discovers stories of Ruby developers from around the world. This show is a great source of inspiration for new developers, as it shows the incredible variety of reasons people got into professional software engineering. I was featured in My Ruby Story episode #088,...","categories": [],
-        "tags": [],
-        "url": "/talks/my-ruby-story-2019",
-        "teaser": null
-      },{
-        "title": "Saint P Ruby Meetup 2020 Fall [RU]",
-        "excerpt":"On the last Thursday of October, 2020 I gave a talk at Saint P Ruby Community, the same community which organizes Saint P RubyConf. My talk’s name was «Модель С4. Зачем нам моделировать архитектуру». I roughly translate it as “C4 model. Why do we need to model architecture”. In this...","categories": [],
-        "tags": [],
-        "url": "/talks/saint-p-meetup-2020",
-        "teaser": null
       }]
