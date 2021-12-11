@@ -27,9 +27,6 @@ collections:
   slides:
     output: true
     permalink: /:collection/:name
-  talks:
-    output: true
-    permalink: /:collection/:name
 
 read_time: true
 
