@@ -1,0 +1,19 @@
+name: Lint
+on:
+  push:
+    branches:
+      - "!build"
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: latest
+      - name: Install and Build
+        run: |
+          bundle install
+          bundle exec danger
