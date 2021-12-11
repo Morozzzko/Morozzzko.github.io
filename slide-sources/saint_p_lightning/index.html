@@ -1,0 +1,202 @@
+<style type="text/css">
+  .hljs {
+    background: transparent;
+  }
+
+  .reveal pre {
+    box-shadow: none;
+  }
+
+  .reveal blockquote {
+    background: transparent;
+    border: none;
+  }
+
+  img {
+    max-height: 600px !important;
+    width: auto !important;
+  }
+
+  .green {
+    color: lightgreen;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    text-transform: none !important;
+  }
+</style>
+
+<h2 id="кулстори-про-cli">Кулстори про CLI</h2>
+
+<hr />
+
+<h2 id="я--игорь">Я — Игорь</h2>
+
+<ul>
+  <li>В руби с 2016</li>
+  <li>Писал на всяком, в основном на руби</li>
+  <li>Не очень хорош с рельсой</li>
+  <li>❤️  энтерпрайзную разработку</li>
+  <li>Делаю Bookmate.com</li>
+</ul>
+
+<hr />
+
+<h2 id="иногда-надо-делать-cli">Иногда надо делать CLI</h2>
+
+<p>И это бывает больно</p>
+
+<hr />
+
+<h2 id="а-зачем">А зачем?</h2>
+
+<hr />
+
+<h2 id="а-зачем-1">А зачем?</h2>
+
+<ul>
+  <li>Оптимизировать рутину</li>
+  <li>Шорткаты</li>
+</ul>
+
+<hr />
+
+<h2 id="шорткаты">Шорткаты</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Было</span>
+
+npx reveal-md slide-sources/saint_p_lightning/index.md  <span class="se">\</span>
+    <span class="nt">--static</span> assets/slides/saint_p_meetup_2021 <span class="se">\</span>
+    <span class="nt">--static-dirs</span><span class="o">=</span>slide-sources/saint_p_lightning/img
+
+<span class="c"># Стало</span>
+
+make slides-2021-saint-p
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="мейк--это-хорошо">Мейк — это хорошо</h2>
+
+<hr />
+
+<figure>
+<img src="img/makefile.png" />
+<figcaption><a href="https://malefile.site">makefile.site</a></figcaption>
+</figure>
+
+<hr />
+
+<h2 id="а-что-с-рутиной">А что с рутиной?</h2>
+
+<ul>
+  <li>Сходи туда</li>
+  <li>Скачай то</li>
+  <li>Распакуй</li>
+  <li>Переименуй</li>
+  <li>Выстави значения</li>
+</ul>
+
+<hr />
+
+<h2 id="шелл-скриптинг-не-всегда-хорош">Шелл скриптинг не всегда хорош</h2>
+
+<table>
+  <tbody>
+    <tr>
+      <td>На fish хорош, а вот на (ba</td>
+      <td>z)sh не очень</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="альтернативы-библиотеки-для-cli">Альтернативы — библиотеки для CLI</h2>
+
+<ul>
+  <li>argparse</li>
+  <li>click</li>
+  <li>thor</li>
+  <li>hanami-cli → dry-cli</li>
+</ul>
+
+<hr />
+
+<h2 id="не-люблю-чувствовать-себя-тупым">Не люблю чувствовать себя тупым</h2>
+
+<p>Самое важное требование к библиотекам</p>
+
+<hr />
+
+<h2 id="тор-не-помогает">Тор не помогает</h2>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MyCLI</span> <span class="o">&lt;</span> <span class="no">Thor</span>
+  <span class="n">desc</span> <span class="s2">"hello NAME"</span><span class="p">,</span> <span class="s2">"say hello to NAME"</span>
+  <span class="k">def</span> <span class="nf">hello</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
+    <span class="nb">puts</span> <span class="s2">"Hello </span><span class="si">#{</span><span class="nb">name</span><span class="si">}</span><span class="s2">"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">MyCLI</span><span class="p">.</span><span class="nf">start</span><span class="p">(</span><span class="no">ARGV</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="method_defined--хорошо">method_defined — хорошо</h2>
+
+<p>Но не очень просто</p>
+
+<hr />
+
+<h2 id="а-как-тестить">А как тестить?</h2>
+
+<p>Очевидно: запускать и смотреть на stdout
+Не очень очевидно: запускать через rspec/minitest и тоже тестить</p>
+
+<hr />
+
+<h2 id="dry-cli-теперь-проще">dry-cli: теперь проще</h2>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">MyCLI</span>
+  <span class="kp">extend</span> <span class="no">Dry</span><span class="o">::</span><span class="no">CLI</span><span class="o">::</span><span class="no">Registry</span>
+
+  <span class="k">class</span> <span class="nc">Hello</span> <span class="o">&lt;</span> <span class="no">Dry</span><span class="o">::</span><span class="no">CLI</span><span class="o">::</span><span class="no">Command</span>
+    <span class="n">desc</span> <span class="s2">"say hello to NAME"</span>
+    <span class="n">argument</span> <span class="ss">:name</span>
+
+    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="nb">name</span><span class="p">:,</span> <span class="o">**</span><span class="p">)</span>
+      <span class="nb">puts</span> <span class="s2">"Hello </span><span class="si">#{</span><span class="nb">name</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="n">register</span> <span class="s1">'hello'</span><span class="p">,</span> <span class="no">Hello</span>
+<span class="k">end</span>
+
+<span class="no">Dry</span><span class="o">::</span><span class="no">CLI</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="no">MyCLI</span><span class="p">).</span><span class="nf">call</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="больше-текста-проще-кот">Больше текста, проще кот</h2>
+
+<p>Your mileage may vary, though</p>
+
+<hr />
+
+<h2 id="а-ещё-там-меньше-интеграций">А ещё там меньше интеграций</h2>
+
+<p>Спросить у пользователя ввести что-нибудь? Ставь tty-shell</p>
+
+<p>Нужны цвета? Ставь tty-color</p>
+
+<hr />
+
+<h1 id="спасибо">Спасибо</h1>
+
+<ul>
+  <li>https://dry-rb.org/gems/dry-cli/</li>
+  <li>https://makefile.site</li>
+  <li>http://whatisthor.com/</li>
+</ul>
+
