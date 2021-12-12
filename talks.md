@@ -4,8 +4,6 @@ author_profile: true
 title: Talks, podcasts, and vids
 ---
 
-# Talks, podcasts & vids
-
 Throughout my career I've given a couple of talks at different meetups & conferences. This page is a collection of them, with videos, slides, descriptions.
 
 [2021-09-30] (🇷🇺) **Data types**, Trampoline.to #4, Tver. [Slides](/assets/slides/trampoline_types/)
