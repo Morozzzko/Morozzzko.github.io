@@ -9,7 +9,7 @@
   <head>
     <meta charset="utf-8">
 
-<!-- begin _includes/seo.html --><title>Talks, podcasts, and vids - Igor writing about things</title>
+<!-- begin _includes/seo.html --><title>Igor writing about things - Page 2</title>
 <meta name="description" content="Thoughts, programming, Ruby">
 
 
@@ -20,8 +20,8 @@
 <meta property="og:type" content="website">
 <meta property="og:locale" content="en_US">
 <meta property="og:site_name" content="Igor writing about things">
-<meta property="og:title" content="Talks, podcasts, and vids">
-<meta property="og:url" content="https://www.morozov.is/talks.html">
+<meta property="og:title" content="Igor writing about things">
+<meta property="og:url" content="https://www.morozov.is/page2/">
 
 
   <meta property="og:description" content="Thoughts, programming, Ruby">
@@ -37,8 +37,10 @@
 
 
 
-<link rel="canonical" href="https://www.morozov.is/talks.html">
+<link rel="canonical" href="https://www.morozov.is/page2/">
 
+
+  <link rel="prev" href="https://www.morozov.is/">
 
 
 
@@ -88,7 +90,7 @@
 
   </head>
 
-  <body class="layout--archive">
+  <body class="layout--home">
     <nav class="skip-links">
   <ul>
     <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
@@ -240,19 +242,118 @@ Enthusiastic about Ruby, DDD, FP, OOP, software architecture and emotions.</p>
 
   <div class="archive">
     
-      <h1 id="page-title" class="page__title">Talks, podcasts, and vids</h1>
+      <h1 id="page-title" class="page__title"></h1>
     
-    <p>Throughout my career I’ve given a couple of talks at different meetups &amp; conferences. This page is a collection of them, with videos, slides, descriptions.</p>
+    
 
-<p>[2021-09-30] (🇷🇺) <strong>Data types</strong>, Trampoline.to #4, Tver. <a href="/assets/slides/trampoline_types/">Slides</a></p>
+<h3 class="archive__subtitle">Recent Posts</h3>
 
-<p>[2020-10-29] (🇷🇺) <strong>C4 model and why do we need to model architecture</strong>, Saint P. Ruby Meetup 2020 Fall, Zoom. <a href="https://www.youtube.com/embed/tYUNIJg7wl0?start=1411">YouTube</a> | <a href="/assets/slides/saint_p_meetup_2020/">Slides</a></p>
 
-<p>[2019-05-14] <strong>My Ruby Story #88</strong> 🎙️ | <a href="https://myrubystory.com/88">Listen</a></p>
 
-<p>[2019-04-09] <strong>Functional Programming in Ruby using Dry Gems</strong> | Ruby rogues #407 🎙️ | <a href="https://rubyrogues.com/415">Listen</a></p>
 
-<p>[2018-08-25] <strong>Ducks and monads: wonders of Ruby types</strong>, EuRuKo 2018, Vienna. <a href="https://,www.youtube.com/watch?v=v-H9nK8hqfE">YouTube</a> | <a href="/slides/euruko-2018">Slides</a></p>
+<div class="entries-list">
+  
+    
+
+
+
+<div class="list__item">
+  <article class="archive__item" itemscope itemtype="http://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/2018/05/27/do-notation-ruby.html" rel="permalink">Railway Oriented programming in Ruby: do notation vs dry-transaction
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          7 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description"><p>Railway oriented programming is a design pattern which helps us
+handle errors in our applications. Instead of relying on exceptions,
+we design our data and functions in a specific way. Since applications
+are essentially just a combination of steps, we’ll make some design decisions
+about those steps and their structure:</p>
+
+<ul>
+  <li>There is a <code class="language-plaintext highlighter-rouge">Result</code> type, which can be either a <code class="language-plaintext highlighter-rouge">Success</code> or a <code class="language-plaintext highlighter-rouge">Failure</code></li>
+  <li><code class="language-plaintext highlighter-rouge">Success</code> and <code class="language-plaintext highlighter-rouge">Failure</code> are practically containers with different data</li>
+  <li>Steps accept <code class="language-plaintext highlighter-rouge">Result</code> and return <code class="language-plaintext highlighter-rouge">Result</code></li>
+  <li>Once a step returns <code class="language-plaintext highlighter-rouge">Failure</code>, we stop further execution</li>
+</ul>
+
+<p>I want to emphasize that <code class="language-plaintext highlighter-rouge">Result</code> is just an alternative name for the <code class="language-plaintext highlighter-rouge">Either</code>
+monad. Railway Oriented Programming comes from functional programming,
+so it is tightly related to the usual FP concepts like monads, composition, and many
+others. However, you don’t need to have an extensive knowledge of monads to
+use ROP in your code. In this article, I’ll show you how to write railway-oriented
+code in Ruby.</p>
+
+</p>
+  </article>
+</div>
+
+  
+</div>
+
+
+<nav class="pagination">
+  
+  <ul>
+    
+    
+      
+        <li><a href="/">Previous</a></li>
+      
+    
+
+    
+    
+      <li><a href="/">1</a></li>
+    
+
+    
+    
+
+    
+    
+    
+
+    
+
+    
+    
+
+    
+      <li><a href="#" class="disabled current">2</a></li>
+    
+
+    
+    
+      <li><a href="#" class="disabled"><span aria-hidden="true">Next</span></a></li>
+    
+  </ul>
+</nav>
+
+
 
   </div>
 </div>
