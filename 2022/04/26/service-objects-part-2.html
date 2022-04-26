@@ -1,0 +1,732 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Unfinished: Designing helpful service objects. Part 2. Practice - Igor writing about things</title>
+<meta name="description" content="This is a partially-written post, which will never be complete    I&#39;ve been writing this article on-and-off since June 2020. I didn&#39;t like how it turned out and re-wrote it numerous times.    It tries to cover way too many things at once, and that&#39;s the problem I can&#39;t resolve without removing everything I&#39;ve done and re-working the whole series. There are way too many assumptions and things which are missing for the complete picture. The reader would need the context for the article to be useful    However, the work still might serve as an inspiration or an example to some. Even as an anti-example. So I&#39;m leaving it here with an &quot;unfinished&quot; notice   I’ve had countless arguments about software engineering, and “service objects” are one of the hot topics. I published an article where I assessed different approaches to designing service objects. I’ve planned to have a three-part series of posts:     Choosing the right design   The practice   The next level   Right now, I want to demonstrate how to apply those principles in practice.  This article may read like a tutorial on adding service objects to Rails app. Frankly, it is a tutorial on adding service objects to Rails app.">
+
+
+  <meta name="author" content="Igor Morozov">
+  
+  <meta property="article:author" content="Igor Morozov">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Igor writing about things">
+<meta property="og:title" content="Unfinished: Designing helpful service objects. Part 2. Practice">
+<meta property="og:url" content="https://www.morozov.is/2022/04/26/service-objects-part-2.html">
+
+
+  <meta property="og:description" content="This is a partially-written post, which will never be complete    I&#39;ve been writing this article on-and-off since June 2020. I didn&#39;t like how it turned out and re-wrote it numerous times.    It tries to cover way too many things at once, and that&#39;s the problem I can&#39;t resolve without removing everything I&#39;ve done and re-working the whole series. There are way too many assumptions and things which are missing for the complete picture. The reader would need the context for the article to be useful    However, the work still might serve as an inspiration or an example to some. Even as an anti-example. So I&#39;m leaving it here with an &quot;unfinished&quot; notice   I’ve had countless arguments about software engineering, and “service objects” are one of the hot topics. I published an article where I assessed different approaches to designing service objects. I’ve planned to have a three-part series of posts:     Choosing the right design   The practice   The next level   Right now, I want to demonstrate how to apply those principles in practice.  This article may read like a tutorial on adding service objects to Rails app. Frankly, it is a tutorial on adding service objects to Rails app.">
+
+
+
+  <meta property="og:image" content="https://www.morozov.is/assets/images/posts/service_objects/part_two.png">
+
+
+
+
+
+  <meta property="article:published_time" content="2022-04-26T20:38:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="https://www.morozov.is/2022/04/26/service-objects-part-2.html">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Igor Morozov",
+      "url": "https://www.morozov.is/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Igor writing about things Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <a href="/">
+          <img src="/assets/images/bio-photo.jpg" alt="Igor Morozov" itemprop="image">
+        </a>
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <a href="/"><h3 class="author__name" itemprop="name">Igor Morozov</h3></a>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>I’m a software engineer from Russia
+<br />
+Familiar with Ruby and many other things
+<br />
+Enthusiastic about Ruby, DDD, FP, OOP, software architecture and emotions.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:igor@morozov.is">
+            <meta itemprop="email" content="igor@morozov.is" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://twitter.com/morozzzko" itemprop="sameAs" rel="nofollow noopener noreferrer">
+            <i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+        <li>
+          <a href="https://www.linkedin.com/in/igor-morozov" itemprop="sameAs" rel="nofollow noopener noreferrer">
+            <i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/Morozzzko" itemprop="sameAs" rel="nofollow noopener noreferrer">
+            <i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+<li>
+  <a href="/talks" itemprop="sameAs">
+    <i class="fas fa-chalkboard-teacher" aria-hidden="true"></i> Talks
+  </a>
+</li>
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Unfinished: Designing helpful service objects. Part 2. Practice">
+    <meta itemprop="description" content="  This is a partially-written post, which will never be complete  I&#39;ve been writing this article on-and-off since June 2020. I didn&#39;t like how it turned out and re-wrote it numerous times.  It tries to cover way too many things at once, and that&#39;s the problem I can&#39;t resolve without removing everything I&#39;ve done and re-working the whole series. There are way too many assumptions and things which are missing for the complete picture. The reader would need the context for the article to be useful  However, the work still might serve as an inspiration or an example to some. Even as an anti-example. So I&#39;m leaving it here with an &quot;unfinished&quot; noticeI’ve had countless arguments about software engineering, and “service objects” are one of the hot topics. I published an article where I assessed different approaches to designing service objects. I’ve planned to have a three-part series of posts:  Choosing the right design  The practice  The next levelRight now, I want to demonstrate how to apply those principles in practice.This article may read like a tutorial on adding service objects to Rails app. Frankly, it is a tutorial on adding service objects to Rails app.">
+    <meta itemprop="datePublished" content="2022-04-26T20:38:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Unfinished: Designing helpful service objects. Part 2. Practice
+</h1>
+          
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          11 minute read
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> On this page</h4></header>
+              <ul class="toc__menu"><li><a href="#what-were-dealing-with">What we’re dealing with</a></li><li><a href="#how-were-going-to-do-it">How we’re going to do it</a></li><li><a href="#application-improving-quality-for-a-baker-to-consumer-marketplace">Application: improving quality for a baker-to-consumer marketplace</a></li><li><a href="#assumptions-about-the-tech-stack">Assumptions about the tech stack</a></li><li><a href="#designing-contracts">Designing contracts</a></li><li><a href="#implementation-bridge-to-existing-code">Implementation: bridge to existing code</a></li><li><a href="#implementation-all-new-code">Implementation: all-new code</a></li><li><a href="#service-object-may-not-be-a-good-name">“Service object” may not be a good name</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <div class="notice">
+  <p><strong>This is a partially-written post, which will never be complete</strong></p>
+
+  <p>I've been writing this article on-and-off since June 2020. I didn't like how it turned out and re-wrote it numerous times.</p>
+
+  <p>It tries to cover way too many things at once, and that's the problem I can't resolve without removing everything I've done and re-working the whole series. There are way too many assumptions and things which are missing for the complete picture. The reader would need the context for the article to be useful</p>
+
+  <p>However, the work still might serve as an inspiration or an example to some. Even as an anti-example. So I'm leaving it here with an "unfinished" notice</p>
+</div>
+
+<p>I’ve had countless arguments about software engineering, and “service objects” are one of the hot topics. I published <a href="/2020/06/01/helpful-service-objects-part-1-chosing-right-design.html">an article</a> where I assessed different approaches to designing service objects. I’ve planned to have a three-part series of posts:</p>
+
+<ul>
+  <li><a href="/2020/06/01/helpful-service-objects-part-1-chosing-right-design.html">Choosing the right design</a></li>
+  <li><em>The practice</em></li>
+  <li>The next level</li>
+</ul>
+
+<p>Right now, I want to demonstrate how to apply those principles <em>in practice</em>.</p>
+
+<p>This article may read like a tutorial on adding service objects to Rails app. Frankly, it <em>is</em> a tutorial on adding service objects to Rails app.</p>
+
+<!-- excerpt -->
+
+<h1 id="what-were-dealing-with">What we’re dealing with</h1>
+
+<p>In the first part, I’ve listed different ways to implement a “service object”. Out of all those options, I pushed hard towards a concrete design. Let’s revisit it.</p>
+
+<p>Business processes start when <em>something happens</em> or if someone wants to <em>perform an action</em>. We want our code to reflect this reality, so we name our service objects after the <strong>events and commands</strong> which trigger the process. Class names would look like <code class="language-plaintext highlighter-rouge">CustomerSubmittedRating</code>, <code class="language-plaintext highlighter-rouge">BakerHired</code>, <code class="language-plaintext highlighter-rouge">CakeBaked</code> for events and <code class="language-plaintext highlighter-rouge">FireBaker</code>, <code class="language-plaintext highlighter-rouge">SubmitRating</code> and <code class="language-plaintext highlighter-rouge">AmendOrder</code> for commands.</p>
+
+<p><strong>We use <code class="language-plaintext highlighter-rouge">#call</code></strong> to run the logic. It’s a pretty standard way to call a function, proc or just a generic piece of code.</p>
+
+<p><strong>No mutable state</strong> in our objects. Dependencies and configurable options go to constructor / instance attributes and never change. We understand dependencies as other service objects, functions, renderers, database connections, repositories, whatever pieces of logic we need to run it.</p>
+
+<p><strong>Parameters</strong> or <strong>input</strong> go to the <code class="language-plaintext highlighter-rouge">#call</code> as arguments, and we never store them in object state.</p>
+
+<p>If you’ve missed out on some details and reasoning, please refer to section <a href="/2020/06/01/helpful-service-objects-part-1-chosing-right-design.html#why-some-service-objects-are-more-useful-than-others">“Why some service objects are better than other”</a> of my previous article, where I add philosophical and practical perspective to those decisions.</p>
+
+<h1 id="how-were-going-to-do-it">How we’re going to do it</h1>
+
+<p>We’ll dig into a context of a real-life application. We’ll start at the highest level and then “zoom in” to make lower-level considerations. Basically, we’ll have three levels of detail:</p>
+
+<ol>
+  <li><strong>Business requirements</strong>. Figure out <em>what</em> and <em>why</em> we’ll add something to our project.</li>
+  <li><strong>Technical requirements</strong>. What systems do we interact with? How?</li>
+  <li><strong>Code</strong>. Implementation with just enough detail</li>
+</ol>
+
+<p>Afterwards, we’ll see how to adapt to new requirements and extend the objects.</p>
+
+<h1 id="application-improving-quality-for-a-baker-to-consumer-marketplace">Application: improving quality for a baker-to-consumer marketplace</h1>
+
+<p>Let’s say we’re building a multi-sided marketplace where bakers can sell their pastry to customers.</p>
+
+<p>We don’t directly employ the bakers, but serve as an information medium between them and the customers. Customers submit their orders and we help distribute the orders among bakers. If the customer is unhappy, it’s our risk and we cover any damages out of our own pocket.</p>
+
+<p>We want to minimize the risks, so we introduce the <em>quality and motivation</em> system. It is based on communication, feedback and maths:</p>
+
+<ol>
+  <li>After a customer have received their order, we send them an email asking to rate the baked goods on a scale from 1 to 5.</li>
+  <li>After every rating, we calculate the baker’s rating: we take the last 20 orders and calculate a weighted mean: most recent orders matter most.</li>
+  <li>If the rating falls below a certain threshold, the baker enters the “danger zone”.</li>
+  <li>If the bakers in the “danger zone” doesn’t improve their performance within the next three reviews, we cancel their future orders and disable their account.</li>
+  <li>Bakers with perfect rating get a 5% bonus for every rated order</li>
+</ol>
+
+<p>It might not look <em>too</em> complex at the first sight, but in reality, we’ve got a lot of moving parts:</p>
+
+<ul>
+  <li>We need to build a subsystem which allows customers to rate orders: it affects database, code organization and web/mobile apps.</li>
+  <li>Rating recalculation</li>
+  <li>The “danger zone”</li>
+  <li>Payout calculation</li>
+  <li>Communication via e-mail</li>
+  <li>Disabling accounts and cancelling future orders</li>
+  <li>API for customer web app</li>
+  <li>API for baker app, which is the primary way to communicate with bakers</li>
+</ul>
+
+<p>Since we can only communicate via mobile app, let’s assume the “danger zone” is visible in the user interface. It’ll enable us to tell bakers exactly how to improve their situation.</p>
+
+<p>If we try to visualize the whole process, it will look like this:</p>
+
+<figure>
+  <a href="/assets/bpmn/service_objects/rating_workflow.svg" target="_blank">
+    <img src="/assets/bpmn/service_objects/rating_workflow.svg" alt="BPMN representation of the process" />
+  </a>
+  <figcaption>A visual representation of the process. Click to open in new tab.</figcaption>
+</figure>
+
+<p>We can see that  not an atomic process, but a complex and distributed one. Distributed in terms of time and execution, as we can’t afford to <em>just wait</em> for seven days. This way, this huge process actually breaks into three smaller ones:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">OrderCompleted</code> – when we send an email</li>
+  <li><code class="language-plaintext highlighter-rouge">CustomerSubmittedRating</code> – when the customer submits their rating via app. It shouldn’t fail most of the time, but it <em>may</em> fail if the 7-day threshold is passed</li>
+  <li><code class="language-plaintext highlighter-rouge">CustomerRatedOrder</code> – when the rating has been accepted</li>
+</ul>
+
+<figure>
+  <a href="/assets/bpmn/service_objects/rating_workflow_refactored.svg" target="_blank">
+    <img src="/assets/bpmn/service_objects/rating_workflow_refactored.svg" alt="BPMN representation of the refactored process" />
+  </a>
+  <figcaption>A visual representation of the three processes. Click to open in new tab.</figcaption>
+</figure>
+
+<p>We can’t say much more about the flow without introducing more technical detail.</p>
+
+<h1 id="assumptions-about-the-tech-stack">Assumptions about the tech stack</h1>
+
+<p>Since we don’t have a <em>real</em> project, we need to make a few assumptions so that we’re on the same page.</p>
+
+<p><strong>We use Rails</strong> because it’s pretty common and because I want to emphasize that it’s possible to introduce the ideas in the existing app. Even a legacy one.</p>
+
+<p><strong>There are no service objects whatsoever</strong>. All domain logic is in the models.</p>
+
+<p>However, we could have used <a href="https://hanamirb.org/">Hanami</a> as a framework or <a href="https://roda.jeremyevans.net/">Roda</a> as routing &amp; <a href="https://github.com/jeremyevans/sequel">Sequel</a> or <a href="https://rom-rb.org/">ROM</a> for persistence. The principles stay the same.</p>
+
+<p><strong>It’s a monolith</strong> with two “modules” – HTTP API and an admin panel. The modules are not separate <a href="https://guides.rubyonrails.org/engines.html">engines</a>, but simple namespaces within the app.</p>
+
+<p><strong>API is RESTful-ish</strong>. We try to follow resource-based approach and use HTTP verbs, which resembles a lot of RESTful APIs. However, some of our endpoints are <em>verbs</em>. It’s not exactly RESTful, but it’s pragmatic enough.</p>
+
+<p><strong>Mobile apps are the only API consumers</strong>. They are under our control.</p>
+
+<p><strong>There is no tool for delayed execution</strong>. Our only entry points are HTTP controllers. There’s no event bus or sidekiq.</p>
+
+<p><strong>We use all-caps acronyms</strong>. That’s why you’ll see <code class="language-plaintext highlighter-rouge">API</code> instead of <code class="language-plaintext highlighter-rouge">Api</code>. We’ve just configured <a href="https://api.rubyonrails.org/v6.1.3.2/classes/ActiveSupport/Inflector.html">inflections</a>.</p>
+
+<p>Now that we’re on the same page, we can move on to the next step: contracts.</p>
+
+<h1 id="designing-contracts">Designing contracts</h1>
+
+<p>Since our task doesn’t require anything from an admin panel, we can skip it and focus on HTTP API.</p>
+
+<p>When we’re talking about HTTP contracts, we usually speak about paths, methods and payloads. We don’t care about payloads right now, so we’ll focus on the paths and methods.</p>
+
+<p>Let’s imagine we run <code class="language-plaintext highlighter-rouge">rails routes</code>. We should see two routes: one of completing the order and one for submitting the rating.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Prefix Verb URI Pattern                                                Controller#Action
+       POST /api/bakers/orders/:id/complete(.:format)                  api/bakers/orders#complete
+       POST /api/customers/orders/:order_id/rating(.:format)           api/customers/orders/rating#create
+</code></pre></div></div>
+
+<p>This should be enough for the whole client-server communication.</p>
+
+<p>In real life, we’ll also have multiple ways to communicate that the baker has entered the “danger zone” or that they’ve been blocked. Let’s assume that this communication goes through push notifications and text messages, and never queried via API.</p>
+
+<h1 id="implementation-bridge-to-existing-code">Implementation: bridge to existing code</h1>
+
+<p>Aside from writing a lot of new code, we need to integrate into existing Ruby code. Let’s see how we deal with it.</p>
+
+<p>Here’s an existing order-completion code. We’ve had it before starting work on the feature:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/api/bakers/orders_controller.rb</span>
+
+<span class="k">module</span> <span class="nn">API</span>
+  <span class="k">module</span> <span class="nn">Bakers</span>
+    <span class="k">class</span> <span class="nc">OrdersController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+      <span class="k">def</span> <span class="nf">complete</span>
+        <span class="n">order</span><span class="p">.</span><span class="nf">complete!</span>
+
+        <span class="n">render</span> <span class="o">...</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>There’s not much to this code: it calls a method to complete the order.</p>
+
+<p>Right now we need two things: write the code which sends the email, and <em>call it</em>. There are several ways to do that:</p>
+
+<p><strong>Call from controller</strong>. We can call our service object right after we call <code class="language-plaintext highlighter-rouge">order.complete!</code>. It will become a burder right after you use <code class="language-plaintext highlighter-rouge">#complete!</code> in any other context.</p>
+
+<p><strong>Callbacks</strong>. If a model has a callback for <code class="language-plaintext highlighter-rouge">order_completed</code>, then it <em>might</em> be a solution. It’s very likely that your team doesn’t like callbacks, but they may work perfectly in <em>some</em> codebases.</p>
+
+<p><strong>Event bus</strong>. wisper, dry-events, kafka, zeromq, redis, sidekiq – whatever floats your boat. In this approach, <code class="language-plaintext highlighter-rouge">order#complete!</code> will publish an event. I prefer this solution even in monoliths. However, our app doesn’t have an event bus, so we’ll skip this option.</p>
+
+<p><strong>Call from <code class="language-plaintext highlighter-rouge">#complete!</code></strong>. This is probably the most suitable solution here, as it makes sure that we get the same predictable behavior everywhere. It <em>looks</em> worse than callbacks or event bus, but it’ll work for most teams.</p>
+
+<p>There are also other ways and DSLs like <a href="https://github.com/aasm/aasm">AASM</a> which may trigger the code.</p>
+
+<p>Either way, here’s what it might look like:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/models/order.rb</span>
+
+<span class="k">class</span> <span class="nc">Order</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+  <span class="k">def</span> <span class="nf">complete!</span>
+    <span class="o">...</span>
+    <span class="n">on_completed</span>
+  <span class="k">end</span>
+
+  <span class="kp">private</span>
+
+  <span class="k">def</span> <span class="nf">on_completed</span>
+    <span class="c1"># what has to go there?</span>
+  <span class="k">def</span>
+<span class="nf">end</span>
+</code></pre></div></div>
+
+<p>Now, we’ll need to write some code which we’ll call inside <code class="language-plaintext highlighter-rouge">on_completed</code>.</p>
+
+<p>Before we go on, we need to figure out the naming. Since we’re developing “quality and motivation” features, let’s put it in the corresponding module: <code class="language-plaintext highlighter-rouge">QualityAndMotivation</code>.</p>
+
+<p>We’ve got at least two options of naming our class:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">SendReviewEmailToCustomer</code>, which is verbose, but clearly indicates what’s going on</li>
+  <li><code class="language-plaintext highlighter-rouge">OrderCompleted</code>, which doesn’t tell us <em>what’s</em> going on inside, but tells us <em>when</em> the logic should be called</li>
+</ul>
+
+<p>I suggest we use <code class="language-plaintext highlighter-rouge">OrderCompleted</code>, practically making it an <em>event</em>. I prefer this way for a number of reasons.</p>
+
+<p><strong>The name makes it easier to search</strong> related files. Whenever we want to find all things which happen when order is completed, we can just search for files containing <code class="language-plaintext highlighter-rouge">OrderCompleted</code> and dig from there.</p>
+
+<p><strong>Project becomes easier to explore</strong>. The name is an answer to “When exactly do we use the code?”.</p>
+
+<p>There’s a significant downside, though.</p>
+
+<p><strong>You have to dig in to figure out what it does</strong>. Usually when we see a method call, we can figure out the side-effects and what exactly the method does. If we see <code class="language-plaintext highlighter-rouge">SendReviewEmailToCustomer</code>, then it’s obvious what’s going on. With <code class="language-plaintext highlighter-rouge">OrderComplete</code>? Not so much.</p>
+
+<p>It’s okay, though. It helps us figure out <em>the important</em> parts of the process. Otherwise, we’d have to ask “is sending review email to customer a crucial part of order completing process?”.</p>
+
+<p>So here’s the last reason to use event-centered naming:</p>
+
+<p><strong>It helps us tell what’s important and what’s not</strong>. If you decide to test <code class="language-plaintext highlighter-rouge">Order#complete</code>, you <em>know</em> you can just stub <code class="language-plaintext highlighter-rouge">QualityAndMotivation::OrderCompleted</code> to do nothing.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/&lt;we_will_decide_later&gt;/quality_and_motivation/order_completed.rb</span>
+
+<span class="k">module</span> <span class="nn">QualityAndMotivation</span>
+  <span class="k">class</span> <span class="nc">OrderCompleted</span>
+    <span class="nb">attr_reader</span> <span class="ss">:send_email</span>
+
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">send_email</span><span class="p">:)</span>
+      <span class="vi">@send_email</span> <span class="o">=</span> <span class="n">send_email</span>
+    <span class="k">end</span>
+
+    <span class="c1"># we'll discuss parts above later</span>
+
+    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+      <span class="n">send_email</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span>
+        <span class="n">order</span><span class="p">.</span><span class="nf">user</span><span class="p">,</span> 
+        <span class="ss">template: </span><span class="s1">'order_completed'</span><span class="p">,</span> 
+        <span class="ss">locals: </span><span class="p">{</span> <span class="ss">baker_names: </span><span class="o">...</span><span class="p">,</span> <span class="ss">scheduled_at: </span><span class="n">order</span><span class="p">.</span><span class="nf">scheduled_at</span> <span class="p">}</span>
+      <span class="p">)</span>
+
+      <span class="ss">:success</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="c1"># app/models/order.rb</span>
+
+<span class="k">class</span> <span class="nc">Order</span> <span class="o">&lt;</span> <span class="o">...</span>
+  <span class="o">...</span>
+  <span class="k">def</span> <span class="nf">on_completed</span>
+    <span class="no">QualityAndMotivation</span><span class="o">::</span><span class="no">OrderCompleted</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span>
+      <span class="ss">send_email: </span><span class="no">SendEmail</span><span class="p">.</span><span class="nf">new</span><span class="p">,</span>
+    <span class="p">).</span><span class="nf">call</span><span class="p">(</span><span class="nb">self</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>That’s it. We’ve integrated new code into an existing process. Let’s recap</p>
+
+<ul>
+  <li>We named our service object after an event. The namespace represents the <em>context</em> in which we handle the event – quality and motivation</li>
+  <li>We’ve decided to put a call to our service object to a model method. It’s okay because we don’t have an event bus or other service objects</li>
+  <li>We <em>have not</em> given a name to the <em>directory</em> for the newly created files</li>
+  <li>We don’t handle any errors. If email sending fails, the controller will handle it manually</li>
+</ul>
+
+<h1 id="implementation-all-new-code">Implementation: all-new code</h1>
+
+<p>Now we need to implement the new logic: which will handle newly received logic. There are two parts: a service object and controller.</p>
+
+<p>Controller will look pretty straightforward: it just instantiates service object and calls it, handling the result in a way.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/controllers/api/customers/orders/rating_controller.rb</span>
+
+<span class="k">module</span> <span class="nn">API</span>
+  <span class="k">module</span> <span class="nn">Customers</span>
+    <span class="k">module</span> <span class="nn">Orders</span>
+      <span class="k">class</span> <span class="nc">RatingController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+        <span class="k">def</span> <span class="nf">complete</span>
+          <span class="k">case</span> <span class="n">customer_submitted_rating</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="n">current_order</span><span class="p">,</span> <span class="n">prepared_params</span><span class="p">[</span><span class="ss">:rating</span><span class="p">])</span>
+          <span class="k">in</span> <span class="ss">:period_to_rate_expired</span>
+            <span class="n">render</span> <span class="o">...</span>
+          <span class="k">in</span> <span class="ss">:success</span>
+            <span class="n">render</span> <span class="o">...</span>
+          <span class="k">end</span>
+        <span class="k">end</span>
+
+        <span class="kp">private</span>
+
+        <span class="k">def</span> <span class="nf">customer_submitted_rating</span>
+          <span class="no">QualityAndMotivation</span><span class="o">::</span><span class="no">CustomerSubmittedRating</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">order_rating: </span><span class="no">OrderRating</span><span class="p">,</span> <span class="ss">period_to_rate_days: </span><span class="mi">7</span><span class="p">)</span>
+        <span class="k">end</span>
+
+        <span class="k">def</span> <span class="nf">prepared_params</span>
+          <span class="n">params</span><span class="p">.</span><span class="nf">require</span><span class="p">(</span><span class="ss">:rating</span><span class="p">)</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Here’s how  <code class="language-plaintext highlighter-rouge">CustomerSubmittedRating</code> service object might look: it accepts or rejects the rating, considering the duration between current time and rating.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">QualityAndMotivation</span>
+  <span class="k">class</span> <span class="nc">CustomerSubmittedRating</span>
+    <span class="nb">attr_reader</span> <span class="ss">:period_to_rate_days</span><span class="p">,</span> <span class="ss">:order_rating</span>
+
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">period_to_rate_days</span><span class="p">:,</span> <span class="n">order_rating</span><span class="p">:)</span>
+      <span class="vi">@period_to_rate_days</span> <span class="o">=</span> <span class="n">period_to_rate_days</span>
+      <span class="vi">@order_rating</span> <span class="o">=</span> <span class="n">order_rating</span>
+    <span class="k">end</span>
+
+    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">rating</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">within_period_to_rate?</span>
+        <span class="n">order_rating</span><span class="p">.</span><span class="nf">create!</span><span class="p">(</span><span class="ss">order: </span><span class="n">order</span><span class="p">,</span> <span class="ss">rating: </span><span class="n">rating</span><span class="p">)</span>
+        <span class="ss">:success</span>
+      <span class="k">else</span>
+        <span class="ss">:period_to_rate_expired</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p class="notice">In real life we may get a constraint error because we can’t submit the rating for the same order twice. We omit this because we don’t want to add too many details.</p>
+
+<p>Here’s one last thing: we still haven’t implemented the logic which actually recalculates the rating and does something. I won’t bother you with the actual code, as it’ll look like this:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+  <span class="n">baker</span> <span class="o">=</span> <span class="n">order</span><span class="p">.</span><span class="nf">baker</span>
+  <span class="n">old_rating</span><span class="p">,</span> <span class="n">new_rating</span> <span class="o">=</span> <span class="n">recalculate_rating</span><span class="p">(</span><span class="n">baker</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="o">...</span>
+  <span class="k">else</span> <span class="o">...</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h1 id="service-object-may-not-be-a-good-name">“Service object” may not be a good name</h1>
+
+<div class="notice">
+  <p>The term "service object" is ambiguous and puts the discussion in the wrong direction. This happens because "service" is a term which is used in many contexts, including object-oriented programming, domain-driven design, Rails and Ruby world. Whenever we don't have a shared understanding, we get long-lasting arguments.</p>
+
+  <p>My idea is that those "objects" are just functions. However, it's a variation of the more broad approach, so I'm still going to use the name.</p>
+</div>
+
+<p>… the post ended here</p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2022-04-26T20:38:00+00:00">April 26, 2022</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+    
+
+    <a href="https://twitter.com/intent/tweet?text=Unfinished%3A+Designing+helpful+service+objects.+Part+2.+Practice%20https%3A%2F%2Fwww.morozov.is%2F2022%2F04%2F26%2Fservice-objects-part-2.html" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+    <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.morozov.is%2F2022%2F04%2F26%2Fservice-objects-part-2.html" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fwww.morozov.is%2F2022%2F04%2F26%2Fservice-objects-part-2.html" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/2020/06/01/helpful-service-objects-part-1-chosing-right-design.html" class="pagination--pager" title="Designing helpful service objects. Part 1. Choosing the right design
+">Previous</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2022 Igor Morozov. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

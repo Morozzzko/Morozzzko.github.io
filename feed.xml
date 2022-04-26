@@ -1,5 +1,357 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://www.morozov.is/feed.xml" rel="self" type="application/atom+xml" /><link href="https://www.morozov.is/" rel="alternate" type="text/html" /><updated>2022-01-08T21:45:14+00:00</updated><id>https://www.morozov.is/feed.xml</id><title type="html">Igor writing about things</title><subtitle>Thoughts, programming, Ruby
-</subtitle><author><name>Igor Morozov</name><email>igor@morozov.is</email></author><entry><title type="html">Designing helpful service objects. Part 1. Choosing the right design</title><link href="https://www.morozov.is/2020/06/01/helpful-service-objects-part-1-chosing-right-design.html" rel="alternate" type="text/html" title="Designing helpful service objects. Part 1. Choosing the right design" /><published>2020-06-01T18:57:00+00:00</published><updated>2020-06-01T18:57:00+00:00</updated><id>https://www.morozov.is/2020/06/01/helpful-service-objects-part-1-chosing-right-design</id><content type="html" xml:base="https://www.morozov.is/2020/06/01/helpful-service-objects-part-1-chosing-right-design.html">&lt;p&gt;I’ve been programming for a long time and I’ve had countless arguments about different things. I’d like to list top four reasons I’ve had an argument online.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="https://www.morozov.is/feed.xml" rel="self" type="application/atom+xml" /><link href="https://www.morozov.is/" rel="alternate" type="text/html" /><updated>2022-04-26T23:45:15+00:00</updated><id>https://www.morozov.is/feed.xml</id><title type="html">Igor writing about things</title><subtitle>Thoughts, programming, Ruby
+</subtitle><author><name>Igor Morozov</name><email>igor@morozov.is</email></author><entry><title type="html">Unfinished: Designing helpful service objects. Part 2. Practice</title><link href="https://www.morozov.is/2022/04/26/service-objects-part-2.html" rel="alternate" type="text/html" title="Unfinished: Designing helpful service objects. Part 2. Practice" /><published>2022-04-26T20:38:00+00:00</published><updated>2022-04-26T20:38:00+00:00</updated><id>https://www.morozov.is/2022/04/26/service-objects-part-2</id><content type="html" xml:base="https://www.morozov.is/2022/04/26/service-objects-part-2.html">&lt;div class=&quot;notice&quot;&gt;
+  &lt;p&gt;&lt;strong&gt;This is a partially-written post, which will never be complete&lt;/strong&gt;&lt;/p&gt;
+
+  &lt;p&gt;I&apos;ve been writing this article on-and-off since June 2020. I didn&apos;t like how it turned out and re-wrote it numerous times.&lt;/p&gt;
+
+  &lt;p&gt;It tries to cover way too many things at once, and that&apos;s the problem I can&apos;t resolve without removing everything I&apos;ve done and re-working the whole series. There are way too many assumptions and things which are missing for the complete picture. The reader would need the context for the article to be useful&lt;/p&gt;
+
+  &lt;p&gt;However, the work still might serve as an inspiration or an example to some. Even as an anti-example. So I&apos;m leaving it here with an &quot;unfinished&quot; notice&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;p&gt;I’ve had countless arguments about software engineering, and “service objects” are one of the hot topics. I published &lt;a href=&quot;/2020/06/01/helpful-service-objects-part-1-chosing-right-design.html&quot;&gt;an article&lt;/a&gt; where I assessed different approaches to designing service objects. I’ve planned to have a three-part series of posts:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;/2020/06/01/helpful-service-objects-part-1-chosing-right-design.html&quot;&gt;Choosing the right design&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;The practice&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;The next level&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Right now, I want to demonstrate how to apply those principles &lt;em&gt;in practice&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;This article may read like a tutorial on adding service objects to Rails app. Frankly, it &lt;em&gt;is&lt;/em&gt; a tutorial on adding service objects to Rails app.&lt;/p&gt;
+
+&lt;!-- excerpt --&gt;
+
+&lt;h1 id=&quot;what-were-dealing-with&quot;&gt;What we’re dealing with&lt;/h1&gt;
+
+&lt;p&gt;In the first part, I’ve listed different ways to implement a “service object”. Out of all those options, I pushed hard towards a concrete design. Let’s revisit it.&lt;/p&gt;
+
+&lt;p&gt;Business processes start when &lt;em&gt;something happens&lt;/em&gt; or if someone wants to &lt;em&gt;perform an action&lt;/em&gt;. We want our code to reflect this reality, so we name our service objects after the &lt;strong&gt;events and commands&lt;/strong&gt; which trigger the process. Class names would look like &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CustomerSubmittedRating&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;BakerHired&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CakeBaked&lt;/code&gt; for events and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;FireBaker&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;SubmitRating&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AmendOrder&lt;/code&gt; for commands.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;We use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;#call&lt;/code&gt;&lt;/strong&gt; to run the logic. It’s a pretty standard way to call a function, proc or just a generic piece of code.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;No mutable state&lt;/strong&gt; in our objects. Dependencies and configurable options go to constructor / instance attributes and never change. We understand dependencies as other service objects, functions, renderers, database connections, repositories, whatever pieces of logic we need to run it.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Parameters&lt;/strong&gt; or &lt;strong&gt;input&lt;/strong&gt; go to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;#call&lt;/code&gt; as arguments, and we never store them in object state.&lt;/p&gt;
+
+&lt;p&gt;If you’ve missed out on some details and reasoning, please refer to section &lt;a href=&quot;/2020/06/01/helpful-service-objects-part-1-chosing-right-design.html#why-some-service-objects-are-more-useful-than-others&quot;&gt;“Why some service objects are better than other”&lt;/a&gt; of my previous article, where I add philosophical and practical perspective to those decisions.&lt;/p&gt;
+
+&lt;h1 id=&quot;how-were-going-to-do-it&quot;&gt;How we’re going to do it&lt;/h1&gt;
+
+&lt;p&gt;We’ll dig into a context of a real-life application. We’ll start at the highest level and then “zoom in” to make lower-level considerations. Basically, we’ll have three levels of detail:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;Business requirements&lt;/strong&gt;. Figure out &lt;em&gt;what&lt;/em&gt; and &lt;em&gt;why&lt;/em&gt; we’ll add something to our project.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Technical requirements&lt;/strong&gt;. What systems do we interact with? How?&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Code&lt;/strong&gt;. Implementation with just enough detail&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Afterwards, we’ll see how to adapt to new requirements and extend the objects.&lt;/p&gt;
+
+&lt;h1 id=&quot;application-improving-quality-for-a-baker-to-consumer-marketplace&quot;&gt;Application: improving quality for a baker-to-consumer marketplace&lt;/h1&gt;
+
+&lt;p&gt;Let’s say we’re building a multi-sided marketplace where bakers can sell their pastry to customers.&lt;/p&gt;
+
+&lt;p&gt;We don’t directly employ the bakers, but serve as an information medium between them and the customers. Customers submit their orders and we help distribute the orders among bakers. If the customer is unhappy, it’s our risk and we cover any damages out of our own pocket.&lt;/p&gt;
+
+&lt;p&gt;We want to minimize the risks, so we introduce the &lt;em&gt;quality and motivation&lt;/em&gt; system. It is based on communication, feedback and maths:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;After a customer have received their order, we send them an email asking to rate the baked goods on a scale from 1 to 5.&lt;/li&gt;
+  &lt;li&gt;After every rating, we calculate the baker’s rating: we take the last 20 orders and calculate a weighted mean: most recent orders matter most.&lt;/li&gt;
+  &lt;li&gt;If the rating falls below a certain threshold, the baker enters the “danger zone”.&lt;/li&gt;
+  &lt;li&gt;If the bakers in the “danger zone” doesn’t improve their performance within the next three reviews, we cancel their future orders and disable their account.&lt;/li&gt;
+  &lt;li&gt;Bakers with perfect rating get a 5% bonus for every rated order&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;It might not look &lt;em&gt;too&lt;/em&gt; complex at the first sight, but in reality, we’ve got a lot of moving parts:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;We need to build a subsystem which allows customers to rate orders: it affects database, code organization and web/mobile apps.&lt;/li&gt;
+  &lt;li&gt;Rating recalculation&lt;/li&gt;
+  &lt;li&gt;The “danger zone”&lt;/li&gt;
+  &lt;li&gt;Payout calculation&lt;/li&gt;
+  &lt;li&gt;Communication via e-mail&lt;/li&gt;
+  &lt;li&gt;Disabling accounts and cancelling future orders&lt;/li&gt;
+  &lt;li&gt;API for customer web app&lt;/li&gt;
+  &lt;li&gt;API for baker app, which is the primary way to communicate with bakers&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Since we can only communicate via mobile app, let’s assume the “danger zone” is visible in the user interface. It’ll enable us to tell bakers exactly how to improve their situation.&lt;/p&gt;
+
+&lt;p&gt;If we try to visualize the whole process, it will look like this:&lt;/p&gt;
+
+&lt;figure&gt;
+  &lt;a href=&quot;/assets/bpmn/service_objects/rating_workflow.svg&quot; target=&quot;_blank&quot;&gt;
+    &lt;img src=&quot;/assets/bpmn/service_objects/rating_workflow.svg&quot; alt=&quot;BPMN representation of the process&quot; /&gt;
+  &lt;/a&gt;
+  &lt;figcaption&gt;A visual representation of the process. Click to open in new tab.&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;We can see that  not an atomic process, but a complex and distributed one. Distributed in terms of time and execution, as we can’t afford to &lt;em&gt;just wait&lt;/em&gt; for seven days. This way, this huge process actually breaks into three smaller ones:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;OrderCompleted&lt;/code&gt; – when we send an email&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CustomerSubmittedRating&lt;/code&gt; – when the customer submits their rating via app. It shouldn’t fail most of the time, but it &lt;em&gt;may&lt;/em&gt; fail if the 7-day threshold is passed&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CustomerRatedOrder&lt;/code&gt; – when the rating has been accepted&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;figure&gt;
+  &lt;a href=&quot;/assets/bpmn/service_objects/rating_workflow_refactored.svg&quot; target=&quot;_blank&quot;&gt;
+    &lt;img src=&quot;/assets/bpmn/service_objects/rating_workflow_refactored.svg&quot; alt=&quot;BPMN representation of the refactored process&quot; /&gt;
+  &lt;/a&gt;
+  &lt;figcaption&gt;A visual representation of the three processes. Click to open in new tab.&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;We can’t say much more about the flow without introducing more technical detail.&lt;/p&gt;
+
+&lt;h1 id=&quot;assumptions-about-the-tech-stack&quot;&gt;Assumptions about the tech stack&lt;/h1&gt;
+
+&lt;p&gt;Since we don’t have a &lt;em&gt;real&lt;/em&gt; project, we need to make a few assumptions so that we’re on the same page.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;We use Rails&lt;/strong&gt; because it’s pretty common and because I want to emphasize that it’s possible to introduce the ideas in the existing app. Even a legacy one.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;There are no service objects whatsoever&lt;/strong&gt;. All domain logic is in the models.&lt;/p&gt;
+
+&lt;p&gt;However, we could have used &lt;a href=&quot;https://hanamirb.org/&quot;&gt;Hanami&lt;/a&gt; as a framework or &lt;a href=&quot;https://roda.jeremyevans.net/&quot;&gt;Roda&lt;/a&gt; as routing &amp;amp; &lt;a href=&quot;https://github.com/jeremyevans/sequel&quot;&gt;Sequel&lt;/a&gt; or &lt;a href=&quot;https://rom-rb.org/&quot;&gt;ROM&lt;/a&gt; for persistence. The principles stay the same.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;It’s a monolith&lt;/strong&gt; with two “modules” – HTTP API and an admin panel. The modules are not separate &lt;a href=&quot;https://guides.rubyonrails.org/engines.html&quot;&gt;engines&lt;/a&gt;, but simple namespaces within the app.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;API is RESTful-ish&lt;/strong&gt;. We try to follow resource-based approach and use HTTP verbs, which resembles a lot of RESTful APIs. However, some of our endpoints are &lt;em&gt;verbs&lt;/em&gt;. It’s not exactly RESTful, but it’s pragmatic enough.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Mobile apps are the only API consumers&lt;/strong&gt;. They are under our control.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;There is no tool for delayed execution&lt;/strong&gt;. Our only entry points are HTTP controllers. There’s no event bus or sidekiq.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;We use all-caps acronyms&lt;/strong&gt;. That’s why you’ll see &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;API&lt;/code&gt; instead of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Api&lt;/code&gt;. We’ve just configured &lt;a href=&quot;https://api.rubyonrails.org/v6.1.3.2/classes/ActiveSupport/Inflector.html&quot;&gt;inflections&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Now that we’re on the same page, we can move on to the next step: contracts.&lt;/p&gt;
+
+&lt;h1 id=&quot;designing-contracts&quot;&gt;Designing contracts&lt;/h1&gt;
+
+&lt;p&gt;Since our task doesn’t require anything from an admin panel, we can skip it and focus on HTTP API.&lt;/p&gt;
+
+&lt;p&gt;When we’re talking about HTTP contracts, we usually speak about paths, methods and payloads. We don’t care about payloads right now, so we’ll focus on the paths and methods.&lt;/p&gt;
+
+&lt;p&gt;Let’s imagine we run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rails routes&lt;/code&gt;. We should see two routes: one of completing the order and one for submitting the rating.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Prefix Verb URI Pattern                                                Controller#Action
+       POST /api/bakers/orders/:id/complete(.:format)                  api/bakers/orders#complete
+       POST /api/customers/orders/:order_id/rating(.:format)           api/customers/orders/rating#create
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This should be enough for the whole client-server communication.&lt;/p&gt;
+
+&lt;p&gt;In real life, we’ll also have multiple ways to communicate that the baker has entered the “danger zone” or that they’ve been blocked. Let’s assume that this communication goes through push notifications and text messages, and never queried via API.&lt;/p&gt;
+
+&lt;h1 id=&quot;implementation-bridge-to-existing-code&quot;&gt;Implementation: bridge to existing code&lt;/h1&gt;
+
+&lt;p&gt;Aside from writing a lot of new code, we need to integrate into existing Ruby code. Let’s see how we deal with it.&lt;/p&gt;
+
+&lt;p&gt;Here’s an existing order-completion code. We’ve had it before starting work on the feature:&lt;/p&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# app/controllers/api/bakers/orders_controller.rb&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;API&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Bakers&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;OrdersController&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ApplicationController&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;complete&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;order&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;complete!&lt;/span&gt;
+
+        &lt;span class=&quot;n&quot;&gt;render&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;There’s not much to this code: it calls a method to complete the order.&lt;/p&gt;
+
+&lt;p&gt;Right now we need two things: write the code which sends the email, and &lt;em&gt;call it&lt;/em&gt;. There are several ways to do that:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Call from controller&lt;/strong&gt;. We can call our service object right after we call &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;order.complete!&lt;/code&gt;. It will become a burder right after you use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;#complete!&lt;/code&gt; in any other context.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Callbacks&lt;/strong&gt;. If a model has a callback for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;order_completed&lt;/code&gt;, then it &lt;em&gt;might&lt;/em&gt; be a solution. It’s very likely that your team doesn’t like callbacks, but they may work perfectly in &lt;em&gt;some&lt;/em&gt; codebases.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Event bus&lt;/strong&gt;. wisper, dry-events, kafka, zeromq, redis, sidekiq – whatever floats your boat. In this approach, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;order#complete!&lt;/code&gt; will publish an event. I prefer this solution even in monoliths. However, our app doesn’t have an event bus, so we’ll skip this option.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Call from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;#complete!&lt;/code&gt;&lt;/strong&gt;. This is probably the most suitable solution here, as it makes sure that we get the same predictable behavior everywhere. It &lt;em&gt;looks&lt;/em&gt; worse than callbacks or event bus, but it’ll work for most teams.&lt;/p&gt;
+
+&lt;p&gt;There are also other ways and DSLs like &lt;a href=&quot;https://github.com/aasm/aasm&quot;&gt;AASM&lt;/a&gt; which may trigger the code.&lt;/p&gt;
+
+&lt;p&gt;Either way, here’s what it might look like:&lt;/p&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# app/models/order.rb&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Order&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ApplicationRecord&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;complete!&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;on_completed&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+  &lt;span class=&quot;kp&quot;&gt;private&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;on_completed&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;# what has to go there?&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt;
+&lt;span class=&quot;nf&quot;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Now, we’ll need to write some code which we’ll call inside &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;on_completed&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Before we go on, we need to figure out the naming. Since we’re developing “quality and motivation” features, let’s put it in the corresponding module: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;QualityAndMotivation&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;We’ve got at least two options of naming our class:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;SendReviewEmailToCustomer&lt;/code&gt;, which is verbose, but clearly indicates what’s going on&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;OrderCompleted&lt;/code&gt;, which doesn’t tell us &lt;em&gt;what’s&lt;/em&gt; going on inside, but tells us &lt;em&gt;when&lt;/em&gt; the logic should be called&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I suggest we use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;OrderCompleted&lt;/code&gt;, practically making it an &lt;em&gt;event&lt;/em&gt;. I prefer this way for a number of reasons.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;The name makes it easier to search&lt;/strong&gt; related files. Whenever we want to find all things which happen when order is completed, we can just search for files containing &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;OrderCompleted&lt;/code&gt; and dig from there.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Project becomes easier to explore&lt;/strong&gt;. The name is an answer to “When exactly do we use the code?”.&lt;/p&gt;
+
+&lt;p&gt;There’s a significant downside, though.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;You have to dig in to figure out what it does&lt;/strong&gt;. Usually when we see a method call, we can figure out the side-effects and what exactly the method does. If we see &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;SendReviewEmailToCustomer&lt;/code&gt;, then it’s obvious what’s going on. With &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;OrderComplete&lt;/code&gt;? Not so much.&lt;/p&gt;
+
+&lt;p&gt;It’s okay, though. It helps us figure out &lt;em&gt;the important&lt;/em&gt; parts of the process. Otherwise, we’d have to ask “is sending review email to customer a crucial part of order completing process?”.&lt;/p&gt;
+
+&lt;p&gt;So here’s the last reason to use event-centered naming:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;It helps us tell what’s important and what’s not&lt;/strong&gt;. If you decide to test &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Order#complete&lt;/code&gt;, you &lt;em&gt;know&lt;/em&gt; you can just stub &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;QualityAndMotivation::OrderCompleted&lt;/code&gt; to do nothing.&lt;/p&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# app/&amp;lt;we_will_decide_later&amp;gt;/quality_and_motivation/order_completed.rb&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;QualityAndMotivation&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;OrderCompleted&lt;/span&gt;
+    &lt;span class=&quot;nb&quot;&gt;attr_reader&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:send_email&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;initialize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;send_email&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:)&lt;/span&gt;
+      &lt;span class=&quot;vi&quot;&gt;@send_email&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;send_email&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;# we&apos;ll discuss parts above later&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;order&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;send_email&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;order&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+        &lt;span class=&quot;ss&quot;&gt;template: &lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;order_completed&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+        &lt;span class=&quot;ss&quot;&gt;locals: &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;baker_names: &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;scheduled_at: &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;order&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;scheduled_at&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+      &lt;span class=&quot;ss&quot;&gt;:success&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# app/models/order.rb&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Order&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;on_completed&lt;/span&gt;
+    &lt;span class=&quot;no&quot;&gt;QualityAndMotivation&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;OrderCompleted&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+      &lt;span class=&quot;ss&quot;&gt;send_email: &lt;/span&gt;&lt;span class=&quot;no&quot;&gt;SendEmail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;That’s it. We’ve integrated new code into an existing process. Let’s recap&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;We named our service object after an event. The namespace represents the &lt;em&gt;context&lt;/em&gt; in which we handle the event – quality and motivation&lt;/li&gt;
+  &lt;li&gt;We’ve decided to put a call to our service object to a model method. It’s okay because we don’t have an event bus or other service objects&lt;/li&gt;
+  &lt;li&gt;We &lt;em&gt;have not&lt;/em&gt; given a name to the &lt;em&gt;directory&lt;/em&gt; for the newly created files&lt;/li&gt;
+  &lt;li&gt;We don’t handle any errors. If email sending fails, the controller will handle it manually&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;implementation-all-new-code&quot;&gt;Implementation: all-new code&lt;/h1&gt;
+
+&lt;p&gt;Now we need to implement the new logic: which will handle newly received logic. There are two parts: a service object and controller.&lt;/p&gt;
+
+&lt;p&gt;Controller will look pretty straightforward: it just instantiates service object and calls it, handling the result in a way.&lt;/p&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# app/controllers/api/customers/orders/rating_controller.rb&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;API&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Customers&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Orders&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;RatingController&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ApplicationController&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;complete&lt;/span&gt;
+          &lt;span class=&quot;k&quot;&gt;case&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;customer_submitted_rating&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;current_order&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prepared_params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:rating&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+          &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:period_to_rate_expired&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;render&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+          &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:success&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;render&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+          &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+        &lt;span class=&quot;kp&quot;&gt;private&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;customer_submitted_rating&lt;/span&gt;
+          &lt;span class=&quot;no&quot;&gt;QualityAndMotivation&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;CustomerSubmittedRating&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;order_rating: &lt;/span&gt;&lt;span class=&quot;no&quot;&gt;OrderRating&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;period_to_rate_days: &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;prepared_params&lt;/span&gt;
+          &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:rating&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Here’s how  &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CustomerSubmittedRating&lt;/code&gt; service object might look: it accepts or rejects the rating, considering the duration between current time and rating.&lt;/p&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;QualityAndMotivation&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;CustomerSubmittedRating&lt;/span&gt;
+    &lt;span class=&quot;nb&quot;&gt;attr_reader&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:period_to_rate_days&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:order_rating&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;initialize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;period_to_rate_days&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;order_rating&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:)&lt;/span&gt;
+      &lt;span class=&quot;vi&quot;&gt;@period_to_rate_days&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;period_to_rate_days&lt;/span&gt;
+      &lt;span class=&quot;vi&quot;&gt;@order_rating&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;order_rating&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;order&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rating&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;within_period_to_rate?&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;order_rating&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;create!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;order: &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;order&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;rating: &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rating&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;ss&quot;&gt;:success&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;
+        &lt;span class=&quot;ss&quot;&gt;:period_to_rate_expired&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p class=&quot;notice&quot;&gt;In real life we may get a constraint error because we can’t submit the rating for the same order twice. We omit this because we don’t want to add too many details.&lt;/p&gt;
+
+&lt;p&gt;Here’s one last thing: we still haven’t implemented the logic which actually recalculates the rating and does something. I won’t bother you with the actual code, as it’ll look like this:&lt;/p&gt;
+
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;order&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;baker&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;order&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;baker&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;old_rating&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;new_rating&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;recalculate_rating&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;baker&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h1 id=&quot;service-object-may-not-be-a-good-name&quot;&gt;“Service object” may not be a good name&lt;/h1&gt;
+
+&lt;div class=&quot;notice&quot;&gt;
+  &lt;p&gt;The term &quot;service object&quot; is ambiguous and puts the discussion in the wrong direction. This happens because &quot;service&quot; is a term which is used in many contexts, including object-oriented programming, domain-driven design, Rails and Ruby world. Whenever we don&apos;t have a shared understanding, we get long-lasting arguments.&lt;/p&gt;
+
+  &lt;p&gt;My idea is that those &quot;objects&quot; are just functions. However, it&apos;s a variation of the more broad approach, so I&apos;m still going to use the name.&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;p&gt;… the post ended here&lt;/p&gt;</content><author><name>Igor Morozov</name><email>igor@morozov.is</email></author><summary type="html">This is a partially-written post, which will never be complete I&apos;ve been writing this article on-and-off since June 2020. I didn&apos;t like how it turned out and re-wrote it numerous times. It tries to cover way too many things at once, and that&apos;s the problem I can&apos;t resolve without removing everything I&apos;ve done and re-working the whole series. There are way too many assumptions and things which are missing for the complete picture. The reader would need the context for the article to be useful However, the work still might serve as an inspiration or an example to some. Even as an anti-example. So I&apos;m leaving it here with an &quot;unfinished&quot; notice I’ve had countless arguments about software engineering, and “service objects” are one of the hot topics. I published an article where I assessed different approaches to designing service objects. I’ve planned to have a three-part series of posts: Choosing the right design The practice The next level Right now, I want to demonstrate how to apply those principles in practice. This article may read like a tutorial on adding service objects to Rails app. Frankly, it is a tutorial on adding service objects to Rails app.</summary></entry><entry><title type="html">Designing helpful service objects. Part 1. Choosing the right design</title><link href="https://www.morozov.is/2020/06/01/helpful-service-objects-part-1-chosing-right-design.html" rel="alternate" type="text/html" title="Designing helpful service objects. Part 1. Choosing the right design" /><published>2020-06-01T18:57:00+00:00</published><updated>2020-06-01T18:57:00+00:00</updated><id>https://www.morozov.is/2020/06/01/helpful-service-objects-part-1-chosing-right-design</id><content type="html" xml:base="https://www.morozov.is/2020/06/01/helpful-service-objects-part-1-chosing-right-design.html">&lt;p&gt;I’ve been programming for a long time and I’ve had countless arguments about different things. I’d like to list top four reasons I’ve had an argument online.&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;Style guide.&lt;/strong&gt; Thankfully, the number of arguments reduces as I mature, but I’m still spending a lot of time on them. I’d rather have an extremely opinionated styleguide and just stop talking about it. Something like &lt;a href=&quot;https://github.com/wemake-services/wemake-python-styleguide&quot;&gt;wemake-python-styleguide&lt;/a&gt;, but for Ruby.&lt;/p&gt;
 

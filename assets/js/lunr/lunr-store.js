@@ -35,6 +35,12 @@ var store = [{
         "url": "/2020/06/01/helpful-service-objects-part-1-chosing-right-design.html",
         "teaser": null
       },{
+        "title": "Unfinished: Designing helpful service objects. Part 2. Practice",
+        "excerpt":"This is a partially-written post, which will never be complete I've been writing this article on-and-off since June 2020. I didn't like how it turned out and re-wrote it numerous times. It tries to cover way too many things at once, and that's the problem I can't resolve without removing...","categories": [],
+        "tags": [],
+        "url": "/2022/04/26/service-objects-part-2.html",
+        "teaser": null
+      },{
         "title": "Ducks and Monads: Wonders of Ruby types",
         "excerpt":"Ducks and Monads Wonders of Ruby Types Hey, I'm Igor /'iːgɔːɹ/ I'm a polyglot programmer at Qlean.ru I don't trust myself There are four reasons I don't trust myself undefined is not a function N&nbsp;+&nbsp;1 I mess up business logic I forget to close a bracket I forget some details...","categories": [],
         "tags": [],
