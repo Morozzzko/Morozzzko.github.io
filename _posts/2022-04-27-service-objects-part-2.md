@@ -1,12 +1,12 @@
 ---
 layout: single
-title: "Unfinished: Designing helpful service objects. Part 2. Practice"
+title: 'Unfinished: Designing helpful service objects. Part 2. Practice'
 toc: true
 header:
   og_image: "/assets/images/posts/service_objects/part_two.png"
-reddit_comment_url: null
+reddit_comment_url:
+date: 2022-04-27 03:38 +0300
 ---
-
 <div class="notice">
   <p><strong>This is a partially-written post, which will never be complete</strong></p>
 
