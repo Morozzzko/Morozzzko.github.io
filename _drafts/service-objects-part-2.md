@@ -1,11 +1,22 @@
 ---
 layout: single
-title: "Designing helpful service objects. Part 2. Practice"
+title: "Unfinished: Designing helpful service objects. Part 2. Practice"
 toc: true
 header:
   og_image: "/assets/images/posts/service_objects/part_two.png"
-reddit_comment_url: false
+reddit_comment_url: null
 ---
+
+<div class="notice">
+  <p><strong>This is a partially-written post, which will never be complete</strong></p>
+
+  <p>I've been writing this article on-and-off since June 2020. I didn't like how it turned out and re-wrote it numerous times.</p>
+
+  <p>It tries to cover way too many things at once, and that's the problem I can't resolve without removing everything I've done and re-working the whole series. There are way too many assumptions and things which are missing for the complete picture. The reader would need the context for the article to be useful</p>
+
+  <p>However, the work still might serve as an inspiration or an example to some. Even as an anti-example. So I'm leaving it here with an "unfinished" notice</p>
+</div>
+
 
 I've had countless arguments about software engineering, and "service objects" are one of the hot topics. I published [an article](/2020/06/01/helpful-service-objects-part-1-chosing-right-design.html) where I assessed different approaches to designing service objects. I've planned to have a three-part series of posts:
 
@@ -13,9 +24,9 @@ I've had countless arguments about software engineering, and "service objects" a
 * _The practice_
 * The next level
 
-Right now, I want to demonstrate how to demonstrate how to apply those principles _in practice_. 
+Right now, I want to demonstrate how to apply those principles _in practice_. 
 
-This article may read like a tutorial on adding service objects to Rails app.
+This article may read like a tutorial on adding service objects to Rails app. Frankly, it _is_ a tutorial on adding service objects to Rails app.
 
 <!-- excerpt -->
 
@@ -339,113 +350,6 @@ def call(order)
 end
 ```
 
-We haven't addressed an important questions: how do we call this code?
-
-
-  // ///////// TODO
-
-
-  ```ruby
-  module QualityAndMotivation
-    class CustomerSubmittedRating
-      attr_reader :order_rating_repo, :period_to_rate_days, :subscribers
-
-      def initialize(order_rating_repo:, period_to_rate_days:, subscribers:)
-        @order_rating_repo = order_rating_repo
-        @period_to_rate_days = period_to_rate_days
-        @subscribers = subscribers
-      end
-
-      def call(order, rating)
-        if still_eligible_for_rating?(order)
-          recored_rating = order_rating_repo.create(
-            value: rating,
-            order: order
-          )
-
-          call_subscribers(order, recorded_rating)
-
-          {
-            result: :customer_rated_order,
-            rating: recorded_rating
-          }
-        else
-          {
-            result: :rating_no_longer_available, 
-            period_to_rate_days: period_to_rate_days
-          }
-        end
-      end
-
-      private 
-
-      def call_subscribers(order, recorded_rating)
-        subscribers.map do |subscriber|
-          subscriber.call(order.id, recorded_rating.id)
-        end
-      end
-
-      def still_eligible_for_rating?(order)
-        ...
-      end
-    end
-  end
-  ```
-
-  ```ruby
-  module QualityAndMotivation
-    class CustomerRatedOrder
-      attr_reader :block_baker, :show_warning, :remove_warnings, :give_bonus, :block_reason
-
-      def initialize(block_baker:, show_warning:, remove_warnings:, give_bonus:, block_reason:)
-        @block_baker = block_baker 
-        @show_warning = show_warning 
-        @remove_warnings = remove_warnings 
-        @give_bonus = give_bonus 
-        @block_reason = block_reason 
-      end
-
-      def call(order)
-        baker_old_rating = order.baker
-
-        baker_new_rating = baker_old_rating.recalculate_rating
-        
-        decision = decide_how_to_handle_change(baker_old_rating, baker_new_rating)
-
-        case decision
-        in :block
-          block_baker.call(baker_new_rating, reason: block_reason)
-        in :show_warnings
-          show_warning.call(baker_new_rating)
-        in :rating_recovered
-          remove_warnings.call(baker_new_rating)
-        in :reward
-          give_bonus.call(baker_new_rating)
-        end
-      end
-
-      private
-
-      def decide_how_to_handle_change(baker_old_rating, baker_new_rating)
-        ...
-      end
-  end
-end
-```
-
-# Guidelines for helpful service object
-
-Here's my own set of rules that help me build and maintain service objects. Those rules assume we're building single-method services in a mix of functional, object-oriented and procedural style.
-
-**Pick the interface.** I use `#call`, but there are other options: `#run`, `#perform`, and some others. Anything works – just make sure to stay consistent throughout the project
-
-**Expose errors and code smells early.** Focus your desing on exposing overly complex code as early as possible, while maintaining flexibility. 
-
-**Pass arguments to `#call`, not the constructor.** While this advice will make you type a little more, the benefits are astonishing. 
-
-**Use constructor to configure the concrete service.** This includes passing dependencies and magic values you'd put in constants. It enables you to tweak your logic whenever you need it. 
-
-
 
 # "Service object" may not be a good name
 
@@ -455,3 +359,5 @@ Here's my own set of rules that help me build and maintain service objects. Thos
   <p>My idea is that those "objects" are just functions. However, it's a variation of the more broad approach, so I'm still going to use the name.</p>
 </div>
 
+
+... the post ended here
